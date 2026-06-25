@@ -143,27 +143,6 @@
   #view-pendulum .back-btn{ color:#94a3b8; }
   #pend_errBox{ color:#fca5a5; font-size:13px; margin-top:10px; white-space:pre-wrap; }
 
-  /* ===== POPULATION ===== */
-  #view-population{
-    background:#f8fafc; color:#1f2937; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-population.active{ display:flex; }
-  #view-population h1{ margin:0 0 4px; font-size:22px; }
-  #view-population .sub{ margin:0 0 18px; color:#64748b; font-size:13px; text-align:center; max-width:500px;}
-  #view-population .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
-  #popCanvas{ background:#fff; border-radius:14px; border:1px solid #e2e8f0; display:block; }
-  #view-population .panel{ background:#fff; border-radius:14px; padding:20px; width:240px; border:1px solid #e2e8f0; }
-  #view-population .row{ margin-bottom:16px; }
-  #view-population label{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#475569; }
-  #view-population input[type=range]{ width:100%; }
-  #view-population button.ctrl{
-    width:100%; padding:10px; border:none; border-radius:8px; background:#10b981; color:#fff;
-    font-size:14px; cursor:pointer; margin-top:6px;
-  }
-  #view-population .stat{ font-size:13px; color:#475569; margin-top:10px; }
-  #view-population .back-btn{ color:#10b981; background:#ecfdf5; border-color:#10b981; }
-  #pop_errBox{ color:#dc2626; font-size:13px; margin-top:10px; white-space:pre-wrap; }
-
   /* ===== CORAL ===== */
   #view-coral{
     background:#ecfeff; color:#0c4a6e; flex-direction:column; align-items:center; padding:24px;
@@ -519,6 +498,50 @@
   .info2-legend-item.active-legend{ background:#bae6fd; font-weight:bold; }
   .info2-swatch{ width:12px; height:12px; border-radius:50%; display:inline-block; }
   #view-infographic2 .back-btn{ color:#0c4a6e; background:rgba(0,0,0,0.06); }
+
+  /* ===== REAL MOBILE RESPONSIVE OVERRIDES ===== */
+  @media (max-width: 600px){
+    canvas{ max-width:100%; height:auto; }
+
+    #deviceToggle{ top:6px; right:6px; padding:3px; }
+    #deviceToggle button{ padding:5px 9px; font-size:11px; }
+
+    #view-home header{ padding:30px 16px 16px; }
+    #view-home header h1{ font-size:21px; }
+    #view-home header p{ font-size:13px; }
+    #view-home main{ padding:14px 14px 60px; }
+    #view-home section{ margin-bottom:32px; }
+    .section-title h2{ font-size:17px; }
+    .grid{ grid-template-columns:1fr; gap:12px; }
+    .card{ padding:16px; }
+    .card .icon{ font-size:26px; margin-bottom:8px; }
+    .card h3{ font-size:15px; }
+    .card p{ font-size:12.5px; }
+
+    .back-btn{ width:100%; padding:13px 18px; font-size:15px; margin-top:20px; }
+
+    .save-row{ flex-direction:column; align-items:stretch; }
+    .save-btn{ width:100%; justify-content:center; padding:12px 16px; }
+
+    /* generic view heading/sub used across most categories */
+    .view h1{ font-size:19px; }
+    .view .sub{ font-size:12.5px; }
+
+    /* shrink memory-match grid to fit narrow screens */
+    #match_board{ grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; max-width:340px; }
+    .match-card{ width:100%; height:70px; font-size:22px; }
+
+    /* make sure long flex rows of inputs/buttons wrap and inputs are full-width */
+    input[type="text"], input[type="date"], input[type="number"], textarea, select{
+      font-size:14px; max-width:100%;
+    }
+  }
+
+  @media (max-width: 380px){
+    #view-home header h1{ font-size:19px; }
+    .card .icon{ font-size:23px; }
+    #deviceToggle button{ padding:4px 7px; font-size:10px; }
+  }
 </style>
 </head>
 <body>
@@ -610,12 +633,6 @@
           <p>길이·각도를 조절하며 진자의 운동을 관찰하는 물리 시뮬레이션</p>
           <span class="badge">웹시뮬레이션</span>
         </button>
-        <button class="card" onclick="showView('view-population')">
-          <span class="icon">📈</span>
-          <h3>인구 증가 시뮬레이션</h3>
-          <p>출생률·자원 한계를 조절하며 인구 변화를 관찰하는 시뮬레이션</p>
-          <span class="badge">웹시뮬레이션</span>
-        </button>
         <button class="card" onclick="showView('view-projectile')">
           <span class="icon">🚀</span>
           <h3>포물선 운동 시뮬레이션</h3>
@@ -694,12 +711,6 @@
           <p>날짜별로 출석·체험학습·조퇴·병결·기타결을 체크하고 현황을 집계하는 웹앱</p>
           <span class="badge">웹앱</span>
         </button>
-        <button class="card" onclick="showView('view-genboard')">
-          <span class="icon">📌</span>
-          <h3>일반화 문장 보드</h3>
-          <p>학생들이 탐구를 통해 도출한 일반화 문장을 작성·게시하고 모둠별로 모아보는 웹앱 (실제 저장됨)</p>
-          <span class="badge">웹앱</span>
-        </button>
       </div>
     </section>
   </main>
@@ -746,33 +757,6 @@
       <button class="ctrl" id="pend_resetBtn" style="background:#475569;">초기화</button>
       <div class="stat" id="pend_stat" style="font-size:13px; color:#cbd5e1; margin-top:10px;"></div>
       <div id="pend_errBox"></div>
-    </div>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== POPULATION ===================== -->
-<div class="view" id="view-population">
-  <h1>인구 증가 시뮬레이션 (로지스틱 모형)</h1>
-  <p class="sub">출생률(증가율)과 자원 한계(환경 수용력)를 조절하며 인구가 어떻게 변하는지 관찰해보세요.</p>
-  <div class="wrap">
-    <canvas id="popCanvas" width="420" height="320"></canvas>
-    <div class="panel">
-      <div class="row">
-        <label><span>증가율 (r)</span><span id="pop_rVal">0.30</span></label>
-        <input type="range" id="pop_rInput" min="0.05" max="1" value="0.30" step="0.01">
-      </div>
-      <div class="row">
-        <label><span>환경 수용력 (K)</span><span id="pop_kVal">1000</span></label>
-        <input type="range" id="pop_kInput" min="200" max="2000" value="1000" step="50">
-      </div>
-      <div class="row">
-        <label><span>초기 인구</span><span id="pop_p0Val">50</span></label>
-        <input type="range" id="pop_p0Input" min="5" max="300" value="50" step="5">
-      </div>
-      <button class="ctrl" id="pop_runBtn">시뮬레이션 실행</button>
-      <div class="stat" id="pop_stat"></div>
-      <div id="pop_errBox"></div>
     </div>
   </div>
   <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
@@ -994,8 +978,14 @@
   <div class="save-row">
     <button class="save-btn" id="notes_saveBtn">💾 저장</button>
     <button class="save-btn sheets" id="notes_sheetsBtn">📤 구글시트 연동</button>
+    <button class="save-btn" id="notes_sheetsSetupBtn" style="background:#64748b;">⚙️ 연동 설정</button>
   </div>
   <div class="save-msg" id="notes_saveMsg"></div>
+  <div id="notes_sheetsSetupBox" style="display:none; max-width:480px; margin-top:14px; background:#fff; border:1px solid #d97706; border-radius:12px; padding:16px; text-align:left; font-size:13px; color:#92400e;">
+    <p style="margin:0 0 10px; font-weight:bold;">배포된 Apps Script 웹앱 URL 입력</p>
+    <input type="text" id="notes_sheetsUrlInput" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%; padding:8px; border-radius:8px; border:1px solid #d97706; margin-bottom:8px; font-size:12px;">
+    <button id="notes_sheetsUrlSaveBtn" style="width:100%; padding:9px; border:none; border-radius:8px; background:#d97706; color:#fff; cursor:pointer; font-size:13px;">URL 저장</button>
+  </div>
   <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
 </div>
 
@@ -1072,7 +1062,12 @@
 <!-- ===================== CONCEPT-BASED INQUIRY: 사실-개념-일반화 피라미드 ===================== -->
 <div class="view" id="view-infographic3">
   <h1>🔺 사실-개념-일반화 피라미드</h1>
-  <p class="sub">단계를 클릭하면 '기후변화' 단원을 예시로 한 사고 단계별 설명이 나타납니다.</p>
+  <p class="sub">단계를 클릭하면 사고 단계별 설명이 나타납니다. 화살표를 눌러 다른 단원 예시도 살펴보세요. (1/5)</p>
+  <div id="pyr_topicNav" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+    <button id="pyr_prevBtn" style="border:none;background:#e2e8f0;color:#1f2937;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;">←</button>
+    <div id="pyr_topicLabel" style="font-weight:bold;font-size:14px;color:#1f2937;min-width:170px;text-align:center;">1 / 5 · 기후변화</div>
+    <button id="pyr_nextBtn" style="border:none;background:#e2e8f0;color:#1f2937;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;">→</button>
+  </div>
   <div id="pyr_wrap" style="display:flex;flex-direction:column;align-items:center;gap:6px;max-width:420px;">
     <button class="pyr-tier" data-tier="generalization" style="width:160px;padding:18px 10px;border:none;border-radius:10px 10px 0 0;background:#f43f5e;color:#fff;font-weight:bold;cursor:pointer;font-size:14px;">일반화</button>
     <button class="pyr-tier" data-tier="concept" style="width:260px;padding:18px 10px;border:none;border-radius:6px;background:#fb7185;color:#fff;font-weight:bold;cursor:pointer;font-size:14px;">개념</button>
@@ -1146,19 +1141,6 @@
     </div>
 
   </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== CONCEPT-BASED INQUIRY: 일반화 문장 보드 ===================== -->
-<div class="view" id="view-genboard">
-  <h1>📌 일반화 문장 보드</h1>
-  <p class="sub">탐구를 통해 도출한 일반화 문장을 모둠별로 게시해보세요. (실제로 저장되어 새로고침해도 유지됩니다)</p>
-  <div id="gb_addRow" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:480px;margin-bottom:14px;">
-    <input type="text" id="gb_group" placeholder="모둠/이름" style="flex:1;min-width:100px;padding:8px;border-radius:8px;border:1px solid #7dd3fc;">
-    <input type="text" id="gb_sentence" placeholder="일반화 문장을 입력하세요" style="flex:2;min-width:200px;padding:8px;border-radius:8px;border:1px solid #7dd3fc;">
-    <button id="gb_addBtn" style="padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;">게시</button>
-  </div>
-  <div id="gb_board" style="display:flex;flex-wrap:wrap;gap:12px;max-width:640px;justify-content:center;"></div>
   <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
 </div>
 
@@ -1437,91 +1419,6 @@ function demoSave(msgEl, kind, summary) {
     window.requestAnimationFrame(loop);
   } catch (e) {
     var box = document.getElementById('pend_errBox');
-    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== POPULATION MODULE ===================== */
-(function () {
-  try {
-    var canvas = document.getElementById('popCanvas');
-    var ctx = canvas.getContext('2d');
-    if (!ctx) { throw new Error('이 브라우저에서 캔버스를 지원하지 않습니다.'); }
-
-    var rInput = document.getElementById('pop_rInput');
-    var kInput = document.getElementById('pop_kInput');
-    var p0Input = document.getElementById('pop_p0Input');
-    var rVal = document.getElementById('pop_rVal');
-    var kVal = document.getElementById('pop_kVal');
-    var p0Val = document.getElementById('pop_p0Val');
-    var stat = document.getElementById('pop_stat');
-
-    function simulate() {
-      var r = parseFloat(rInput.value);
-      var K = parseFloat(kInput.value);
-      var p0 = parseFloat(p0Input.value);
-      var steps = 80;
-      var data = [p0];
-      var p = p0;
-      for (var i = 0; i < steps; i++) {
-        p = p + r * p * (1 - p / K);
-        if (p < 0) { p = 0; }
-        data.push(p);
-      }
-      return data;
-    }
-
-    function draw(data) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      var padding = 40;
-      var w = canvas.width - padding * 2;
-      var h = canvas.height - padding * 2;
-      var maxVal = 0;
-      for (var i = 0; i < data.length; i++) {
-        if (data[i] > maxVal) { maxVal = data[i]; }
-      }
-      var maxY = maxVal * 1.15 || 1;
-
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(padding, padding);
-      ctx.lineTo(padding, padding + h);
-      ctx.lineTo(padding + w, padding + h);
-      ctx.stroke();
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '11px sans-serif';
-      ctx.fillText('인구', padding - 30, padding - 5);
-      ctx.fillText('시간', padding + w - 15, padding + h + 20);
-
-      ctx.strokeStyle = '#10b981';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      for (var j = 0; j < data.length; j++) {
-        var x = padding + (j / (data.length - 1)) * w;
-        var y = padding + h - (data[j] / maxY) * h;
-        if (j === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
-      }
-      ctx.stroke();
-
-      var last = data[data.length - 1];
-      stat.textContent = '최종 인구(추정): ' + Math.round(last) + ' / 환경 수용력: ' + kInput.value;
-    }
-
-    function run() {
-      var data = simulate();
-      draw(data);
-    }
-
-    rInput.addEventListener('input', function () { rVal.textContent = parseFloat(rInput.value).toFixed(2); });
-    kInput.addEventListener('input', function () { kVal.textContent = kInput.value; });
-    p0Input.addEventListener('input', function () { p0Val.textContent = p0Input.value; });
-    document.getElementById('pop_runBtn').addEventListener('click', run);
-
-    run();
-  } catch (e) {
-    var box = document.getElementById('pop_errBox');
     if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
   }
 })();
@@ -2271,6 +2168,18 @@ function demoSave(msgEl, kind, summary) {
     var board = document.getElementById('notes_board');
     var colors = ['#fde68a', '#fecaca', '#bbf7d0', '#bfdbfe', '#ddd6fe', '#fbcfe8'];
     var notes = [];
+    var STORAGE_KEY = 'vch_notes_data_v1';
+
+    function loadFromStorage() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) { notes = JSON.parse(raw) || []; }
+      } catch (e) { notes = []; }
+    }
+
+    function persistToStorage() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch (e) {}
+    }
 
     function render() {
       board.innerHTML = '';
@@ -2285,6 +2194,7 @@ function demoSave(msgEl, kind, summary) {
         btn.addEventListener('click', function () {
           var i = Number(btn.getAttribute('data-i'));
           notes.splice(i, 1);
+          persistToStorage();
           render();
         });
       });
@@ -2295,6 +2205,7 @@ function demoSave(msgEl, kind, summary) {
       if (!text) { return; }
       notes.push(text);
       input.value = '';
+      persistToStorage();
       render();
     }
 
@@ -2306,17 +2217,74 @@ function demoSave(msgEl, kind, summary) {
     var saveMsg = document.getElementById('notes_saveMsg');
     var saveBtn = document.getElementById('notes_saveBtn');
     var sheetsBtn = document.getElementById('notes_sheetsBtn');
+    var setupBtn = document.getElementById('notes_sheetsSetupBtn');
+    var setupBox = document.getElementById('notes_sheetsSetupBox');
+    var urlInput = document.getElementById('notes_sheetsUrlInput');
+    var urlSaveBtn = document.getElementById('notes_sheetsUrlSaveBtn');
+    var SHEETS_URL_KEY = 'vch_notes_sheets_url';
+
+    function showMsg(text) {
+      if (!saveMsg) { return; }
+      saveMsg.textContent = text;
+      saveMsg.classList.add('show');
+      clearTimeout(saveMsg._hideTimer);
+      saveMsg._hideTimer = setTimeout(function () { saveMsg.classList.remove('show'); }, 5000);
+    }
+
     if (saveBtn) {
       saveBtn.addEventListener('click', function () {
-        demoSave(saveMsg, 'save', '메모 ' + notes.length + '개');
-      });
-    }
-    if (sheetsBtn) {
-      sheetsBtn.addEventListener('click', function () {
-        demoSave(saveMsg, 'sheets', '메모 ' + notes.length + '개');
+        persistToStorage();
+        showMsg('💾 실제로 저장되었습니다. 새로고침해도 메모 ' + notes.length + '개가 유지됩니다. (이 브라우저에만 저장됨)');
       });
     }
 
+    try { urlInput.value = localStorage.getItem(SHEETS_URL_KEY) || ''; } catch (e) {}
+
+    if (setupBtn) {
+      setupBtn.addEventListener('click', function () {
+        setupBox.style.display = setupBox.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    if (urlSaveBtn) {
+      urlSaveBtn.addEventListener('click', function () {
+        var url = urlInput.value.trim();
+        if (!url) { return; }
+        try { localStorage.setItem(SHEETS_URL_KEY, url); } catch (e) {}
+        showMsg('✅ 구글시트 연동 URL이 저장되었습니다. 이제 "구글시트 연동" 버튼을 눌러 전송해보세요.');
+      });
+    }
+
+    if (sheetsBtn) {
+      sheetsBtn.addEventListener('click', function () {
+        var url = '';
+        try { url = localStorage.getItem(SHEETS_URL_KEY) || ''; } catch (e) {}
+        if (!url) {
+          showMsg('⚠️ 먼저 "⚙️ 연동 설정"에서 구글 Apps Script 웹앱 URL을 등록해주세요.');
+          setupBox.style.display = 'block';
+          return;
+        }
+        if (!notes.length) {
+          showMsg('⚠️ 보낼 메모가 없습니다. 먼저 메모를 추가해주세요.');
+          return;
+        }
+        var now = new Date();
+        var payload = { date: now.toLocaleString(), notes: notes };
+        showMsg('📤 전송 중...');
+        fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        }).then(function () {
+          showMsg('📤 전송 완료! (no-cors 방식이라 응답 확인은 안 되니, 구글시트를 직접 열어 데이터가 들어왔는지 확인해주세요.)');
+        }).catch(function (err) {
+          showMsg('❌ 전송 실패: ' + err.message + ' (URL이 올바른지, 배포 권한이 "모든 사용자"인지 확인해주세요.)');
+        });
+      });
+    }
+
+    loadFromStorage();
     render();
   } catch (e) {
     console.error('notes module error', e);
@@ -2638,19 +2606,70 @@ function demoSave(msgEl, kind, summary) {
   try {
     var detail = document.getElementById('pyr_detail');
     var tiers = document.querySelectorAll('.pyr-tier');
-    var content = {
-      fact: '예시: "2023년 폭염일수가 평년보다 15일 늘었다", "북극 빙하 면적이 매년 줄고 있다" 같은 구체적 관찰 사실들',
-      concept: '개념: 위 사실들을 묶는 상위 범주 → "기후변화", "온실효과", "이상기후"',
-      generalization: '일반화 문장: "온실가스 배출이 늘어날수록 지구의 평균 기온과 이상기후 발생 빈도가 높아진다." (사실과 개념을 연결한 전이 가능한 원리)'
-    };
+    var label = document.getElementById('pyr_topicLabel');
+    var prevBtn = document.getElementById('pyr_prevBtn');
+    var nextBtn = document.getElementById('pyr_nextBtn');
+
+    var topics = [
+      {
+        name: '기후변화',
+        fact: '예시: "2023년 폭염일수가 평년보다 15일 늘었다", "북극 빙하 면적이 매년 줄고 있다" 같은 구체적 관찰 사실들',
+        concept: '개념: 위 사실들을 묶는 상위 범주 → "기후변화", "온실효과", "이상기후"',
+        generalization: '일반화 문장: "온실가스 배출이 늘어날수록 지구의 평균 기온과 이상기후 발생 빈도가 높아진다." (사실과 개념을 연결한 전이 가능한 원리)'
+      },
+      {
+        name: '생물의 적응',
+        fact: '예시: "북극곰은 두꺼운 지방층과 흰 털을 가졌다", "선인장은 잎이 가시로 변했다" 같은 구체적 관찰 사실들',
+        concept: '개념: 위 사실들을 묶는 상위 범주 → "적응", "생존 전략", "구조와 기능"',
+        generalization: '일반화 문장: "생물은 서식 환경에 적합한 신체 구조나 행동을 갖출수록 생존 가능성이 높아진다."'
+      },
+      {
+        name: '수요와 공급',
+        fact: '예시: "마스크가 품절되자 가격이 5배로 뛰었다", "딸기가 풍년이라 가격이 떨어졌다" 같은 구체적 관찰 사실들',
+        concept: '개념: 위 사실들을 묶는 상위 범주 → "수요", "공급", "시장 가격"',
+        generalization: '일반화 문장: "공급이 일정할 때 수요가 늘어날수록 가격은 상승한다."'
+      },
+      {
+        name: '혁명과 사회 변화',
+        fact: '예시: "프랑스 혁명 전 평민의 세금 부담이 컸다", "산업혁명으로 도시 인구가 급증했다" 같은 구체적 관찰 사실들',
+        concept: '개념: 위 사실들을 묶는 상위 범주 → "혁명", "사회 구조 변화", "갈등과 개혁"',
+        generalization: '일반화 문장: "기존 체제에 대한 불만이 누적되고 이를 바꿀 힘이 모일 때 사회는 급격히 변화한다."'
+      },
+      {
+        name: '차별과 인권',
+        fact: '예시: "한 세기 전 여성에게는 선거권이 없었다", "특정 인종은 같은 버스 좌석에 앉을 수 없었다" 같은 구체적 관찰 사실들',
+        concept: '개념: 위 사실들을 묶는 상위 범주 → "차별", "평등", "인권 신장"',
+        generalization: '일반화 문장: "사회적 약자의 목소리가 모이고 제도가 바뀔 때 평등과 인권은 확장된다."'
+      }
+    ];
+
+    var idx = 0;
+
+    function renderTopic() {
+      label.textContent = (idx + 1) + ' / ' + topics.length + ' · ' + topics[idx].name;
+      detail.textContent = '단계를 클릭해보세요.';
+      tiers.forEach(function (b) { b.style.outline = ''; });
+    }
+
     tiers.forEach(function (btn) {
       btn.addEventListener('click', function () {
         var tier = btn.getAttribute('data-tier');
-        detail.textContent = content[tier] || '';
+        detail.textContent = topics[idx][tier] || '';
         tiers.forEach(function (b) { b.style.outline = ''; });
         btn.style.outline = '3px solid #111827';
       });
     });
+
+    prevBtn.addEventListener('click', function () {
+      idx = (idx - 1 + topics.length) % topics.length;
+      renderTopic();
+    });
+    nextBtn.addEventListener('click', function () {
+      idx = (idx + 1) % topics.length;
+      renderTopic();
+    });
+
+    renderTopic();
   } catch (e) {
     console.error('infographic3 module error', e);
   }
@@ -2814,82 +2833,6 @@ function demoSave(msgEl, kind, summary) {
     renderAll();
   } catch (e) {
     console.error('questiontypes module error', e);
-  }
-})();
-
-/* ===================== CONCEPT-BASED INQUIRY: 일반화 문장 보드 ===================== */
-(function () {
-  try {
-    var groupInput = document.getElementById('gb_group');
-    var sentenceInput = document.getElementById('gb_sentence');
-    var addBtn = document.getElementById('gb_addBtn');
-    var board = document.getElementById('gb_board');
-    var KEY = 'vch_genboard_notes';
-    var colors = ['#fef08a', '#fecdd3', '#bbf7d0', '#bfdbfe', '#ddd6fe', '#fed7aa'];
-    var notes = [];
-
-    function load() {
-      try {
-        var raw = localStorage.getItem(KEY);
-        notes = raw ? JSON.parse(raw) : [];
-      } catch (e) { notes = []; }
-    }
-
-    function save() {
-      try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {}
-    }
-
-    function render() {
-      board.innerHTML = '';
-      if (!notes.length) {
-        board.innerHTML = '<div style="color:#64748b;font-size:13px;">아직 게시된 일반화 문장이 없습니다.</div>';
-        return;
-      }
-      notes.forEach(function (note, i) {
-        var card = document.createElement('div');
-        card.style.background = colors[i % colors.length];
-        card.style.borderRadius = '10px';
-        card.style.padding = '12px';
-        card.style.width = '160px';
-        card.style.minHeight = '110px';
-        card.style.boxShadow = '0 4px 10px rgba(0,0,0,0.12)';
-        card.style.position = 'relative';
-        card.style.fontSize = '13px';
-        card.innerHTML =
-          '<div style="font-weight:bold;margin-bottom:6px;">' + (note.group || '익명') + '</div>' +
-          '<div style="white-space:pre-wrap;">' + note.sentence + '</div>' +
-          '<button data-idx="' + i + '" style="position:absolute;top:4px;right:6px;border:none;background:transparent;cursor:pointer;font-size:13px;">✕</button>';
-        board.appendChild(card);
-      });
-      board.querySelectorAll('button[data-idx]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var idx = Number(btn.getAttribute('data-idx'));
-          notes.splice(idx, 1);
-          save();
-          render();
-        });
-      });
-    }
-
-    addBtn.addEventListener('click', function () {
-      var group = groupInput.value.trim();
-      var sentence = sentenceInput.value.trim();
-      if (!sentence) { return; }
-      notes.push({ group: group, sentence: sentence });
-      save();
-      groupInput.value = '';
-      sentenceInput.value = '';
-      render();
-    });
-
-    sentenceInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { addBtn.click(); }
-    });
-
-    load();
-    render();
-  } catch (e) {
-    console.error('genboard module error', e);
   }
 })();
 
