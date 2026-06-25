@@ -1,0 +1,3023 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바이브코딩 콘텐츠 허브</title>
+<style>
+  *{box-sizing:border-box;}
+  html,body{ margin:0; padding:0; font-family:'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
+  .view{ display:none; min-height:100vh; }
+  .view.active{ display:block; }
+
+  /* ===== DEVICE PREVIEW TOGGLE ===== */
+  #deviceToggle{
+    position:fixed; top:10px; right:10px; z-index:9999; display:flex; gap:4px;
+    background:rgba(17,24,39,0.85); padding:5px; border-radius:999px; box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  }
+  #deviceToggle button{
+    border:none; background:transparent; color:#cbd5e1; font-size:13px; padding:6px 12px; border-radius:999px;
+    cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:5px;
+  }
+  #deviceToggle button.device-active{ background:#fff; color:#111827; font-weight:bold; }
+  body.device-mobile-mode{
+    max-width:420px; margin:0 auto; box-shadow:0 0 0 1px #d1d5db, 0 10px 40px rgba(0,0,0,0.25);
+    min-height:100vh; overflow-x:hidden;
+  }
+  body.device-mobile-mode .view.active{ overflow-y:auto; max-height:100vh; }
+
+  /* ===== HOME ===== */
+  #view-home{
+    background:#f5f7fb; color:#1f2937;
+  }
+  #view-home header{ text-align:center; padding:48px 20px 24px; }
+  #view-home header h1{ margin:0 0 8px; font-size:28px; }
+  #view-home header p{ margin:0; color:#6b7280; font-size:15px; }
+  #view-home main{ max-width:980px; margin:0 auto; padding:20px 24px 80px; }
+  #view-home section{ margin-bottom:48px; }
+  .section-title{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .section-title .dot{ width:12px; height:12px; border-radius:50%; }
+  .section-title h2{ margin:0; font-size:20px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:18px; }
+  .card{
+    background:#ffffff; border-radius:14px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    text-decoration:none; color:#1f2937; display:block; transition:transform .15s ease, box-shadow .15s ease;
+    border:1px solid #eef0f4; cursor:pointer; text-align:left; width:100%; font-family:inherit;
+  }
+  .card:hover{ transform:translateY(-4px); box-shadow:0 8px 22px rgba(0,0,0,0.12); }
+  .card .icon{ font-size:30px; margin-bottom:10px; display:block; }
+  .card h3{ margin:0 0 6px; font-size:16px; }
+  .card p{ margin:0; font-size:13px; color:#6b7280; line-height:1.5; }
+  .badge{
+    display:inline-block; font-size:11px; padding:3px 9px; border-radius:999px; margin-top:10px;
+    background:#eef2ff; color:#4338ca;
+  }
+  #view-home footer{ text-align:center; padding:24px; color:#6b7280; font-size:13px; }
+
+  /* ===== shared back button ===== */
+  .back-btn{
+    margin-top:28px; background:rgba(255,255,255,0.15); border:2px solid currentColor; cursor:pointer;
+    text-decoration:none; font-size:16px; font-weight:bold; font-family:inherit; padding:14px 28px;
+    border-radius:12px; transition:background .15s ease, transform .15s ease;
+  }
+  .back-btn:hover{ background:rgba(255,255,255,0.3); transform:translateY(-2px); }
+  #view-home .back-btn{ display:none; }
+
+  /* ===== SAVE / GOOGLE SHEETS DEMO BUTTON (shared by 웹앱 category) ===== */
+  .save-row{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; justify-content:center; }
+  .save-btn{
+    border:none; border-radius:8px; padding:10px 18px; font-size:13px; font-weight:bold; cursor:pointer;
+    font-family:inherit; display:inline-flex; align-items:center; gap:6px; background:#475569; color:#fff;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .save-btn:hover{ transform:translateY(-2px); opacity:0.92; }
+  .save-btn.sheets{ background:#0f9d58; }
+  .save-msg{
+    font-size:12px; margin-top:8px; min-height:16px; opacity:0; transition:opacity .25s ease;
+  }
+  .save-msg.show{ opacity:1; }
+
+  /* ===== QUIZ ===== */
+  #view-quiz{
+    background:linear-gradient(135deg,#3b82f6,#6366f1); align-items:center; justify-content:center; padding:24px;
+  }
+  #view-quiz.active{ display:flex; }
+  #quiz_box{ background:#fff; border-radius:18px; padding:36px; width:420px; max-width:90vw; box-shadow:0 12px 30px rgba(0,0,0,0.25); }
+  #quiz_app{ }
+  .quiz-top{ display:flex; justify-content:space-between; font-size:14px; color:#6b7280; margin-bottom:14px;}
+  .quiz-q{ margin:0 0 20px; font-size:19px; line-height:1.4; color:#1f2937;}
+  .quiz-opt{
+    display:block; width:100%; text-align:left; padding:13px 16px; margin-bottom:10px;
+    border:2px solid #e5e7eb; border-radius:10px; background:#fff; cursor:pointer; font-size:15px; transition:all .15s;
+  }
+  .quiz-opt:hover{ border-color:#93c5fd; background:#eff6ff; }
+  .quiz-opt.correct{ border-color:#10b981; background:#ecfdf5; }
+  .quiz-opt.wrong{ border-color:#ef4444; background:#fef2f2; }
+  .quiz-result{ text-align:center; }
+  .quiz-score{ font-size:42px; font-weight:bold; color:#3b82f6; margin:10px 0; }
+  .quiz-restart{
+    margin-top:14px; padding:11px 22px; border:none; border-radius:10px; background:#3b82f6; color:#fff;
+    font-size:14px; cursor:pointer;
+  }
+  #quiz_box .back-btn{ display:block; margin:24px auto 0; color:#3b82f6; background:#eef2ff; border-color:#3b82f6; }
+
+  /* ===== MATCH ===== */
+  #view-match{
+    background:linear-gradient(135deg,#10b981,#059669); color:#fff;
+    flex-direction:column; align-items:center; justify-content:center; padding:24px;
+  }
+  #view-match.active{ display:flex; }
+  #view-match h1{ margin:0 0 6px; font-size:22px; }
+  #view-match .info{ margin-bottom:16px; font-size:14px; opacity:.9; }
+  #match_board{ display:grid; grid-template-columns:repeat(4,80px); gap:12px; }
+  .match-card{
+    width:80px; height:80px; border-radius:12px; background:#fff; color:#10b981;
+    display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer;
+    box-shadow:0 6px 14px rgba(0,0,0,0.2); user-select:none; transition:transform .15s;
+  }
+  .match-card.hidden-card{ background:#34d399; color:transparent; }
+  .match-card.matched{ background:#a7f3d0; cursor:default; }
+  #view-match .restart-btn{
+    margin-top:18px; padding:10px 20px; border:none; border-radius:10px; background:#fff; color:#059669;
+    font-weight:bold; cursor:pointer; font-size:14px;
+  }
+  #view-match .back-btn{ color:#fff; margin-top:10px; }
+
+  /* ===== PENDULUM ===== */
+  #view-pendulum{
+    background:#0f172a; color:#e2e8f0; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-pendulum.active{ display:flex; }
+  #view-pendulum h1{ margin:0 0 4px; font-size:22px; }
+  #view-pendulum .sub{ margin:0 0 18px; color:#94a3b8; font-size:13px; }
+  #view-pendulum .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+  #pendCanvas{ background:#1e293b; border-radius:14px; display:block; }
+  #view-pendulum .panel{ background:#1e293b; border-radius:14px; padding:20px; width:240px; }
+  #view-pendulum .row{ margin-bottom:16px; }
+  #view-pendulum label{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#cbd5e1; }
+  #view-pendulum input[type=range]{ width:100%; }
+  #view-pendulum button.ctrl{
+    width:100%; padding:10px; border:none; border-radius:8px; background:#3b82f6; color:#fff;
+    font-size:14px; cursor:pointer; margin-top:6px;
+  }
+  #view-pendulum .back-btn{ color:#94a3b8; }
+  #pend_errBox{ color:#fca5a5; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+
+  /* ===== POPULATION ===== */
+  #view-population{
+    background:#f8fafc; color:#1f2937; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-population.active{ display:flex; }
+  #view-population h1{ margin:0 0 4px; font-size:22px; }
+  #view-population .sub{ margin:0 0 18px; color:#64748b; font-size:13px; text-align:center; max-width:500px;}
+  #view-population .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+  #popCanvas{ background:#fff; border-radius:14px; border:1px solid #e2e8f0; display:block; }
+  #view-population .panel{ background:#fff; border-radius:14px; padding:20px; width:240px; border:1px solid #e2e8f0; }
+  #view-population .row{ margin-bottom:16px; }
+  #view-population label{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#475569; }
+  #view-population input[type=range]{ width:100%; }
+  #view-population button.ctrl{
+    width:100%; padding:10px; border:none; border-radius:8px; background:#10b981; color:#fff;
+    font-size:14px; cursor:pointer; margin-top:6px;
+  }
+  #view-population .stat{ font-size:13px; color:#475569; margin-top:10px; }
+  #view-population .back-btn{ color:#10b981; background:#ecfdf5; border-color:#10b981; }
+  #pop_errBox{ color:#dc2626; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+
+  /* ===== CORAL ===== */
+  #view-coral{
+    background:#ecfeff; color:#0c4a6e; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-coral.active{ display:flex; }
+  #view-coral h1{ margin:0 0 4px; font-size:22px; }
+  #view-coral .sub{ margin:0 0 18px; color:#0369a1; font-size:13px; text-align:center; max-width:520px;}
+  #view-coral .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+  #coralCanvas{ background:#fff; border-radius:14px; border:1px solid #bae6fd; display:block; }
+  #view-coral .panel{ background:#fff; border-radius:14px; padding:20px; width:240px; border:1px solid #bae6fd; }
+  #view-coral .row{ margin-bottom:16px; }
+  #view-coral label{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#0369a1; }
+  #view-coral input[type=range]{ width:100%; }
+  #view-coral button.ctrl{
+    width:100%; padding:10px; border:none; border-radius:8px; background:#0ea5e9; color:#fff;
+    font-size:14px; cursor:pointer; margin-top:6px;
+  }
+  #view-coral .stat{ font-size:13px; color:#0369a1; margin-top:10px; }
+  #view-coral .back-btn{ color:#0ea5e9; background:#e0f2fe; border-color:#0ea5e9; }
+  #coral_errBox{ color:#dc2626; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+
+  /* ===== PICKER ===== */
+  #view-picker{
+    background:#1e1b4b; color:#ede9fe; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-picker.active{ display:flex; }
+  #view-picker h1{ margin:0 0 4px; font-size:22px; }
+  #view-picker .sub{ margin:0 0 20px; color:#c4b5fd; font-size:13px; }
+  #view-picker .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; max-width:760px; }
+  #view-picker .panel{ background:#312e81; border-radius:14px; padding:20px; width:300px; }
+  #pick_names{
+    width:100%; height:160px; border-radius:10px; border:1px solid #4338ca; background:#1e1b4b; color:#ede9fe;
+    padding:10px; font-size:13px; resize:vertical;
+  }
+  #view-picker .row{ margin-top:14px; display:flex; gap:8px; align-items:center; font-size:13px; }
+  #pick_groupSize{ width:60px; padding:6px; border-radius:6px; border:1px solid #4338ca; background:#1e1b4b; color:#ede9fe; }
+  #view-picker button.ctrl{ padding:10px 16px; border:none; border-radius:8px; background:#8b5cf6; color:#fff; cursor:pointer; font-size:14px; }
+  #view-picker button.secondary{ background:#4338ca; }
+  #view-picker .resultBox{
+    background:#312e81; border-radius:14px; padding:30px; width:300px; display:flex; align-items:center; justify-content:center;
+    text-align:center; font-size:26px; font-weight:bold; min-height:160px;
+  }
+  #view-picker .picked{ color:#facc15; }
+  #view-picker .back-btn{ color:#c4b5fd; }
+  #pick_errBox{ color:#fca5a5; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+
+  /* ===== TIMER ===== */
+  #view-timer{
+    background:#0c4a6e; color:#e0f2fe; flex-direction:column; align-items:center; justify-content:center; padding:24px;
+  }
+  #view-timer.active{ display:flex; }
+  #view-timer h1{ margin:0 0 4px; font-size:22px; }
+  #view-timer .sub{ margin:0 0 24px; color:#7dd3fc; font-size:13px; }
+  #timer_display{ font-size:72px; font-weight:bold; letter-spacing:2px; margin-bottom:24px; font-family:monospace; }
+  #timer_display.warn{ color:#facc15; }
+  #timer_display.danger{ color:#f87171; }
+  #view-timer .controls{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; justify-content:center; }
+  #view-timer button.ctrl{
+    padding:10px 18px; border:none; border-radius:8px; background:#0ea5e9; color:#fff; cursor:pointer; font-size:14px;
+    transition:transform .12s ease;
+  }
+  #view-timer button.ctrl:active{ transform:scale(0.93); }
+  #view-timer button.ctrl.btn-clicked{ animation:timerBtnPulse .3s ease; }
+  @keyframes timerBtnPulse{
+    0%{ transform:scale(0.9); box-shadow:0 0 0 5px rgba(255,255,255,0.45); }
+    100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(255,255,255,0); }
+  }
+  #view-timer button.secondary{ background:#075985; }
+  #view-timer .presets{ display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; justify-content:center; }
+  #view-timer .presets button{ background:#0369a1; font-size:13px; padding:7px 12px; border:none; border-radius:8px; color:#fff; cursor:pointer; }
+  #view-timer .back-btn{ color:#7dd3fc; }
+  #timer_errBox{ color:#fca5a5; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+  #timer_saveMsg{ color:#bae6fd; max-width:380px; text-align:center; }
+
+  /* ===== RPS (가위바위보) ===== */
+  #view-rps{
+    background:linear-gradient(135deg,#ec4899,#db2777); color:#fff;
+    flex-direction:column; align-items:center; justify-content:center; padding:24px;
+  }
+  #view-rps.active{ display:flex; }
+  #view-rps h1{ margin:0 0 4px; font-size:22px; }
+  #view-rps .sub{ margin:0 0 18px; color:#fbcfe8; font-size:13px; }
+  #rps_score{ font-size:15px; margin-bottom:18px; background:rgba(255,255,255,0.15); padding:8px 18px; border-radius:999px; }
+  #rps_choices{ display:flex; gap:14px; margin-bottom:22px; }
+  #rps_choices button{
+    width:72px; height:72px; border-radius:50%; border:none; background:#fff; font-size:32px; cursor:pointer;
+    box-shadow:0 6px 14px rgba(0,0,0,0.25); transition:transform .12s ease;
+  }
+  #rps_choices button:hover{ transform:translateY(-4px) scale(1.05); }
+  #rps_battle{ display:flex; align-items:center; gap:20px; font-size:46px; margin-bottom:14px; min-height:60px; }
+  #rps_vs{ font-size:16px; opacity:.8; }
+  #rps_result{ font-size:19px; font-weight:bold; margin-bottom:10px; min-height:26px; }
+  #rps_resetBtn{
+    padding:9px 18px; border:none; border-radius:8px; background:rgba(255,255,255,0.2); color:#fff;
+    cursor:pointer; font-size:13px; margin-bottom:6px;
+  }
+  #view-rps .back-btn{ color:#fff; }
+
+  /* ===== NUMBER GUESS (숫자 맞추기) ===== */
+  #view-guess{
+    background:linear-gradient(135deg,#f97316,#ea580c); color:#fff;
+    flex-direction:column; align-items:center; justify-content:center; padding:24px;
+  }
+  #view-guess.active{ display:flex; }
+  #view-guess h1{ margin:0 0 4px; font-size:22px; }
+  #view-guess .sub{ margin:0 0 18px; color:#fed7aa; font-size:13px; text-align:center; }
+  #guess_box{ background:rgba(255,255,255,0.12); border-radius:16px; padding:28px; width:280px; text-align:center; }
+  #guess_input{
+    width:100%; padding:12px; font-size:18px; border-radius:8px; border:none; text-align:center; margin-bottom:12px;
+  }
+  #guess_submitBtn{
+    width:100%; padding:11px; border:none; border-radius:8px; background:#fff; color:#ea580c; font-weight:bold;
+    font-size:15px; cursor:pointer; margin-bottom:10px;
+  }
+  #guess_hint{ font-size:16px; min-height:24px; margin-bottom:8px; font-weight:bold; }
+  #guess_tries{ font-size:13px; color:#fed7aa; margin-bottom:14px; }
+  #guess_resetBtn{
+    padding:9px 18px; border:none; border-radius:8px; background:rgba(255,255,255,0.2); color:#fff;
+    cursor:pointer; font-size:13px;
+  }
+  #view-guess .back-btn{ color:#fff; }
+
+  /* ===== TYPING CHALLENGE (타이핑 챌린지) ===== */
+  #view-typing{
+    background:linear-gradient(135deg,#06b6d4,#0891b2); color:#fff;
+    flex-direction:column; align-items:center; justify-content:center; padding:24px;
+  }
+  #view-typing.active{ display:flex; }
+  #view-typing h1{ margin:0 0 4px; font-size:22px; }
+  #view-typing .sub{ margin:0 0 18px; color:#a5f3fc; font-size:13px; text-align:center; }
+  #typing_box{ background:rgba(255,255,255,0.12); border-radius:16px; padding:28px; width:340px; text-align:center; }
+  #typing_stats{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:14px; color:#a5f3fc; }
+  #typing_word{ font-size:30px; font-weight:bold; margin-bottom:16px; letter-spacing:1px; }
+  #typing_input{
+    width:100%; padding:12px; font-size:16px; border-radius:8px; border:none; text-align:center; margin-bottom:14px;
+  }
+  #typing_startBtn{
+    width:100%; padding:11px; border:none; border-radius:8px; background:#fff; color:#0891b2; font-weight:bold;
+    font-size:15px; cursor:pointer;
+  }
+  #typing_msg{ font-size:14px; min-height:20px; margin-top:10px; }
+  #view-typing .back-btn{ color:#fff; }
+
+  /* ===== PROJECTILE (포물선 운동) ===== */
+  #view-projectile{
+    background:#1e293b; color:#e2e8f0; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-projectile.active{ display:flex; }
+  #view-projectile h1{ margin:0 0 4px; font-size:22px; }
+  #view-projectile .sub{ margin:0 0 18px; color:#94a3b8; font-size:13px; }
+  #view-projectile .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+  #projCanvas{ background:#0f172a; border-radius:14px; display:block; }
+  #view-projectile .panel{ background:#0f172a; border-radius:14px; padding:20px; width:240px; }
+  #view-projectile .row{ margin-bottom:16px; }
+  #view-projectile label{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#cbd5e1; }
+  #view-projectile input[type=range]{ width:100%; }
+  #view-projectile button.ctrl{
+    width:100%; padding:10px; border:none; border-radius:8px; background:#f59e0b; color:#1e293b;
+    font-size:14px; cursor:pointer; margin-top:6px; font-weight:bold;
+  }
+  #view-projectile .stat{ font-size:13px; color:#cbd5e1; margin-top:10px; }
+  #view-projectile .back-btn{ color:#94a3b8; }
+  #proj_errBox{ color:#fca5a5; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+
+  /* ===== COIN FLIP (동전 던지기) ===== */
+  #view-coinflip{
+    background:#fef9c3; color:#713f12; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-coinflip.active{ display:flex; }
+  #view-coinflip h1{ margin:0 0 4px; font-size:22px; }
+  #view-coinflip .sub{ margin:0 0 18px; color:#a16207; font-size:13px; text-align:center; }
+  #coin_face{ font-size:64px; margin-bottom:14px; }
+  #coin_controls{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; justify-content:center; }
+  #coin_controls button{
+    padding:10px 18px; border:none; border-radius:8px; background:#ca8a04; color:#fff; cursor:pointer; font-size:14px;
+  }
+  #coin_controls button.secondary{ background:#92400e; }
+  #coinCanvas{ background:#fffbeb; border-radius:14px; border:1px solid #fde68a; display:block; }
+  #coin_stat{ font-size:14px; margin-top:12px; text-align:center; }
+  #view-coinflip .back-btn{ color:#713f12; background:rgba(0,0,0,0.06); }
+
+  /* ===== POLL (실시간 투표) ===== */
+  #view-poll{
+    background:#0c4a6e; color:#e0f2fe; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-poll.active{ display:flex; }
+  #view-poll h1{ margin:0 0 4px; font-size:22px; }
+  #view-poll .sub{ margin:0 0 18px; color:#7dd3fc; font-size:13px; }
+  #poll_box{ background:rgba(255,255,255,0.08); border-radius:16px; padding:24px; width:360px; }
+  .poll-option{ margin-bottom:14px; }
+  .poll-option-head{ display:flex; gap:6px; margin-bottom:6px; }
+  .poll-label-input{
+    flex:1; background:#075985; color:#fff; border:none; border-radius:10px; padding:10px 12px; font-size:14px;
+    font-family:inherit;
+  }
+  .poll-del{
+    border:none; background:rgba(255,255,255,0.15); color:#fff; border-radius:8px; padding:0 12px; font-size:12px;
+    cursor:pointer;
+  }
+  .poll-btn{
+    width:100%; text-align:left; padding:10px 14px; border:none; border-radius:10px; background:#0369a1; color:#fff;
+    cursor:pointer; font-size:13px; margin-bottom:6px;
+  }
+  .poll-bar-track{ width:100%; height:10px; background:rgba(255,255,255,0.15); border-radius:6px; overflow:hidden; }
+  .poll-bar-fill{ height:100%; background:#38bdf8; width:0%; transition:width .3s ease; }
+  .poll-pct{ font-size:12px; color:#bae6fd; margin-top:4px; }
+  #poll_addRow{ display:flex; gap:6px; margin:14px 0; }
+  #poll_newOptInput{
+    flex:1; padding:9px 10px; border-radius:8px; border:1px solid #38bdf8; background:rgba(255,255,255,0.08);
+    color:#fff; font-size:13px; font-family:inherit;
+  }
+  #poll_addOptBtn{
+    padding:9px 14px; border:none; border-radius:8px; background:#0ea5e9; color:#fff; cursor:pointer; font-size:13px;
+    font-weight:bold;
+  }
+  #poll_resetBtn{
+    width:100%; padding:10px; border:none; border-radius:8px; background:rgba(255,255,255,0.15); color:#fff;
+    cursor:pointer; font-size:13px; margin-top:8px;
+  }
+  #view-poll .back-btn{ color:#7dd3fc; }
+
+  /* ===== ROULETTE (룰렛) ===== */
+  #view-roulette{
+    background:#312e81; color:#e0e7ff; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-roulette.active{ display:flex; }
+  #view-roulette h1{ margin:0 0 4px; font-size:22px; }
+  #view-roulette .sub{ margin:0 0 18px; color:#c7d2fe; font-size:13px; }
+  #view-roulette .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; align-items:flex-start; }
+  #roulette_wheelWrap{ position:relative; width:260px; height:260px; }
+  #roulette_wheel{
+    width:260px; height:260px; border-radius:50%; transition:transform 3s cubic-bezier(.17,.67,.12,.99);
+    box-shadow:0 8px 24px rgba(0,0,0,0.3);
+  }
+  #roulette_pointer{
+    position:absolute; top:-12px; left:50%; transform:translateX(-50%); font-size:28px;
+  }
+  #view-roulette .panel{ background:#3730a3; border-radius:14px; padding:20px; width:260px; }
+  #roulette_items{
+    width:100%; height:120px; border-radius:10px; border:1px solid #4338ca; background:#1e1b4b; color:#e0e7ff;
+    padding:10px; font-size:13px; resize:vertical; margin-bottom:12px;
+  }
+  #roulette_spinBtn{
+    width:100%; padding:11px; border:none; border-radius:8px; background:#fbbf24; color:#1e1b4b; font-weight:bold;
+    font-size:15px; cursor:pointer;
+  }
+  #roulette_result{ font-size:18px; font-weight:bold; margin-top:12px; text-align:center; min-height:26px; }
+  #view-roulette .back-btn{ color:#c7d2fe; }
+
+  /* ===== NOTES (스티키 메모) ===== */
+  #view-notes{
+    background:#fef3c7; color:#78350f; padding:24px;
+  }
+  #view-notes.active{ display:flex; flex-direction:column; align-items:center; }
+  #view-notes h1{ margin:0 0 4px; font-size:22px; }
+  #view-notes .sub{ margin:0 0 18px; color:#92400e; font-size:13px; }
+  #notes_addRow{ display:flex; gap:8px; margin-bottom:20px; width:100%; max-width:600px; }
+  #notes_input{ flex:1; padding:10px; border-radius:8px; border:1px solid #d97706; font-size:14px; }
+  #notes_addBtn{ padding:10px 18px; border:none; border-radius:8px; background:#d97706; color:#fff; cursor:pointer; font-size:14px; }
+  #notes_board{ display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:14px; width:100%; max-width:700px; }
+  .sticky-note{
+    background:#fde68a; border-radius:8px; padding:14px; font-size:13px; line-height:1.5; min-height:100px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.12); position:relative; word-break:break-word;
+  }
+  .sticky-note .del{
+    position:absolute; top:6px; right:8px; background:none; border:none; cursor:pointer; font-size:13px; color:#92400e;
+  }
+  #view-notes .back-btn{ color:#78350f; background:rgba(0,0,0,0.06); }
+  #notes_saveMsg{ color:#92400e; max-width:380px; text-align:center; }
+
+  /* ===== ATTENDANCE (출석 체크) ===== */
+  #view-attendance{
+    background:#f0fdf4; color:#14532d; padding:24px;
+  }
+  #view-attendance.active{ display:flex; flex-direction:column; align-items:center; }
+  #view-attendance h1{ margin:0 0 4px; font-size:22px; }
+  #view-attendance .sub{ margin:0 0 18px; color:#166534; font-size:13px; }
+  #attend_addRow{ display:flex; gap:8px; margin-bottom:14px; width:100%; max-width:480px; }
+  #attend_nameInput{ flex:1; padding:9px 12px; border-radius:8px; border:1px solid #86efac; font-size:13px; font-family:inherit; }
+  #attend_addNameBtn{
+    background:#16a34a; color:#fff; border:none; padding:9px 16px; border-radius:8px; font-size:13px;
+    font-weight:bold; cursor:pointer; font-family:inherit;
+  }
+  #attend_addNameBtn:hover{ background:#15803d; }
+  .attend-row .remark-btn{
+    border:none; background:#e0e7ff; color:#4338ca; border-radius:6px; padding:5px 9px; font-size:11px; cursor:pointer;
+  }
+  .attend-row .remark-tag{
+    display:block; font-size:11px; color:#b45309; font-weight:normal; margin-top:2px;
+  }
+  #attend_controls{
+    display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; justify-content:center;
+  }
+  #attend_controls label{ font-size:13px; font-weight:bold; }
+  #attend_date{ padding:7px 10px; border-radius:8px; border:1px solid #86efac; font-size:13px; font-family:inherit; }
+  #attend_allPresentBtn{
+    background:#16a34a; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:13px;
+    font-weight:bold; cursor:pointer; font-family:inherit;
+  }
+  #attend_allPresentBtn:hover{ background:#15803d; }
+  #attend_saveMsg{ color:#166534; max-width:380px; text-align:center; }
+  #attend_summary{
+    font-size:13px; margin-bottom:16px; background:#dcfce7; padding:10px 18px; border-radius:999px;
+    text-align:center; max-width:90%;
+  }
+  #attend_list{ width:100%; max-width:480px; }
+  .attend-row{
+    display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#fff;
+    border-radius:10px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06); flex-wrap:wrap; gap:6px;
+  }
+  .attend-row .name{ font-size:14px; font-weight:bold; }
+  .attend-row .toggles{ display:flex; flex-wrap:wrap; gap:4px; }
+  .attend-row .toggles button{
+    border:none; border-radius:6px; padding:5px 9px; font-size:11px; cursor:pointer; font-family:inherit;
+  }
+  .attend-row .toggles .present{ background:#dcfce7; color:#15803d; }
+  .attend-row .toggles .field{ background:#dbeafe; color:#1d4ed8; }
+  .attend-row .toggles .early{ background:#fed7aa; color:#c2410c; }
+  .attend-row .toggles .sick{ background:#e9d5ff; color:#7e22ce; }
+  .attend-row .toggles .etc{ background:#e5e7eb; color:#374151; }
+  .attend-row .toggles button.active-state{ font-weight:bold; outline:2px solid currentColor; }
+  #view-attendance .back-btn{ color:#14532d; background:rgba(0,0,0,0.06); margin-top:16px; }
+
+  /* ===== INFOGRAPHIC 1 (학급 통계) ===== */
+  #view-infographic1{
+    background:#fff1f2; color:#881337; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-infographic1.active{ display:flex; }
+  #view-infographic1 h1{ margin:0 0 4px; font-size:22px; }
+  #view-infographic1 .sub{ margin:0 0 16px; color:#be123c; font-size:13px; text-align:center; }
+  #info1_tabs{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; justify-content:center; }
+  #info1_tabs button{
+    padding:9px 16px; border:none; border-radius:999px; background:#ffe4e6; color:#9f1239; cursor:pointer; font-size:13px;
+  }
+  #info1_tabs button.active-tab{ background:#f43f5e; color:#fff; font-weight:bold; }
+  #info1Canvas{ background:#fff; border-radius:14px; border:1px solid #fecdd3; display:block; }
+  #view-infographic1 .back-btn{ color:#881337; background:rgba(0,0,0,0.06); }
+
+  /* ===== INFOGRAPHIC 2 (디지털 리터러시) ===== */
+  #view-infographic2{
+    background:#f0f9ff; color:#0c4a6e; flex-direction:column; align-items:center; padding:24px;
+  }
+  #view-infographic2.active{ display:flex; }
+  #view-infographic2 h1{ margin:0 0 4px; font-size:22px; }
+  #view-infographic2 .sub{ margin:0 0 16px; color:#0369a1; font-size:13px; text-align:center; }
+  #view-infographic2 .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; align-items:center; }
+  #info2Canvas{ background:#fff; border-radius:14px; border:1px solid #bae6fd; display:block; }
+  #info2_legend{ display:flex; flex-direction:column; gap:8px; }
+  .info2-legend-item{
+    display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; cursor:pointer; background:#fff;
+    border:1px solid #bae6fd; font-size:13px;
+  }
+  .info2-legend-item.active-legend{ background:#bae6fd; font-weight:bold; }
+  .info2-swatch{ width:12px; height:12px; border-radius:50%; display:inline-block; }
+  #view-infographic2 .back-btn{ color:#0c4a6e; background:rgba(0,0,0,0.06); }
+</style>
+</head>
+<body>
+
+<div id="deviceToggle">
+  <button id="device_pcBtn">🖥️ PC 화면</button>
+  <button id="device_mobileBtn">📱 모바일 화면</button>
+</div>
+
+<!-- ===================== HOME ===================== -->
+<div class="view active" id="view-home">
+  <header>
+    <h1>🧩 바이브코딩 콘텐츠 허브</h1>
+    <p>카드를 클릭하면 해당 콘텐츠로 이동합니다.</p>
+  </header>
+  <main>
+    <section>
+      <div class="section-title"><span class="dot" style="background:#f43f5e"></span><h2>웹 인포그래픽</h2></div>
+      <div class="grid">
+        <button class="card" onclick="showView('view-infographic1')">
+          <span class="icon">📊</span>
+          <h3>학급 통계 인포그래픽</h3>
+          <p>독서량·참여도·과제 제출률 등 항목을 골라보는 인터랙티브 막대그래프</p>
+          <span class="badge">웹 인포그래픽</span>
+        </button>
+        <button class="card" onclick="showView('view-infographic2')">
+          <span class="icon">🍩</span>
+          <h3>디지털 리터러시 통계</h3>
+          <p>항목을 클릭하면 해당 비율이 강조되는 인터랙티브 도넛 차트</p>
+          <span class="badge">웹 인포그래픽</span>
+        </button>
+        <button class="card" onclick="showView('view-infographic3')">
+          <span class="icon">🔺</span>
+          <h3>사실-개념-일반화 피라미드</h3>
+          <p>개념기반 탐구수업의 사고 단계(사실→개념→일반화)를 한 단원 예시로 시각화한 인포그래픽</p>
+          <span class="badge">웹 인포그래픽</span>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="dot" style="background:#3b82f6"></span><h2>웹게임</h2></div>
+      <div class="grid">
+        <button class="card" onclick="showView('view-quiz')">
+          <span class="icon">❓</span>
+          <h3>교육용 퀴즈 게임</h3>
+          <p>객관식 문제를 풀며 점수를 모으는 간단한 퀴즈 게임</p>
+          <span class="badge">웹게임</span>
+        </button>
+        <button class="card" onclick="showView('view-match')">
+          <span class="icon">🃏</span>
+          <h3>카드 짝맞추기 게임</h3>
+          <p>짝이 맞는 카드를 찾는 메모리 매칭 게임</p>
+          <span class="badge">웹게임</span>
+        </button>
+        <button class="card" onclick="showView('view-rps')">
+          <span class="icon">✊</span>
+          <h3>가위바위보</h3>
+          <p>컴퓨터와 가위바위보 대결을 펼치며 승패를 기록하는 게임</p>
+          <span class="badge">웹게임</span>
+        </button>
+        <button class="card" onclick="showView('view-guess')">
+          <span class="icon">🔢</span>
+          <h3>숫자 맞추기</h3>
+          <p>1~100 사이 숫자를 더 크다/작다 힌트로 맞춰보는 추리 게임</p>
+          <span class="badge">웹게임</span>
+        </button>
+        <button class="card" onclick="showView('view-typing')">
+          <span class="icon">⌨️</span>
+          <h3>타이핑 챌린지</h3>
+          <p>제한 시간 안에 단어를 빠르게 입력해 점수를 쌓는 타자 게임</p>
+          <span class="badge">웹게임</span>
+        </button>
+        <button class="card" onclick="showView('view-conceptsort')">
+          <span class="icon">🧠</span>
+          <h3>사실/개념 분류 게임</h3>
+          <p>제시된 단어가 '사실(예시)'인지 '개념(상위 범주)'인지 분류해 점수를 쌓는 개념기반 탐구 게임</p>
+          <span class="badge">웹게임</span>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="dot" style="background:#10b981"></span><h2>웹시뮬레이션</h2></div>
+      <div class="grid">
+        <button class="card" onclick="showView('view-pendulum')">
+          <span class="icon">🔗</span>
+          <h3>진자 운동 시뮬레이션</h3>
+          <p>길이·각도를 조절하며 진자의 운동을 관찰하는 물리 시뮬레이션</p>
+          <span class="badge">웹시뮬레이션</span>
+        </button>
+        <button class="card" onclick="showView('view-population')">
+          <span class="icon">📈</span>
+          <h3>인구 증가 시뮬레이션</h3>
+          <p>출생률·자원 한계를 조절하며 인구 변화를 관찰하는 시뮬레이션</p>
+          <span class="badge">웹시뮬레이션</span>
+        </button>
+        <button class="card" onclick="showView('view-projectile')">
+          <span class="icon">🚀</span>
+          <h3>포물선 운동 시뮬레이션</h3>
+          <p>초기 속도와 발사 각도를 조절하며 포물선 운동을 관찰하는 시뮬레이션</p>
+          <span class="badge">웹시뮬레이션</span>
+        </button>
+        <button class="card" onclick="showView('view-coinflip')">
+          <span class="icon">🪙</span>
+          <h3>동전 던지기 확률 시뮬레이션</h3>
+          <p>동전을 여러 번 던지며 앞면/뒷면 빈도와 확률을 관찰하는 시뮬레이션</p>
+          <span class="badge">웹시뮬레이션</span>
+        </button>
+        <button class="card" onclick="showView('view-coral')">
+          <span class="icon">🪸</span>
+          <h3>산호초 백화현상 시뮬레이션</h3>
+          <p>해수온 상승·해양오염도·보호구역 지정 효과를 조절하며 산호초 건강도 변화를 관찰하는 시뮬레이션</p>
+          <span class="badge">웹시뮬레이션</span>
+        </button>
+        <button class="card" onclick="showView('view-patternlab')">
+          <span class="icon">🧪</span>
+          <h3>패턴 탐구 실험실</h3>
+          <p>여러 사례의 변인을 바꿔보며 공통 패턴(일반화 문장)을 스스로 발견하는 탐구 시뮬레이션</p>
+          <span class="badge">웹시뮬레이션</span>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="dot" style="background:#8b5cf6"></span><h2>인터랙티브 도구</h2></div>
+      <div class="grid">
+        <button class="card" onclick="showView('view-picker')">
+          <span class="icon">🎯</span>
+          <h3>랜덤 학생/모둠 뽑기</h3>
+          <p>이름 목록을 입력하면 무작위로 발표자나 모둠을 뽑아주는 도구</p>
+          <span class="badge">인터랙티브 도구</span>
+        </button>
+        <button class="card" onclick="showView('view-poll')">
+          <span class="icon">🗳️</span>
+          <h3>실시간 투표 도구</h3>
+          <p>선택지를 클릭하면 즉시 투표 결과가 막대그래프로 반영되는 투표 도구</p>
+          <span class="badge">인터랙티브 도구</span>
+        </button>
+        <button class="card" onclick="showView('view-roulette')">
+          <span class="icon">🎡</span>
+          <h3>룰렛 뽑기 도구</h3>
+          <p>항목을 입력하고 돌리면 룰렛이 회전하며 무작위 항목을 뽑아주는 도구</p>
+          <span class="badge">인터랙티브 도구</span>
+        </button>
+        <button class="card" onclick="showView('view-inquiryladder')">
+          <span class="icon">💭</span>
+          <h3>질문 유형 분류 도구</h3>
+          <p>사실 질문·개념 질문·논쟁적 질문으로 구분해 직접 질문을 작성하고 모아보는 도구</p>
+          <span class="badge">인터랙티브 도구</span>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><span class="dot" style="background:#0ea5e9"></span><h2>웹앱</h2></div>
+      <div class="grid">
+        <button class="card" onclick="showView('view-timer')">
+          <span class="icon">⏱️</span>
+          <h3>수업 타이머</h3>
+          <p>시간을 설정해 카운트다운하는 간단한 수업용 타이머 앱</p>
+          <span class="badge">웹앱</span>
+        </button>
+        <button class="card" onclick="showView('view-notes')">
+          <span class="icon">🗒️</span>
+          <h3>스티키 메모 게시판</h3>
+          <p>공지나 할 일을 메모지로 붙여 정리하는 간단한 게시판 웹앱</p>
+          <span class="badge">웹앱</span>
+        </button>
+        <button class="card" onclick="showView('view-attendance')">
+          <span class="icon">✅</span>
+          <h3>출석 체크 앱</h3>
+          <p>날짜별로 출석·체험학습·조퇴·병결·기타결을 체크하고 현황을 집계하는 웹앱</p>
+          <span class="badge">웹앱</span>
+        </button>
+        <button class="card" onclick="showView('view-genboard')">
+          <span class="icon">📌</span>
+          <h3>일반화 문장 보드</h3>
+          <p>학생들이 탐구를 통해 도출한 일반화 문장을 작성·게시하고 모둠별로 모아보는 웹앱 (실제 저장됨)</p>
+          <span class="badge">웹앱</span>
+        </button>
+      </div>
+    </section>
+  </main>
+  <footer>바이브코딩으로 제작된 예시 페이지 · 단일 HTML 파일이라 어디서든 더블클릭만으로 실행됩니다</footer>
+</div>
+
+<!-- ===================== QUIZ ===================== -->
+<div class="view" id="view-quiz">
+  <div id="quiz_box">
+    <div id="quiz_app"></div>
+    <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+  </div>
+</div>
+
+<!-- ===================== MATCH ===================== -->
+<div class="view" id="view-match">
+  <h1>🃏 카드 짝맞추기</h1>
+  <div class="info" id="match_info">시도 횟수: 0</div>
+  <div id="match_board"></div>
+  <button class="restart-btn" id="match_restartBtn">다시 시작</button>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== PENDULUM ===================== -->
+<div class="view" id="view-pendulum">
+  <h1>진자 운동 시뮬레이션</h1>
+  <p class="sub">줄 길이와 시작 각도를 바꿔보며 진자의 흔들림을 관찰해보세요.</p>
+  <div class="wrap">
+    <canvas id="pendCanvas" width="360" height="380"></canvas>
+    <div class="panel">
+      <div class="row">
+        <label><span>줄 길이</span><span id="pend_lenVal">140</span></label>
+        <input type="range" id="pend_lenInput" min="60" max="170" value="140">
+      </div>
+      <div class="row">
+        <label><span>시작 각도 (도)</span><span id="pend_angVal">35</span></label>
+        <input type="range" id="pend_angInput" min="5" max="80" value="35">
+      </div>
+      <div class="row">
+        <label><span>중력 (m/s^2)</span><span id="pend_gravVal">9.8</span></label>
+        <input type="range" id="pend_gravInput" min="2" max="25" value="9.8" step="0.1">
+      </div>
+      <button class="ctrl" id="pend_toggleBtn">일시정지</button>
+      <button class="ctrl" id="pend_resetBtn" style="background:#475569;">초기화</button>
+      <div class="stat" id="pend_stat" style="font-size:13px; color:#cbd5e1; margin-top:10px;"></div>
+      <div id="pend_errBox"></div>
+    </div>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== POPULATION ===================== -->
+<div class="view" id="view-population">
+  <h1>인구 증가 시뮬레이션 (로지스틱 모형)</h1>
+  <p class="sub">출생률(증가율)과 자원 한계(환경 수용력)를 조절하며 인구가 어떻게 변하는지 관찰해보세요.</p>
+  <div class="wrap">
+    <canvas id="popCanvas" width="420" height="320"></canvas>
+    <div class="panel">
+      <div class="row">
+        <label><span>증가율 (r)</span><span id="pop_rVal">0.30</span></label>
+        <input type="range" id="pop_rInput" min="0.05" max="1" value="0.30" step="0.01">
+      </div>
+      <div class="row">
+        <label><span>환경 수용력 (K)</span><span id="pop_kVal">1000</span></label>
+        <input type="range" id="pop_kInput" min="200" max="2000" value="1000" step="50">
+      </div>
+      <div class="row">
+        <label><span>초기 인구</span><span id="pop_p0Val">50</span></label>
+        <input type="range" id="pop_p0Input" min="5" max="300" value="50" step="5">
+      </div>
+      <button class="ctrl" id="pop_runBtn">시뮬레이션 실행</button>
+      <div class="stat" id="pop_stat"></div>
+      <div id="pop_errBox"></div>
+    </div>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<div class="view" id="view-coral">
+  <h1>산호초 백화현상 시뮬레이션</h1>
+  <p class="sub">해수온 상승, 해양오염도, 보호구역 지정 효과를 조절하며 24개월 동안 산호초 건강도(생존율)가 어떻게 변하는지 관찰해보세요.</p>
+  <div class="wrap">
+    <canvas id="coralCanvas" width="420" height="320"></canvas>
+    <div class="panel">
+      <div class="row">
+        <label><span>해수온 상승 (℃)</span><span id="coral_tempVal">1.5</span></label>
+        <input type="range" id="coral_tempInput" min="0" max="4" value="1.5" step="0.1">
+      </div>
+      <div class="row">
+        <label><span>해양오염도 (%)</span><span id="coral_pollVal">30</span></label>
+        <input type="range" id="coral_pollInput" min="0" max="100" value="30" step="5">
+      </div>
+      <div class="row">
+        <label><span>보호구역 지정 (%)</span><span id="coral_consVal">0</span></label>
+        <input type="range" id="coral_consInput" min="0" max="100" value="0" step="5">
+      </div>
+      <button class="ctrl" id="coral_runBtn">시뮬레이션 실행</button>
+      <div class="stat" id="coral_stat"></div>
+      <div id="coral_errBox"></div>
+    </div>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== PICKER ===================== -->
+<div class="view" id="view-picker">
+  <h1>랜덤 학생/모둠 뽑기</h1>
+  <p class="sub">이름을 한 줄에 한 명씩 입력하고 뽑기를 눌러보세요. (모둠 뽑기는 인원수를 지정하세요)</p>
+  <div class="wrap">
+    <div class="panel">
+      <textarea id="pick_names" placeholder="홍길동
+김철수
+이영희
+박민수">홍길동
+김철수
+이영희
+박민수
+정수진
+최지우</textarea>
+      <div class="row">
+        <label for="pick_groupSize">모둠 인원수:</label>
+        <input type="number" id="pick_groupSize" min="1" value="1">
+      </div>
+      <div class="row">
+        <button class="ctrl" id="pick_pickBtn">뽑기</button>
+        <button class="ctrl secondary" id="pick_resetBtn">전체 초기화</button>
+      </div>
+      <div id="pick_errBox"></div>
+    </div>
+    <div class="resultBox" id="pick_result">이름을 입력하고<br>뽑기를 눌러주세요</div>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== TIMER ===================== -->
+<div class="view" id="view-timer">
+  <h1>수업 타이머</h1>
+  <p class="sub">시간을 설정하고 시작을 누르면 카운트다운이 진행됩니다.</p>
+  <div id="timer_display">05:00</div>
+  <div class="presets">
+    <button data-sec="60">1분</button>
+    <button data-sec="180">3분</button>
+    <button data-sec="300">5분</button>
+    <button data-sec="600">10분</button>
+  </div>
+  <div class="controls">
+    <button class="ctrl" id="timer_startBtn">시작</button>
+    <button class="ctrl secondary" id="timer_pauseBtn">일시정지</button>
+    <button class="ctrl secondary" id="timer_resetBtn">초기화</button>
+  </div>
+  <div id="timer_errBox"></div>
+  <div class="save-row">
+    <button class="save-btn" id="timer_saveBtn">💾 저장</button>
+    <button class="save-btn sheets" id="timer_sheetsBtn">📤 구글시트 연동</button>
+  </div>
+  <div class="save-msg" id="timer_saveMsg"></div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== RPS (가위바위보) ===================== -->
+<div class="view" id="view-rps">
+  <h1>✊ 가위바위보</h1>
+  <p class="sub">컴퓨터와 가위바위보 대결을 펼쳐보세요.</p>
+  <div id="rps_score">승 0 · 패 0 · 무 0</div>
+  <div id="rps_battle">
+    <span id="rps_meIcon">❓</span>
+    <span id="rps_vs">VS</span>
+    <span id="rps_cpuIcon">❓</span>
+  </div>
+  <div id="rps_result"></div>
+  <div id="rps_choices">
+    <button data-choice="rock">✊</button>
+    <button data-choice="paper">✋</button>
+    <button data-choice="scissors">✌️</button>
+  </div>
+  <button id="rps_resetBtn">기록 초기화</button>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== NUMBER GUESS (숫자 맞추기) ===================== -->
+<div class="view" id="view-guess">
+  <h1>🔢 숫자 맞추기</h1>
+  <p class="sub">1부터 100 사이의 숫자를 맞춰보세요. 더 크다/작다 힌트를 보고 추리해보세요.</p>
+  <div id="guess_box">
+    <input type="number" id="guess_input" min="1" max="100" placeholder="숫자 입력 (1~100)">
+    <button id="guess_submitBtn">제출</button>
+    <div id="guess_hint">숫자를 입력해보세요!</div>
+    <div id="guess_tries">시도 횟수: 0</div>
+    <button id="guess_resetBtn">다시 시작</button>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== TYPING CHALLENGE (타이핑 챌린지) ===================== -->
+<div class="view" id="view-typing">
+  <h1>⌨️ 타이핑 챌린지</h1>
+  <p class="sub">30초 동안 화면에 나온 단어를 최대한 빠르고 정확하게 입력해보세요.</p>
+  <div id="typing_box">
+    <div id="typing_stats"><span id="typing_timeLeft">남은 시간: 30초</span><span id="typing_scoreLabel">점수: 0</span></div>
+    <div id="typing_word">시작을 눌러주세요</div>
+    <input type="text" id="typing_input" placeholder="여기에 입력하세요" disabled>
+    <button id="typing_startBtn">시작</button>
+    <div id="typing_msg"></div>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== PROJECTILE (포물선 운동) ===================== -->
+<div class="view" id="view-projectile">
+  <h1>🚀 포물선 운동 시뮬레이션</h1>
+  <p class="sub">초기 속도와 발사 각도를 조절하고 발사해보세요.</p>
+  <div class="wrap">
+    <canvas id="projCanvas" width="420" height="320"></canvas>
+    <div class="panel">
+      <div class="row">
+        <label><span>초기 속도 (m/s)</span><span id="proj_velVal">25</span></label>
+        <input type="range" id="proj_velInput" min="5" max="50" value="25">
+      </div>
+      <div class="row">
+        <label><span>발사 각도 (도)</span><span id="proj_angVal">45</span></label>
+        <input type="range" id="proj_angInput" min="5" max="85" value="45">
+      </div>
+      <button class="ctrl" id="proj_fireBtn">발사</button>
+      <div class="stat" id="proj_stat"></div>
+      <div id="proj_errBox"></div>
+    </div>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== COIN FLIP (동전 던지기) ===================== -->
+<div class="view" id="view-coinflip">
+  <h1>🪙 동전 던지기 확률 시뮬레이션</h1>
+  <p class="sub">동전을 던지면서 앞면/뒷면 빈도가 확률(50%)에 가까워지는 과정을 관찰해보세요.</p>
+  <div id="coin_face">🪙</div>
+  <div id="coin_controls">
+    <button id="coin_flip1Btn">1회 던지기</button>
+    <button id="coin_flip100Btn">100회 던지기</button>
+    <button class="secondary" id="coin_resetBtn">초기화</button>
+  </div>
+  <canvas id="coinCanvas" width="320" height="200"></canvas>
+  <div id="coin_stat">아직 던지지 않았습니다</div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== POLL (실시간 투표) ===================== -->
+<div class="view" id="view-poll">
+  <h1>🗳️ 실시간 투표 도구</h1>
+  <p class="sub">항목 이름을 직접 수정하거나 새 항목을 추가할 수 있어요. 투표하기를 누르면 즉시 결과가 반영됩니다.</p>
+  <div id="poll_box">
+    <div id="poll_list"></div>
+    <div id="poll_addRow">
+      <input type="text" id="poll_newOptInput" placeholder="새 항목 이름 (예: 🍊 오렌지)">
+      <button id="poll_addOptBtn">항목 추가</button>
+    </div>
+    <button id="poll_resetBtn">투표 초기화</button>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== ROULETTE (룰렛 뽑기) ===================== -->
+<div class="view" id="view-roulette">
+  <h1>🎡 룰렛 뽑기 도구</h1>
+  <p class="sub">항목을 입력하고 돌리기를 누르면 룰렛이 회전하며 무작위로 멈춥니다.</p>
+  <div class="wrap">
+    <div id="roulette_wheelWrap">
+      <div id="roulette_pointer">🔻</div>
+      <canvas id="roulette_wheel" width="260" height="260"></canvas>
+    </div>
+    <div class="panel">
+      <textarea id="roulette_items">모둠1
+모둠2
+모둠3
+모둠4
+모둠5</textarea>
+      <button id="roulette_spinBtn">돌리기</button>
+      <div id="roulette_result"></div>
+    </div>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== NOTES (스티키 메모) ===================== -->
+<div class="view" id="view-notes">
+  <h1>🗒️ 스티키 메모 게시판</h1>
+  <p class="sub">공지사항이나 할 일을 메모지로 붙여 정리해보세요.</p>
+  <div id="notes_addRow">
+    <input type="text" id="notes_input" placeholder="메모 내용을 입력하세요">
+    <button id="notes_addBtn">추가</button>
+  </div>
+  <div id="notes_board"></div>
+  <div class="save-row">
+    <button class="save-btn" id="notes_saveBtn">💾 저장</button>
+    <button class="save-btn sheets" id="notes_sheetsBtn">📤 구글시트 연동</button>
+  </div>
+  <div class="save-msg" id="notes_saveMsg"></div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== ATTENDANCE (출석 체크) ===================== -->
+<div class="view" id="view-attendance">
+  <h1>✅ 출석 체크 앱</h1>
+  <p class="sub">날짜를 선택하고 학생별 출결 상태를 체크하면 현황이 자동으로 집계됩니다.</p>
+  <div id="attend_addRow">
+    <input type="text" id="attend_nameInput" placeholder="학생 이름을 입력하세요">
+    <button id="attend_addNameBtn">학생 추가</button>
+  </div>
+  <div id="attend_controls">
+    <label for="attend_date">날짜</label>
+    <input type="date" id="attend_date">
+    <button id="attend_allPresentBtn">전체 출석</button>
+  </div>
+  <div id="attend_summary">출석 0 / 전체 0</div>
+  <div id="attend_list"></div>
+  <div class="save-row">
+    <button class="save-btn" id="attend_saveBtn">💾 저장</button>
+    <button class="save-btn sheets" id="attend_sheetsBtn">📤 구글시트 연동</button>
+    <button class="save-btn" id="attend_sheetsSetupBtn" style="background:#64748b;">⚙️ 연동 설정</button>
+  </div>
+  <div class="save-msg" id="attend_saveMsg"></div>
+  <div id="attend_sheetsSetupBox" style="display:none; max-width:480px; margin-top:14px; background:#fff; border:1px solid #86efac; border-radius:12px; padding:16px; text-align:left; font-size:13px; color:#14532d;">
+    <p style="margin:0 0 10px; font-weight:bold;">배포된 Apps Script 웹앱 URL 입력</p>
+    <input type="text" id="attend_sheetsUrlInput" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%; padding:8px; border-radius:8px; border:1px solid #86efac; margin-bottom:8px; font-size:12px;">
+    <button id="attend_sheetsUrlSaveBtn" style="width:100%; padding:9px; border:none; border-radius:8px; background:#16a34a; color:#fff; cursor:pointer; font-size:13px;">URL 저장</button>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== INFOGRAPHIC 1 (학급 통계) ===================== -->
+<div class="view" id="view-infographic1">
+  <h1>📊 학급 통계 인포그래픽</h1>
+  <p class="sub">항목을 선택하면 해당 데이터의 막대그래프가 표시됩니다.</p>
+  <div id="info1_tabs">
+    <button data-key="reading" class="active-tab">독서량</button>
+    <button data-key="participation">참여도</button>
+    <button data-key="homework">과제 제출률</button>
+  </div>
+  <canvas id="info1Canvas" width="420" height="280"></canvas>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== INFOGRAPHIC 2 (디지털 리터러시) ===================== -->
+<div class="view" id="view-infographic2">
+  <h1>🍩 디지털 리터러시 통계</h1>
+  <p class="sub">항목을 클릭하면 해당 비율이 도넛 차트에서 강조됩니다.</p>
+  <div class="wrap">
+    <canvas id="info2Canvas" width="260" height="260"></canvas>
+    <div id="info2_legend"></div>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== CONCEPT-BASED INQUIRY: 사실/개념 분류 게임 ===================== -->
+<div class="view" id="view-conceptsort">
+  <h1>🧠 사실/개념 분류 게임</h1>
+  <p class="sub">제시된 단어가 '사실(구체적 예시)'인지 '개념(상위 범주)'인지 맞혀보세요.</p>
+  <div id="cs_box" style="background:#fff;border-radius:16px;padding:30px;min-width:240px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+    <div id="cs_term" style="font-size:28px;font-weight:bold;margin-bottom:10px;">-</div>
+    <div id="cs_feedback" style="min-height:22px;font-size:14px;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="cs_factBtn" style="padding:10px 18px;border:none;border-radius:10px;background:#3b82f6;color:#fff;cursor:pointer;font-size:14px;">사실(예시)</button>
+      <button id="cs_conceptBtn" style="padding:10px 18px;border:none;border-radius:10px;background:#8b5cf6;color:#fff;cursor:pointer;font-size:14px;">개념(상위범주)</button>
+    </div>
+  </div>
+  <div id="cs_score" style="margin-top:16px;font-size:15px;color:#1e3a8a;">점수: 0 / 0</div>
+  <button id="cs_restartBtn" style="margin-top:10px;padding:8px 16px;border:none;border-radius:10px;background:#64748b;color:#fff;cursor:pointer;display:none;">다시하기</button>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== CONCEPT-BASED INQUIRY: 사실-개념-일반화 피라미드 ===================== -->
+<div class="view" id="view-infographic3">
+  <h1>🔺 사실-개념-일반화 피라미드</h1>
+  <p class="sub">단계를 클릭하면 '기후변화' 단원을 예시로 한 사고 단계별 설명이 나타납니다.</p>
+  <div id="pyr_wrap" style="display:flex;flex-direction:column;align-items:center;gap:6px;max-width:420px;">
+    <button class="pyr-tier" data-tier="generalization" style="width:160px;padding:18px 10px;border:none;border-radius:10px 10px 0 0;background:#f43f5e;color:#fff;font-weight:bold;cursor:pointer;font-size:14px;">일반화</button>
+    <button class="pyr-tier" data-tier="concept" style="width:260px;padding:18px 10px;border:none;border-radius:6px;background:#fb7185;color:#fff;font-weight:bold;cursor:pointer;font-size:14px;">개념</button>
+    <button class="pyr-tier" data-tier="fact" style="width:360px;padding:18px 10px;border:none;border-radius:0 0 10px 10px;background:#fecdd3;color:#7f1d1d;font-weight:bold;cursor:pointer;font-size:14px;">사실(예시)</button>
+  </div>
+  <div id="pyr_detail" style="margin-top:18px;max-width:420px;background:#fff;border-radius:12px;padding:16px;font-size:14px;color:#374151;box-shadow:0 4px 16px rgba(0,0,0,0.08);min-height:60px;">단계를 클릭해보세요.</div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== CONCEPT-BASED INQUIRY: 패턴 탐구 실험실 ===================== -->
+<div class="view" id="view-patternlab">
+  <h1>🧪 패턴 탐구 실험실</h1>
+  <p class="sub">온도를 바꿔가며 풍선 크기를 관찰하고, 기록을 모아 스스로 일반화 문장을 만들어보세요.</p>
+  <div style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center; max-width:640px;">
+    <div>
+      <canvas id="pl_canvas" width="200" height="200" style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.08);"></canvas>
+      <div style="margin-top:10px;">
+        <label for="pl_temp">온도: <span id="pl_tempVal">20</span>°C</label><br>
+        <input type="range" id="pl_temp" min="-10" max="50" value="20" style="width:200px;">
+      </div>
+      <button id="pl_recordBtn" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:#10b981;color:#fff;cursor:pointer;">📍 이 값 기록하기</button>
+    </div>
+    <div style="min-width:200px;">
+      <div style="font-weight:bold;margin-bottom:6px;">기록된 데이터</div>
+      <div id="pl_log" style="background:#fff;border-radius:10px;padding:10px;font-size:13px;min-height:100px;max-height:160px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.08);">아직 기록이 없습니다.</div>
+    </div>
+  </div>
+  <div style="margin-top:18px;max-width:480px;width:100%;">
+    <label for="pl_genInput" style="font-weight:bold;font-size:14px;">위 데이터를 보고, 온도와 풍선 크기의 관계를 한 문장(일반화)으로 써보세요:</label>
+    <textarea id="pl_genInput" rows="2" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid #a7f3d0;font-size:13px;"></textarea>
+    <button id="pl_checkBtn" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;">✅ 확인하기</button>
+    <div id="pl_result" style="margin-top:10px;font-size:13px;color:#065f46;"></div>
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== CONCEPT-BASED INQUIRY: 탐구 질문 사다리 ===================== -->
+<div class="view" id="view-inquiryladder">
+  <h1>💭 질문 유형 분류 도구</h1>
+  <p class="sub">질문을 사실 질문 · 개념 질문 · 논쟁적 질문으로 구분해서 작성하고 모아보세요.</p>
+  <div style="max-width:520px; width:100%; display:flex; flex-direction:column; gap:14px;">
+
+    <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+      <div style="font-weight:bold;color:#7f1d1d;margin-bottom:4px;">🔹 사실 질문 (Factual)</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">답이 정해져 있는, 구체적 사실에 근거한 질문. 예: "광합성은 어디에서 일어날까?"</div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="qt_factInput" placeholder="사실 질문을 입력하세요" style="flex:1;padding:8px;border-radius:8px;border:1px solid #fecdd3;font-size:13px;">
+        <button class="qt-addBtn" data-cat="fact" style="padding:8px 12px;border:none;border-radius:8px;background:#ef4444;color:#fff;cursor:pointer;font-size:13px;">추가</button>
+      </div>
+      <div id="qt_factList" style="margin-top:8px;font-size:13px;"></div>
+    </div>
+
+    <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+      <div style="font-weight:bold;color:#9d174d;margin-bottom:4px;">🔸 개념 질문 (Conceptual)</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">사실들을 연결해 패턴·관계를 탐구하는, 여러 상황에 적용 가능한 질문. 예: "생물은 왜 환경에 적응할까?"</div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="qt_conceptInput" placeholder="개념 질문을 입력하세요" style="flex:1;padding:8px;border-radius:8px;border:1px solid #fbcfe8;font-size:13px;">
+        <button class="qt-addBtn" data-cat="concept" style="padding:8px 12px;border:none;border-radius:8px;background:#db2777;color:#fff;cursor:pointer;font-size:13px;">추가</button>
+      </div>
+      <div id="qt_conceptList" style="margin-top:8px;font-size:13px;"></div>
+    </div>
+
+    <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+      <div style="font-weight:bold;color:#581c87;margin-bottom:4px;">🔺 논쟁적 질문 (Debatable)</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">정답이 하나가 아니며 가치 판단·입장에 따라 답이 달라지는 질문. 예: "유전자 편집 기술을 인간에게 사용해도 될까?"</div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="qt_debateInput" placeholder="논쟁적 질문을 입력하세요" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e9d5ff;font-size:13px;">
+        <button class="qt-addBtn" data-cat="debate" style="padding:8px 12px;border:none;border-radius:8px;background:#7c3aed;color:#fff;cursor:pointer;font-size:13px;">추가</button>
+      </div>
+      <div id="qt_debateList" style="margin-top:8px;font-size:13px;"></div>
+    </div>
+
+  </div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<!-- ===================== CONCEPT-BASED INQUIRY: 일반화 문장 보드 ===================== -->
+<div class="view" id="view-genboard">
+  <h1>📌 일반화 문장 보드</h1>
+  <p class="sub">탐구를 통해 도출한 일반화 문장을 모둠별로 게시해보세요. (실제로 저장되어 새로고침해도 유지됩니다)</p>
+  <div id="gb_addRow" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:480px;margin-bottom:14px;">
+    <input type="text" id="gb_group" placeholder="모둠/이름" style="flex:1;min-width:100px;padding:8px;border-radius:8px;border:1px solid #7dd3fc;">
+    <input type="text" id="gb_sentence" placeholder="일반화 문장을 입력하세요" style="flex:2;min-width:200px;padding:8px;border-radius:8px;border:1px solid #7dd3fc;">
+    <button id="gb_addBtn" style="padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;">게시</button>
+  </div>
+  <div id="gb_board" style="display:flex;flex-wrap:wrap;gap:12px;max-width:640px;justify-content:center;"></div>
+  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+</div>
+
+<script>
+function showView(id) {
+  var views = document.querySelectorAll('.view');
+  for (var i = 0; i < views.length; i++) { views[i].classList.remove('active'); }
+  var target = document.getElementById(id);
+  if (target) { target.classList.add('active'); }
+  window.scrollTo(0, 0);
+}
+
+/* ===================== DEVICE PREVIEW TOGGLE ===================== */
+(function () {
+  try {
+    var pcBtn = document.getElementById('device_pcBtn');
+    var mobileBtn = document.getElementById('device_mobileBtn');
+
+    function applyDevice(mode) {
+      if (mode === 'mobile') {
+        document.body.classList.add('device-mobile-mode');
+        mobileBtn.classList.add('device-active');
+        pcBtn.classList.remove('device-active');
+      } else {
+        document.body.classList.remove('device-mobile-mode');
+        pcBtn.classList.add('device-active');
+        mobileBtn.classList.remove('device-active');
+      }
+      try { localStorage.setItem('vch_device_mode', mode); } catch (e) {}
+    }
+
+    pcBtn.addEventListener('click', function () { applyDevice('pc'); });
+    mobileBtn.addEventListener('click', function () { applyDevice('mobile'); });
+
+    var saved = 'pc';
+    try { saved = localStorage.getItem('vch_device_mode') || 'pc'; } catch (e) {}
+    applyDevice(saved);
+  } catch (e) {
+    console.error('device toggle error', e);
+  }
+})();
+
+/* 웹앱 카테고리 공용: "저장"/"구글시트 연동" 버튼은 백엔드가 없는 데모이므로
+   실제 저장은 하지 않고, 어떤 데이터가 전송될지 메시지로만 보여준다. */
+function demoSave(msgEl, kind, summary) {
+  if (!msgEl) { return; }
+  var text = kind === 'sheets'
+    ? '📤 구글시트 연동(데모): ' + summary + ' → 실제 연동을 위해서는 백엔드/구글 API 설정이 필요해요.'
+    : '💾 저장(데모): ' + summary + ' → 지금은 새로고침하면 사라져요. 영구 저장을 위해서는 백엔드 연결이 필요해요.';
+  msgEl.textContent = text;
+  msgEl.classList.add('show');
+  clearTimeout(msgEl._hideTimer);
+  msgEl._hideTimer = setTimeout(function () { msgEl.classList.remove('show'); }, 4500);
+}
+
+/* ===================== QUIZ MODULE ===================== */
+(function () {
+  try {
+    var questions = [
+      { q: "다음 중 대한민국의 수도는?", opts: ["부산", "대전", "서울", "인천"], answer: 2 },
+      { q: "물은 몇 도에서 끓는가? (1기압 기준)", opts: ["0도", "50도", "100도", "150도"], answer: 2 },
+      { q: "지구에서 가장 큰 대륙은?", opts: ["유럽", "아시아", "아프리카", "북아메리카"], answer: 1 },
+      { q: "다음 중 소수(素數)가 아닌 것은?", opts: ["7", "11", "15", "13"], answer: 2 },
+      { q: "광합성이 주로 일어나는 식물의 기관은?", opts: ["뿌리", "줄기", "잎", "꽃"], answer: 2 }
+    ];
+    var current = 0, score = 0;
+    var app = document.getElementById('quiz_app');
+
+    function render() {
+      if (current >= questions.length) {
+        app.innerHTML =
+          '<div class="quiz-result">' +
+          '<div>퀴즈 완료!</div>' +
+          '<div class="quiz-score">' + score + ' / ' + questions.length + '</div>' +
+          '<button class="quiz-restart" id="quiz_restartBtn">다시 풀기</button>' +
+          '</div>';
+        document.getElementById('quiz_restartBtn').addEventListener('click', restart);
+        return;
+      }
+      var item = questions[current];
+      var html = '<div class="quiz-top"><span>문제 ' + (current + 1) + ' / ' + questions.length + '</span><span>점수: ' + score + '</span></div>';
+      html += '<h2 class="quiz-q">' + item.q + '</h2>';
+      for (var i = 0; i < item.opts.length; i++) {
+        html += '<button class="quiz-opt" data-i="' + i + '">' + item.opts[i] + '</button>';
+      }
+      app.innerHTML = html;
+      var btns = app.querySelectorAll('.quiz-opt');
+      btns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var i = Number(btn.getAttribute('data-i'));
+          btns.forEach(function (b) { b.disabled = true; });
+          if (i === item.answer) {
+            btn.classList.add('correct');
+            score++;
+          } else {
+            btn.classList.add('wrong');
+            btns[item.answer].classList.add('correct');
+          }
+          setTimeout(function () { current++; render(); }, 900);
+        });
+      });
+    }
+
+    function restart() { current = 0; score = 0; render(); }
+    render();
+  } catch (e) {
+    console.error('quiz module error', e);
+  }
+})();
+
+/* ===================== MATCH MODULE ===================== */
+(function () {
+  try {
+    var icons = ['🍎', '🍌', '🍇', '🍓', '🍉', '🍒', '🍍', '🥝'];
+    var cards, flipped, matchedCount, tries, locked;
+    var board = document.getElementById('match_board');
+    var info = document.getElementById('match_info');
+
+    function shuffle(arr) {
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+      }
+      return arr;
+    }
+
+    function initMatch() {
+      var doubled = icons.concat(icons);
+      cards = shuffle(doubled.map(function (icon, i) { return { id: i, icon: icon, matched: false }; }));
+      flipped = []; matchedCount = 0; tries = 0; locked = false;
+      info.textContent = '시도 횟수: ' + tries;
+      renderBoard();
+    }
+
+    function renderBoard() {
+      board.innerHTML = '';
+      cards.forEach(function (card) {
+        var el = document.createElement('div');
+        var cls = 'match-card' + (card.matched ? ' matched' : (flipped.indexOf(card.id) !== -1 ? '' : ' hidden-card'));
+        el.className = cls;
+        el.textContent = (card.matched || flipped.indexOf(card.id) !== -1) ? card.icon : '';
+        el.addEventListener('click', function () { flip(card.id); });
+        board.appendChild(el);
+      });
+    }
+
+    function flip(id) {
+      if (locked) { return; }
+      var card = cards.filter(function (c) { return c.id === id; })[0];
+      if (card.matched || flipped.indexOf(id) !== -1) { return; }
+      flipped.push(id);
+      renderBoard();
+      if (flipped.length === 2) {
+        tries++;
+        info.textContent = '시도 횟수: ' + tries;
+        var a = cards.filter(function (c) { return c.id === flipped[0]; })[0];
+        var b = cards.filter(function (c) { return c.id === flipped[1]; })[0];
+        if (a.icon === b.icon) {
+          a.matched = true; b.matched = true;
+          matchedCount += 2;
+          flipped = [];
+          renderBoard();
+          if (matchedCount === cards.length) {
+            setTimeout(function () { alert('완료! 총 시도 횟수: ' + tries); }, 200);
+          }
+        } else {
+          locked = true;
+          setTimeout(function () { flipped = []; locked = false; renderBoard(); }, 700);
+        }
+      }
+    }
+
+    document.getElementById('match_restartBtn').addEventListener('click', initMatch);
+    initMatch();
+  } catch (e) {
+    console.error('match module error', e);
+  }
+})();
+
+/* ===================== PENDULUM MODULE ===================== */
+(function () {
+  try {
+    var canvas = document.getElementById('pendCanvas');
+    var ctx = canvas.getContext('2d');
+    if (!ctx) { throw new Error('이 브라우저에서 캔버스를 지원하지 않습니다.'); }
+
+    var lenInput = document.getElementById('pend_lenInput');
+    var angInput = document.getElementById('pend_angInput');
+    var gravInput = document.getElementById('pend_gravInput');
+    var lenVal = document.getElementById('pend_lenVal');
+    var angVal = document.getElementById('pend_angVal');
+    var gravVal = document.getElementById('pend_gravVal');
+    var toggleBtn = document.getElementById('pend_toggleBtn');
+    var resetBtn = document.getElementById('pend_resetBtn');
+    var statEl = document.getElementById('pend_stat');
+
+    var originX = 180, originY = 40;
+    var armLength = parseFloat(lenInput.value);
+    var gravity = parseFloat(gravInput.value);
+    var theta = parseFloat(angInput.value) * Math.PI / 180;
+    var omega = 0;
+    var running = true;
+    var lastTime = null;
+
+    function update(dt) {
+      var alpha = -(gravity / armLength) * Math.sin(theta);
+      omega += alpha * dt;
+      theta += omega * dt;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var bobX = originX + armLength * Math.sin(theta);
+      var bobY = originY + armLength * Math.cos(theta);
+
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(bobX, bobY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(originX, originY, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#3b82f6';
+      ctx.beginPath();
+      ctx.arc(bobX, bobY, 16, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function loop(t) {
+      if (lastTime === null) { lastTime = t; }
+      var dt = Math.min((t - lastTime) / 1000, 0.032);
+      lastTime = t;
+      if (running) { update(dt); }
+      draw();
+      window.requestAnimationFrame(loop);
+    }
+
+    function updateStat() {
+      /* 소진폭 근사 주기: T = 2π√(L/g). 실제 시뮬레이션은 큰 각도도 정확히 계산하지만,
+         중력이 주기에 미치는 영향을 한눈에 보여주기 위한 참고값입니다. */
+      var period = 2 * Math.PI * Math.sqrt((armLength / 100) / gravity);
+      statEl.textContent = '예상 주기(소진폭 근사): ' + period.toFixed(2) + '초 — 중력이 커질수록 더 빨리 흔들립니다.';
+    }
+
+    lenInput.addEventListener('input', function () {
+      armLength = parseFloat(lenInput.value);
+      lenVal.textContent = lenInput.value;
+      updateStat();
+    });
+    angInput.addEventListener('input', function () {
+      angVal.textContent = angInput.value;
+    });
+    gravInput.addEventListener('input', function () {
+      gravity = parseFloat(gravInput.value);
+      gravVal.textContent = gravity.toFixed(1);
+      updateStat();
+    });
+    toggleBtn.addEventListener('click', function () {
+      running = !running;
+      toggleBtn.textContent = running ? '일시정지' : '재생';
+    });
+    resetBtn.addEventListener('click', function () {
+      theta = parseFloat(angInput.value) * Math.PI / 180;
+      omega = 0;
+      running = true;
+      toggleBtn.textContent = '일시정지';
+    });
+
+    updateStat();
+    draw();
+    window.requestAnimationFrame(loop);
+  } catch (e) {
+    var box = document.getElementById('pend_errBox');
+    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== POPULATION MODULE ===================== */
+(function () {
+  try {
+    var canvas = document.getElementById('popCanvas');
+    var ctx = canvas.getContext('2d');
+    if (!ctx) { throw new Error('이 브라우저에서 캔버스를 지원하지 않습니다.'); }
+
+    var rInput = document.getElementById('pop_rInput');
+    var kInput = document.getElementById('pop_kInput');
+    var p0Input = document.getElementById('pop_p0Input');
+    var rVal = document.getElementById('pop_rVal');
+    var kVal = document.getElementById('pop_kVal');
+    var p0Val = document.getElementById('pop_p0Val');
+    var stat = document.getElementById('pop_stat');
+
+    function simulate() {
+      var r = parseFloat(rInput.value);
+      var K = parseFloat(kInput.value);
+      var p0 = parseFloat(p0Input.value);
+      var steps = 80;
+      var data = [p0];
+      var p = p0;
+      for (var i = 0; i < steps; i++) {
+        p = p + r * p * (1 - p / K);
+        if (p < 0) { p = 0; }
+        data.push(p);
+      }
+      return data;
+    }
+
+    function draw(data) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var padding = 40;
+      var w = canvas.width - padding * 2;
+      var h = canvas.height - padding * 2;
+      var maxVal = 0;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i] > maxVal) { maxVal = data[i]; }
+      }
+      var maxY = maxVal * 1.15 || 1;
+
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding, padding + h);
+      ctx.lineTo(padding + w, padding + h);
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('인구', padding - 30, padding - 5);
+      ctx.fillText('시간', padding + w - 15, padding + h + 20);
+
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (var j = 0; j < data.length; j++) {
+        var x = padding + (j / (data.length - 1)) * w;
+        var y = padding + h - (data[j] / maxY) * h;
+        if (j === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+      }
+      ctx.stroke();
+
+      var last = data[data.length - 1];
+      stat.textContent = '최종 인구(추정): ' + Math.round(last) + ' / 환경 수용력: ' + kInput.value;
+    }
+
+    function run() {
+      var data = simulate();
+      draw(data);
+    }
+
+    rInput.addEventListener('input', function () { rVal.textContent = parseFloat(rInput.value).toFixed(2); });
+    kInput.addEventListener('input', function () { kVal.textContent = kInput.value; });
+    p0Input.addEventListener('input', function () { p0Val.textContent = p0Input.value; });
+    document.getElementById('pop_runBtn').addEventListener('click', run);
+
+    run();
+  } catch (e) {
+    var box = document.getElementById('pop_errBox');
+    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== CORAL BLEACHING MODULE ===================== */
+(function () {
+  try {
+    var canvas = document.getElementById('coralCanvas');
+    var ctx = canvas.getContext('2d');
+    if (!ctx) { throw new Error('이 브라우저에서 캔버스를 지원하지 않습니다.'); }
+
+    var tempInput = document.getElementById('coral_tempInput');
+    var pollInput = document.getElementById('coral_pollInput');
+    var consInput = document.getElementById('coral_consInput');
+    var tempVal = document.getElementById('coral_tempVal');
+    var pollVal = document.getElementById('coral_pollVal');
+    var consVal = document.getElementById('coral_consVal');
+    var stat = document.getElementById('coral_stat');
+
+    function simulate() {
+      var temp = parseFloat(tempInput.value);
+      var pollution = parseFloat(pollInput.value);
+      var conservation = parseFloat(consInput.value);
+      var months = 24;
+      var coral = 100;
+      var data = [coral];
+      var damageRate = (temp * 1.8 + pollution * 0.08) * (1 - conservation / 150);
+      if (damageRate < 0) { damageRate = 0; }
+      for (var i = 0; i < months; i++) {
+        coral = coral - damageRate;
+        if (coral < 0) { coral = 0; }
+        data.push(coral);
+      }
+      return data;
+    }
+
+    function draw(data) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var padding = 40;
+      var w = canvas.width - padding * 2;
+      var h = canvas.height - padding * 2;
+      var maxY = 100;
+
+      ctx.strokeStyle = '#bae6fd';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding, padding + h);
+      ctx.lineTo(padding + w, padding + h);
+      ctx.stroke();
+
+      ctx.fillStyle = '#0369a1';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('건강도(%)', padding - 32, padding - 8);
+      ctx.fillText('개월', padding + w - 10, padding + h + 20);
+
+      var last = data[data.length - 1];
+      var lineColor = last > 60 ? '#16a34a' : (last > 30 ? '#f59e0b' : '#dc2626');
+
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (var j = 0; j < data.length; j++) {
+        var x = padding + (j / (data.length - 1)) * w;
+        var y = padding + h - (data[j] / maxY) * h;
+        if (j === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+      }
+      ctx.stroke();
+
+      var riskLabel = last > 60 ? '낮음' : (last > 30 ? '높음' : '매우 높음');
+      stat.textContent = '24개월 후 산호 건강도: ' + Math.round(last) + '% / 백화 위험도: ' + riskLabel;
+    }
+
+    function run() {
+      var data = simulate();
+      draw(data);
+    }
+
+    tempInput.addEventListener('input', function () { tempVal.textContent = parseFloat(tempInput.value).toFixed(1); });
+    pollInput.addEventListener('input', function () { pollVal.textContent = pollInput.value; });
+    consInput.addEventListener('input', function () { consVal.textContent = consInput.value; });
+    document.getElementById('coral_runBtn').addEventListener('click', run);
+
+    run();
+  } catch (e) {
+    var box = document.getElementById('coral_errBox');
+    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== PICKER MODULE ===================== */
+(function () {
+  try {
+    var namesArea = document.getElementById('pick_names');
+    var groupSizeInput = document.getElementById('pick_groupSize');
+    var pickBtn = document.getElementById('pick_pickBtn');
+    var resetBtn = document.getElementById('pick_resetBtn');
+    var result = document.getElementById('pick_result');
+    var remaining = [];
+
+    function loadNames() {
+      return namesArea.value.split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
+    }
+
+    function ensurePool() {
+      if (remaining.length === 0) { remaining = loadNames(); }
+    }
+
+    pickBtn.addEventListener('click', function () {
+      ensurePool();
+      if (remaining.length === 0) {
+        result.innerHTML = '이름을 먼저 입력해주세요';
+        return;
+      }
+      var size = Math.max(1, parseInt(groupSizeInput.value, 10) || 1);
+      size = Math.min(size, remaining.length);
+      var picked = [];
+      for (var i = 0; i < size; i++) {
+        var idx = Math.floor(Math.random() * remaining.length);
+        picked.push(remaining[idx]);
+        remaining.splice(idx, 1);
+      }
+      result.innerHTML = picked.map(function (n) { return '<span class="picked">' + n + '</span>'; }).join('<br>');
+    });
+
+    resetBtn.addEventListener('click', function () {
+      remaining = [];
+      result.innerHTML = '이름을 입력하고<br>뽑기를 눌러주세요';
+    });
+  } catch (e) {
+    var box = document.getElementById('pick_errBox');
+    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== TIMER MODULE ===================== */
+(function () {
+  try {
+    var display = document.getElementById('timer_display');
+    var startBtn = document.getElementById('timer_startBtn');
+    var pauseBtn = document.getElementById('timer_pauseBtn');
+    var resetBtn = document.getElementById('timer_resetBtn');
+    var presetButtons = document.querySelectorAll('#view-timer .presets button');
+
+    var totalSeconds = 300;
+    var remaining = totalSeconds;
+    var timerId = null;
+
+    function format(sec) {
+      var m = Math.floor(sec / 60);
+      var s = sec % 60;
+      return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+    }
+
+    function render() {
+      display.textContent = format(remaining);
+      display.classList.remove('warn', 'danger');
+      if (remaining <= 10) { display.classList.add('danger'); }
+      else if (remaining <= 30) { display.classList.add('warn'); }
+    }
+
+    function tick() {
+      remaining--;
+      if (remaining <= 0) {
+        remaining = 0;
+        render();
+        clearInterval(timerId);
+        timerId = null;
+        display.textContent = '시간 종료!';
+        return;
+      }
+      render();
+    }
+
+    function flashClick(btn) {
+      btn.classList.remove('btn-clicked');
+      /* restart animation even on rapid repeat clicks */
+      void btn.offsetWidth;
+      btn.classList.add('btn-clicked');
+      clearTimeout(btn._flashTimer);
+      btn._flashTimer = setTimeout(function () { btn.classList.remove('btn-clicked'); }, 300);
+    }
+
+    startBtn.addEventListener('click', function () {
+      flashClick(startBtn);
+      if (timerId) { return; }
+      if (remaining <= 0) { remaining = totalSeconds; }
+      timerId = setInterval(tick, 1000);
+    });
+
+    pauseBtn.addEventListener('click', function () {
+      flashClick(pauseBtn);
+      if (timerId) { clearInterval(timerId); timerId = null; }
+    });
+
+    resetBtn.addEventListener('click', function () {
+      flashClick(resetBtn);
+      if (timerId) { clearInterval(timerId); timerId = null; }
+      remaining = totalSeconds;
+      render();
+    });
+
+    presetButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (timerId) { clearInterval(timerId); timerId = null; }
+        totalSeconds = parseInt(btn.getAttribute('data-sec'), 10);
+        remaining = totalSeconds;
+        render();
+      });
+    });
+
+    var saveMsg = document.getElementById('timer_saveMsg');
+    var saveBtn = document.getElementById('timer_saveBtn');
+    var sheetsBtn = document.getElementById('timer_sheetsBtn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function () {
+        demoSave(saveMsg, 'save', '남은 시간 ' + format(remaining));
+      });
+    }
+    if (sheetsBtn) {
+      sheetsBtn.addEventListener('click', function () {
+        demoSave(saveMsg, 'sheets', '남은 시간 ' + format(remaining));
+      });
+    }
+
+    render();
+  } catch (e) {
+    var box = document.getElementById('timer_errBox');
+    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== RPS MODULE ===================== */
+(function () {
+  try {
+    var choices = ['rock', 'paper', 'scissors'];
+    var icons = { rock: '✊', paper: '✋', scissors: '✌️' };
+    var names = { rock: '바위', paper: '보', scissors: '가위' };
+    var win = 0, lose = 0, draw = 0;
+
+    var scoreEl = document.getElementById('rps_score');
+    var meIcon = document.getElementById('rps_meIcon');
+    var cpuIcon = document.getElementById('rps_cpuIcon');
+    var resultEl = document.getElementById('rps_result');
+    var buttons = document.querySelectorAll('#rps_choices button');
+
+    function judge(me, cpu) {
+      if (me === cpu) { return 'draw'; }
+      if (
+        (me === 'rock' && cpu === 'scissors') ||
+        (me === 'paper' && cpu === 'rock') ||
+        (me === 'scissors' && cpu === 'paper')
+      ) { return 'win'; }
+      return 'lose';
+    }
+
+    function updateScore() {
+      scoreEl.textContent = '승 ' + win + ' · 패 ' + lose + ' · 무 ' + draw;
+    }
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var me = btn.getAttribute('data-choice');
+        var cpu = choices[Math.floor(Math.random() * choices.length)];
+        meIcon.textContent = icons[me];
+        cpuIcon.textContent = icons[cpu];
+        var outcome = judge(me, cpu);
+        if (outcome === 'win') { win++; resultEl.textContent = '승리! ' + names[me] + ' > ' + names[cpu]; }
+        else if (outcome === 'lose') { lose++; resultEl.textContent = '패배! ' + names[cpu] + ' > ' + names[me]; }
+        else { draw++; resultEl.textContent = '무승부! 둘 다 ' + names[me]; }
+        updateScore();
+      });
+    });
+
+    document.getElementById('rps_resetBtn').addEventListener('click', function () {
+      win = 0; lose = 0; draw = 0;
+      updateScore();
+      meIcon.textContent = '❓';
+      cpuIcon.textContent = '❓';
+      resultEl.textContent = '';
+    });
+
+    updateScore();
+  } catch (e) {
+    console.error('rps module error', e);
+  }
+})();
+
+/* ===================== NUMBER GUESS MODULE ===================== */
+(function () {
+  try {
+    var input = document.getElementById('guess_input');
+    var submitBtn = document.getElementById('guess_submitBtn');
+    var resetBtn = document.getElementById('guess_resetBtn');
+    var hint = document.getElementById('guess_hint');
+    var triesEl = document.getElementById('guess_tries');
+
+    var target = Math.floor(Math.random() * 100) + 1;
+    var tries = 0;
+    var solved = false;
+
+    function newGame() {
+      target = Math.floor(Math.random() * 100) + 1;
+      tries = 0;
+      solved = false;
+      hint.textContent = '숫자를 입력해보세요!';
+      triesEl.textContent = '시도 횟수: 0';
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+    }
+
+    function submitGuess() {
+      if (solved) { return; }
+      var val = parseInt(input.value, 10);
+      if (isNaN(val) || val < 1 || val > 100) {
+        hint.textContent = '1~100 사이의 숫자를 입력해주세요';
+        return;
+      }
+      tries++;
+      triesEl.textContent = '시도 횟수: ' + tries;
+      if (val === target) {
+        hint.textContent = '정답입니다! 🎉 (' + tries + '번 만에 맞췄어요)';
+        solved = true;
+        input.disabled = true;
+      } else if (val < target) {
+        hint.textContent = '더 큰 수예요 ⬆️';
+      } else {
+        hint.textContent = '더 작은 수예요 ⬇️';
+      }
+    }
+
+    submitBtn.addEventListener('click', submitGuess);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { submitGuess(); }
+    });
+    resetBtn.addEventListener('click', newGame);
+  } catch (e) {
+    var box = document.getElementById('guess_errBox');
+    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== TYPING CHALLENGE MODULE ===================== */
+(function () {
+  try {
+    var words = [
+      '사과', '바나나', '컴퓨터', '학교', '선생님', '바이브코딩', '키보드', '인터넷',
+      '교실', '연수', '시뮬레이션', '학생', '도전', '집중', '연습', '성공',
+      '창의력', '협동', '발표', '문제해결'
+    ];
+    var wordEl = document.getElementById('typing_word');
+    var input = document.getElementById('typing_input');
+    var startBtn = document.getElementById('typing_startBtn');
+    var timeLeftEl = document.getElementById('typing_timeLeft');
+    var scoreLabelEl = document.getElementById('typing_scoreLabel');
+    var msgEl = document.getElementById('typing_msg');
+
+    var score = 0;
+    var timeLeft = 30;
+    var timerId = null;
+    var currentWord = '';
+
+    function pickWord() {
+      currentWord = words[Math.floor(Math.random() * words.length)];
+      wordEl.textContent = currentWord;
+    }
+
+    function endGame() {
+      clearInterval(timerId);
+      timerId = null;
+      input.disabled = true;
+      wordEl.textContent = '시간 종료!';
+      msgEl.textContent = '최종 점수: ' + score + '점';
+      startBtn.textContent = '다시 시작';
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = 30;
+      scoreLabelEl.textContent = '점수: 0';
+      timeLeftEl.textContent = '남은 시간: 30초';
+      msgEl.textContent = '';
+      input.value = '';
+      input.disabled = false;
+      input.focus();
+      pickWord();
+      startBtn.textContent = '시작';
+      if (timerId) { clearInterval(timerId); }
+      timerId = setInterval(function () {
+        timeLeft--;
+        timeLeftEl.textContent = '남은 시간: ' + timeLeft + '초';
+        if (timeLeft <= 0) { endGame(); }
+      }, 1000);
+    }
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        if (input.value.trim() === currentWord) {
+          score++;
+          scoreLabelEl.textContent = '점수: ' + score;
+          pickWord();
+        }
+        input.value = '';
+      }
+    });
+
+    startBtn.addEventListener('click', startGame);
+  } catch (e) {
+    var box = document.getElementById('typing_msg');
+    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== PROJECTILE MODULE ===================== */
+(function () {
+  try {
+    var canvas = document.getElementById('projCanvas');
+    var ctx = canvas.getContext('2d');
+    if (!ctx) { throw new Error('이 브라우저에서 캔버스를 지원하지 않습니다.'); }
+
+    var velInput = document.getElementById('proj_velInput');
+    var angInput = document.getElementById('proj_angInput');
+    var velVal = document.getElementById('proj_velVal');
+    var angVal = document.getElementById('proj_angVal');
+    var fireBtn = document.getElementById('proj_fireBtn');
+    var stat = document.getElementById('proj_stat');
+
+    var g = 9.8;
+    var groundY = canvas.height - 20;
+    var originX = 30;
+    var scale = 6;
+    var animId = null;
+
+    function drawStatic() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.lineTo(canvas.width, groundY);
+      ctx.stroke();
+    }
+
+    function fire() {
+      if (animId) { cancelAnimationFrame(animId); animId = null; }
+      var v0 = parseFloat(velInput.value);
+      var angle = parseFloat(angInput.value) * Math.PI / 180;
+      var vx = v0 * Math.cos(angle);
+      var vy = v0 * Math.sin(angle);
+      var t = 0;
+      var dt = 0.03;
+      var path = [];
+
+      var totalRange = (v0 * v0 * Math.sin(2 * angle)) / g;
+      var maxHeight = (vy * vy) / (2 * g);
+      stat.textContent = '예상 사거리: ' + totalRange.toFixed(1) + 'm · 최고 높이: ' + maxHeight.toFixed(1) + 'm';
+
+      function step() {
+        drawStatic();
+        var x = vx * t;
+        var y = vy * t - 0.5 * g * t * t;
+        if (y < 0) {
+          drawPath(path);
+          return;
+        }
+        path.push([originX + x * scale, groundY - y * scale]);
+        drawPath(path);
+        t += dt;
+        animId = requestAnimationFrame(step);
+      }
+
+      function drawPath(pts) {
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (var i = 0; i < pts.length; i++) {
+          if (i === 0) { ctx.moveTo(pts[i][0], pts[i][1]); } else { ctx.lineTo(pts[i][0], pts[i][1]); }
+        }
+        ctx.stroke();
+        if (pts.length > 0) {
+          var last = pts[pts.length - 1];
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.arc(last[0], last[1], 7, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      step();
+    }
+
+    velInput.addEventListener('input', function () { velVal.textContent = velInput.value; });
+    angInput.addEventListener('input', function () { angVal.textContent = angInput.value; });
+    fireBtn.addEventListener('click', fire);
+
+    drawStatic();
+  } catch (e) {
+    var box = document.getElementById('proj_errBox');
+    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== COIN FLIP MODULE ===================== */
+(function () {
+  try {
+    var face = document.getElementById('coin_face');
+    var flip1Btn = document.getElementById('coin_flip1Btn');
+    var flip100Btn = document.getElementById('coin_flip100Btn');
+    var resetBtn = document.getElementById('coin_resetBtn');
+    var stat = document.getElementById('coin_stat');
+    var canvas = document.getElementById('coinCanvas');
+    var ctx = canvas.getContext('2d');
+
+    var heads = 0, tails = 0;
+
+    function drawBars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var total = heads + tails;
+      var maxBar = canvas.height - 60;
+      var hH = total > 0 ? (heads / Math.max(heads, tails, 1)) * maxBar : 0;
+      var tH = total > 0 ? (tails / Math.max(heads, tails, 1)) * maxBar : 0;
+
+      ctx.fillStyle = '#ca8a04';
+      ctx.fillRect(70, canvas.height - 30 - hH, 70, hH);
+      ctx.fillStyle = '#92400e';
+      ctx.fillRect(180, canvas.height - 30 - tH, 70, tH);
+
+      ctx.fillStyle = '#713f12';
+      ctx.font = '13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('앞면 ' + heads, 105, canvas.height - 10);
+      ctx.fillText('뒷면 ' + tails, 215, canvas.height - 10);
+    }
+
+    function updateStat() {
+      var total = heads + tails;
+      if (total === 0) {
+        stat.textContent = '아직 던지지 않았습니다';
+        return;
+      }
+      var pctH = ((heads / total) * 100).toFixed(1);
+      var pctT = ((tails / total) * 100).toFixed(1);
+      stat.textContent = '총 ' + total + '회 · 앞면 ' + pctH + '% · 뒷면 ' + pctT + '%';
+    }
+
+    function flipOnce() {
+      var result = Math.random() < 0.5 ? 'heads' : 'tails';
+      if (result === 'heads') { heads++; face.textContent = '🙂'; } else { tails++; face.textContent = '🌑'; }
+      drawBars();
+      updateStat();
+    }
+
+    flip1Btn.addEventListener('click', flipOnce);
+    flip100Btn.addEventListener('click', function () {
+      for (var i = 0; i < 100; i++) {
+        if (Math.random() < 0.5) { heads++; } else { tails++; }
+      }
+      face.textContent = '🪙';
+      drawBars();
+      updateStat();
+    });
+    resetBtn.addEventListener('click', function () {
+      heads = 0; tails = 0;
+      face.textContent = '🪙';
+      drawBars();
+      updateStat();
+    });
+
+    drawBars();
+  } catch (e) {
+    var stat2 = document.getElementById('coin_stat');
+    if (stat2) { stat2.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== POLL MODULE ===================== */
+(function () {
+  try {
+    var listEl = document.getElementById('poll_list');
+    var newOptInput = document.getElementById('poll_newOptInput');
+    var addOptBtn = document.getElementById('poll_addOptBtn');
+    var resetBtn = document.getElementById('poll_resetBtn');
+
+    var options = [
+      { label: '🍎 사과', votes: 0 },
+      { label: '🍌 바나나', votes: 0 },
+      { label: '🍇 포도', votes: 0 }
+    ];
+
+    function esc(s) { return String(s).replace(/"/g, '&quot;'); }
+
+    function render() {
+      var total = options.reduce(function (a, o) { return a + o.votes; }, 0);
+      listEl.innerHTML = '';
+      options.forEach(function (o, i) {
+        var pct = total > 0 ? Math.round((o.votes / total) * 100) : 0;
+        var row = document.createElement('div');
+        row.className = 'poll-option';
+        row.innerHTML =
+          '<div class="poll-option-head">' +
+            '<input type="text" class="poll-label-input" data-idx="' + i + '" value="' + esc(o.label) + '">' +
+            '<button class="poll-del" data-idx="' + i + '">삭제</button>' +
+          '</div>' +
+          '<button class="poll-btn" data-idx="' + i + '">투표하기</button>' +
+          '<div class="poll-bar-track"><div class="poll-bar-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="poll-pct">' + o.votes + '표 (' + pct + '%)</div>';
+        listEl.appendChild(row);
+      });
+
+      listEl.querySelectorAll('.poll-label-input').forEach(function (input) {
+        input.addEventListener('change', function () {
+          var idx = parseInt(input.getAttribute('data-idx'), 10);
+          var v = input.value.trim();
+          options[idx].label = v || options[idx].label;
+        });
+      });
+      listEl.querySelectorAll('.poll-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var idx = parseInt(btn.getAttribute('data-idx'), 10);
+          options[idx].votes++;
+          render();
+        });
+      });
+      listEl.querySelectorAll('.poll-del').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var idx = parseInt(btn.getAttribute('data-idx'), 10);
+          if (options.length <= 1) { return; }
+          options.splice(idx, 1);
+          render();
+        });
+      });
+    }
+
+    function addOption() {
+      var name = newOptInput.value.trim();
+      if (!name) { return; }
+      options.push({ label: name, votes: 0 });
+      newOptInput.value = '';
+      render();
+    }
+
+    addOptBtn.addEventListener('click', addOption);
+    newOptInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { addOption(); }
+    });
+
+    resetBtn.addEventListener('click', function () {
+      options.forEach(function (o) { o.votes = 0; });
+      render();
+    });
+
+    render();
+  } catch (e) {
+    console.error('poll module error', e);
+  }
+})();
+
+/* ===================== ROULETTE MODULE ===================== */
+(function () {
+  try {
+    var wheel = document.getElementById('roulette_wheel');
+    var ctx = wheel.getContext('2d');
+    var itemsArea = document.getElementById('roulette_items');
+    var spinBtn = document.getElementById('roulette_spinBtn');
+    var resultEl = document.getElementById('roulette_result');
+    var colors = ['#fbbf24', '#f87171', '#34d399', '#60a5fa', '#a78bfa', '#f472b6', '#facc15', '#38bdf8'];
+    var currentRotation = 0;
+    var spinning = false;
+
+    function getItems() {
+      return itemsArea.value.split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
+    }
+
+    function drawWheel(items) {
+      var cx = wheel.width / 2, cy = wheel.height / 2, r = wheel.width / 2 - 4;
+      ctx.clearRect(0, 0, wheel.width, wheel.height);
+      var n = items.length;
+      if (n === 0) { return; }
+      var slice = (2 * Math.PI) / n;
+      for (var i = 0; i < n; i++) {
+        var start = i * slice;
+        var end = start + slice;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, start, end);
+        ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(start + slice / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#1e1b4b';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(items[i], r - 10, 4);
+        ctx.restore();
+      }
+    }
+
+    function spin() {
+      if (spinning) { return; }
+      var items = getItems();
+      if (items.length === 0) {
+        resultEl.textContent = '항목을 먼저 입력해주세요';
+        return;
+      }
+      spinning = true;
+      var n = items.length;
+      var sliceDeg = 360 / n;
+      var winnerIndex = Math.floor(Math.random() * n);
+      // canvas angle convention: 0deg = 3 o'clock, increasing clockwise.
+      // the fixed pointer sits at the top of the wheel, which is 270deg in that convention.
+      var targetCenterDeg = winnerIndex * sliceDeg + sliceDeg / 2;
+      var pointerDeg = 270;
+      var extraSpins = 4 * 360;
+      var currentMod = ((currentRotation % 360) + 360) % 360;
+      var neededMod = ((pointerDeg - targetCenterDeg) % 360 + 360) % 360;
+      var delta = neededMod - currentMod;
+      if (delta <= 0) { delta += 360; }
+      var finalRotation = currentRotation + extraSpins + delta;
+      currentRotation = finalRotation;
+      wheel.style.transform = 'rotate(' + finalRotation + 'deg)';
+      resultEl.textContent = '회전 중...';
+      setTimeout(function () {
+        resultEl.textContent = '결과: ' + items[winnerIndex] + ' 🎉';
+        spinning = false;
+      }, 3100);
+    }
+
+    itemsArea.addEventListener('input', function () { drawWheel(getItems()); });
+    spinBtn.addEventListener('click', spin);
+
+    drawWheel(getItems());
+  } catch (e) {
+    var box = document.getElementById('roulette_result');
+    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
+  }
+})();
+
+/* ===================== NOTES MODULE ===================== */
+(function () {
+  try {
+    var input = document.getElementById('notes_input');
+    var addBtn = document.getElementById('notes_addBtn');
+    var board = document.getElementById('notes_board');
+    var colors = ['#fde68a', '#fecaca', '#bbf7d0', '#bfdbfe', '#ddd6fe', '#fbcfe8'];
+    var notes = [];
+
+    function render() {
+      board.innerHTML = '';
+      notes.forEach(function (note, i) {
+        var div = document.createElement('div');
+        div.className = 'sticky-note';
+        div.style.background = colors[i % colors.length];
+        div.innerHTML = '<button class="del" data-i="' + i + '">✕</button>' + note;
+        board.appendChild(div);
+      });
+      board.querySelectorAll('.del').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var i = Number(btn.getAttribute('data-i'));
+          notes.splice(i, 1);
+          render();
+        });
+      });
+    }
+
+    function addNote() {
+      var text = input.value.trim();
+      if (!text) { return; }
+      notes.push(text);
+      input.value = '';
+      render();
+    }
+
+    addBtn.addEventListener('click', addNote);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { addNote(); }
+    });
+
+    var saveMsg = document.getElementById('notes_saveMsg');
+    var saveBtn = document.getElementById('notes_saveBtn');
+    var sheetsBtn = document.getElementById('notes_sheetsBtn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function () {
+        demoSave(saveMsg, 'save', '메모 ' + notes.length + '개');
+      });
+    }
+    if (sheetsBtn) {
+      sheetsBtn.addEventListener('click', function () {
+        demoSave(saveMsg, 'sheets', '메모 ' + notes.length + '개');
+      });
+    }
+
+    render();
+  } catch (e) {
+    console.error('notes module error', e);
+  }
+})();
+
+/* ===================== ATTENDANCE MODULE ===================== */
+(function () {
+  try {
+    var names = ['홍길동', '김철수', '이영희', '박민수', '정수진', '최지우'];
+    var statusDefs = [
+      { key: 'present', label: '출석', cls: 'present' },
+      { key: 'field', label: '체험학습', cls: 'field' },
+      { key: 'early', label: '조퇴', cls: 'early' },
+      { key: 'sick', label: '병결', cls: 'sick' },
+      { key: 'etc', label: '기타결', cls: 'etc' }
+    ];
+    var STORAGE_KEY = 'vch_attendance_data_v1';
+    var records = {}; /* dateStr -> { name: statusKey|null } */
+    var remarksAll = {}; /* dateStr -> { name: remarkText } */
+
+    function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+    function todayStr() {
+      var d = new Date();
+      return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    }
+
+    function loadFromStorage() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) { return; }
+        var parsed = JSON.parse(raw);
+        if (parsed && parsed.records) { records = parsed.records; }
+        if (parsed && parsed.remarksAll) { remarksAll = parsed.remarksAll; }
+        if (parsed && parsed.names && parsed.names.length) { names = parsed.names; }
+      } catch (e) { console.error('attendance load error', e); }
+    }
+
+    function persistToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ records: records, remarksAll: remarksAll, names: names }));
+      } catch (e) { console.error('attendance save error', e); }
+    }
+
+    loadFromStorage();
+
+    var dateInput = document.getElementById('attend_date');
+    var allPresentBtn = document.getElementById('attend_allPresentBtn');
+    var listEl = document.getElementById('attend_list');
+    var summaryEl = document.getElementById('attend_summary');
+    var nameInput = document.getElementById('attend_nameInput');
+    var addNameBtn = document.getElementById('attend_addNameBtn');
+
+    dateInput.value = todayStr();
+
+    function getRecord() {
+      var d = dateInput.value || todayStr();
+      if (!records[d]) {
+        var obj = {};
+        names.forEach(function (n) { obj[n] = null; });
+        records[d] = obj;
+      }
+      return records[d];
+    }
+
+    function getRemarkRecord() {
+      var d = dateInput.value || todayStr();
+      if (!remarksAll[d]) { remarksAll[d] = {}; }
+      return remarksAll[d];
+    }
+
+    function render() {
+      var rec = getRecord();
+      var remarkRec = getRemarkRecord();
+      listEl.innerHTML = '';
+      var counts = {};
+      statusDefs.forEach(function (s) { counts[s.key] = 0; });
+      names.forEach(function (name) {
+        var row = document.createElement('div');
+        row.className = 'attend-row';
+        var st = rec[name];
+        if (st && counts.hasOwnProperty(st)) { counts[st]++; }
+        var remark = remarkRec[name] || '';
+        var btnsHtml = statusDefs.map(function (s) {
+          return '<button class="' + s.cls + (st === s.key ? ' active-state' : '') +
+            '" data-name="' + name + '" data-st="' + s.key + '">' + s.label + '</button>';
+        }).join('');
+        row.innerHTML =
+          '<span class="name">' + name + (remark ? '<span class="remark-tag">📝 ' + remark + '</span>' : '') + '</span>' +
+          '<span class="toggles">' + btnsHtml +
+          '<button class="remark-btn" data-remark="' + name + '">비고등록</button></span>';
+        listEl.appendChild(row);
+      });
+      summaryEl.textContent = statusDefs.map(function (s) {
+        return s.label + ' ' + counts[s.key];
+      }).join(' · ') + ' / 전체 ' + names.length;
+      persistToStorage();
+
+      listEl.querySelectorAll('button[data-st]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var name = btn.getAttribute('data-name');
+          var st = btn.getAttribute('data-st');
+          var rec2 = getRecord();
+          rec2[name] = rec2[name] === st ? null : st;
+          render();
+        });
+      });
+      listEl.querySelectorAll('button.remark-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var name = btn.getAttribute('data-remark');
+          var remarkRec2 = getRemarkRecord();
+          var current = remarkRec2[name] || '';
+          var input = window.prompt(name + ' 학생의 비고를 입력하세요 (예: 감기). 비워두고 확인을 누르면 비고가 삭제됩니다.', current);
+          if (input === null) { return; }
+          var trimmed = input.trim();
+          if (trimmed) { remarkRec2[name] = trimmed; } else { delete remarkRec2[name]; }
+          render();
+        });
+      });
+    }
+
+    function addName() {
+      var name = nameInput.value.trim();
+      if (!name) { return; }
+      if (names.indexOf(name) > -1) { nameInput.value = ''; return; }
+      names.push(name);
+      nameInput.value = '';
+      render();
+    }
+
+    dateInput.addEventListener('change', render);
+    allPresentBtn.addEventListener('click', function () {
+      var rec = getRecord();
+      names.forEach(function (n) { rec[n] = 'present'; });
+      render();
+    });
+    addNameBtn.addEventListener('click', addName);
+    nameInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { addName(); }
+    });
+
+    var saveMsg = document.getElementById('attend_saveMsg');
+    var saveBtn = document.getElementById('attend_saveBtn');
+    var sheetsBtn = document.getElementById('attend_sheetsBtn');
+    var setupBtn = document.getElementById('attend_sheetsSetupBtn');
+    var setupBox = document.getElementById('attend_sheetsSetupBox');
+    var urlInput = document.getElementById('attend_sheetsUrlInput');
+    var urlSaveBtn = document.getElementById('attend_sheetsUrlSaveBtn');
+    var SHEETS_URL_KEY = 'vch_attendance_sheets_url';
+
+    function showMsg(text) {
+      if (!saveMsg) { return; }
+      saveMsg.textContent = text;
+      saveMsg.classList.add('show');
+      clearTimeout(saveMsg._hideTimer);
+      saveMsg._hideTimer = setTimeout(function () { saveMsg.classList.remove('show'); }, 5000);
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function () {
+        persistToStorage();
+        showMsg('💾 실제로 저장되었습니다. 새로고침해도 ' + dateInput.value + ' 출결 데이터가 유지됩니다. (이 브라우저에만 저장됨)');
+      });
+    }
+
+    try { urlInput.value = localStorage.getItem(SHEETS_URL_KEY) || ''; } catch (e) {}
+
+    if (setupBtn) {
+      setupBtn.addEventListener('click', function () {
+        setupBox.style.display = setupBox.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    if (urlSaveBtn) {
+      urlSaveBtn.addEventListener('click', function () {
+        var url = urlInput.value.trim();
+        if (!url) { return; }
+        try { localStorage.setItem(SHEETS_URL_KEY, url); } catch (e) {}
+        showMsg('✅ 구글시트 연동 URL이 저장되었습니다. 이제 "구글시트 연동" 버튼을 눌러 전송해보세요.');
+      });
+    }
+
+    if (sheetsBtn) {
+      sheetsBtn.addEventListener('click', function () {
+        var url = '';
+        try { url = localStorage.getItem(SHEETS_URL_KEY) || ''; } catch (e) {}
+        if (!url) {
+          showMsg('⚠️ 먼저 "⚙️ 연동 설정"에서 구글 Apps Script 웹앱 URL을 등록해주세요.');
+          setupBox.style.display = 'block';
+          return;
+        }
+        var rec = getRecord();
+        var remarkRec = getRemarkRecord();
+        var rows = names.map(function (n) {
+          var st = rec[n];
+          var label = '';
+          statusDefs.forEach(function (s) { if (s.key === st) { label = s.label; } });
+          return { name: n, status: label || '미체크', remark: remarkRec[n] || '' };
+        });
+        var payload = { date: dateInput.value, rows: rows };
+        showMsg('📤 전송 중...');
+        fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        }).then(function () {
+          showMsg('📤 전송 완료! (no-cors 방식이라 응답 확인은 안 되니, 구글시트를 직접 열어 데이터가 들어왔는지 확인해주세요.)');
+        }).catch(function (err) {
+          showMsg('❌ 전송 실패: ' + err.message + ' (URL이 올바른지, 배포 권한이 "모든 사용자"인지 확인해주세요.)');
+        });
+      });
+    }
+
+    render();
+  } catch (e) {
+    console.error('attendance module error', e);
+  }
+})();
+
+/* ===================== CONCEPT-BASED INQUIRY: 사실/개념 분류 게임 ===================== */
+(function () {
+  try {
+    var items = [
+      { term: '사과', type: 'fact' },
+      { term: '과일', type: 'concept' },
+      { term: '코끼리', type: 'fact' },
+      { term: '동물', type: 'concept' },
+      { term: '선거', type: 'fact' },
+      { term: '민주주의', type: 'concept' },
+      { term: '태풍', type: 'fact' },
+      { term: '자연재해', type: 'concept' },
+      { term: '세종대왕', type: 'fact' },
+      { term: '리더십', type: 'concept' },
+      { term: '삼각형', type: 'fact' },
+      { term: '도형', type: 'concept' },
+      { term: '엽록소', type: 'fact' },
+      { term: '광합성', type: 'concept' },
+      { term: '용돈 기입장', type: 'fact' },
+      { term: '경제활동', type: 'concept' }
+    ];
+    var termEl = document.getElementById('cs_term');
+    var feedbackEl = document.getElementById('cs_feedback');
+    var scoreEl = document.getElementById('cs_score');
+    var factBtn = document.getElementById('cs_factBtn');
+    var conceptBtn = document.getElementById('cs_conceptBtn');
+    var restartBtn = document.getElementById('cs_restartBtn');
+    var order = [];
+    var idx = 0;
+    var correct = 0;
+    var answered = 0;
+    var ROUNDS = 10;
+
+    function shuffle(arr) {
+      var a = arr.slice();
+      for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+      }
+      return a;
+    }
+
+    function updateScore() {
+      scoreEl.textContent = '점수: ' + correct + ' / ' + answered;
+    }
+
+    function showCurrent() {
+      if (idx >= order.length) {
+        termEl.textContent = '🎉 완료!';
+        feedbackEl.style.color = '#1f2937';
+        feedbackEl.textContent = '총 ' + order.length + '문제 중 ' + correct + '개 정답!';
+        factBtn.disabled = true; conceptBtn.disabled = true;
+        restartBtn.style.display = 'inline-block';
+        return;
+      }
+      termEl.textContent = order[idx].term;
+    }
+
+    function startGame() {
+      order = shuffle(items).slice(0, ROUNDS);
+      idx = 0; correct = 0; answered = 0;
+      feedbackEl.textContent = '';
+      restartBtn.style.display = 'none';
+      factBtn.disabled = false; conceptBtn.disabled = false;
+      updateScore();
+      showCurrent();
+    }
+
+    function answer(type) {
+      if (idx >= order.length) { return; }
+      var item = order[idx];
+      answered++;
+      var label = item.type === 'fact' ? '사실(예시)' : '개념(상위범주)';
+      if (type === item.type) {
+        correct++;
+        feedbackEl.style.color = '#16a34a';
+        feedbackEl.textContent = '✅ 정답! "' + item.term + '"은(는) ' + label + '입니다.';
+      } else {
+        feedbackEl.style.color = '#dc2626';
+        feedbackEl.textContent = '❌ 오답! "' + item.term + '"은(는) ' + label + '입니다.';
+      }
+      updateScore();
+      idx++;
+      setTimeout(showCurrent, 700);
+    }
+
+    factBtn.addEventListener('click', function () { answer('fact'); });
+    conceptBtn.addEventListener('click', function () { answer('concept'); });
+    restartBtn.addEventListener('click', startGame);
+
+    startGame();
+  } catch (e) {
+    console.error('conceptsort module error', e);
+  }
+})();
+
+/* ===================== CONCEPT-BASED INQUIRY: 사실-개념-일반화 피라미드 ===================== */
+(function () {
+  try {
+    var detail = document.getElementById('pyr_detail');
+    var tiers = document.querySelectorAll('.pyr-tier');
+    var content = {
+      fact: '예시: "2023년 폭염일수가 평년보다 15일 늘었다", "북극 빙하 면적이 매년 줄고 있다" 같은 구체적 관찰 사실들',
+      concept: '개념: 위 사실들을 묶는 상위 범주 → "기후변화", "온실효과", "이상기후"',
+      generalization: '일반화 문장: "온실가스 배출이 늘어날수록 지구의 평균 기온과 이상기후 발생 빈도가 높아진다." (사실과 개념을 연결한 전이 가능한 원리)'
+    };
+    tiers.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tier = btn.getAttribute('data-tier');
+        detail.textContent = content[tier] || '';
+        tiers.forEach(function (b) { b.style.outline = ''; });
+        btn.style.outline = '3px solid #111827';
+      });
+    });
+  } catch (e) {
+    console.error('infographic3 module error', e);
+  }
+})();
+
+/* ===================== CONCEPT-BASED INQUIRY: 패턴 탐구 실험실 ===================== */
+(function () {
+  try {
+    var canvas = document.getElementById('pl_canvas');
+    var ctx = canvas.getContext('2d');
+    var tempInput = document.getElementById('pl_temp');
+    var tempVal = document.getElementById('pl_tempVal');
+    var recordBtn = document.getElementById('pl_recordBtn');
+    var logEl = document.getElementById('pl_log');
+    var genInput = document.getElementById('pl_genInput');
+    var checkBtn = document.getElementById('pl_checkBtn');
+    var resultEl = document.getElementById('pl_result');
+    var records = [];
+
+    function radiusFor(temp) {
+      return 30 + (temp + 10) * 1.1;
+    }
+
+    function draw() {
+      var temp = Number(tempInput.value);
+      var r = radiusFor(temp);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.arc(100, 100, r, 0, Math.PI * 2);
+      ctx.fillStyle = temp < 10 ? '#60a5fa' : (temp < 30 ? '#fbbf24' : '#f87171');
+      ctx.fill();
+    }
+
+    function renderLog() {
+      if (!records.length) { logEl.textContent = '아직 기록이 없습니다.'; return; }
+      logEl.innerHTML = records.map(function (r, i) {
+        return (i + 1) + '. 온도 ' + r.temp + '°C → 크기(반지름) ' + r.radius + 'px';
+      }).join('<br>');
+    }
+
+    tempInput.addEventListener('input', function () {
+      tempVal.textContent = tempInput.value;
+      draw();
+    });
+
+    recordBtn.addEventListener('click', function () {
+      var temp = Number(tempInput.value);
+      var r = Math.round(radiusFor(temp));
+      records.push({ temp: temp, radius: r });
+      renderLog();
+    });
+
+    checkBtn.addEventListener('click', function () {
+      var text = genInput.value.trim();
+      if (!text) {
+        resultEl.style.color = '#dc2626';
+        resultEl.textContent = '먼저 일반화 문장을 작성해주세요.';
+        return;
+      }
+      var hasTemp = /온도|기온/.test(text);
+      var hasIncrease = /클수록|커질수록|높아질수록|많을수록|증가|올라갈수록/.test(text);
+      var hasSize = /크기|커진다|커짐|풍선|부피/.test(text);
+      if (hasTemp && hasIncrease && hasSize) {
+        resultEl.style.color = '#16a34a';
+        resultEl.textContent = '👍 좋습니다! 예시 일반화: "온도가 높아질수록 풍선의 크기가 커진다." 와 비슷한 패턴을 잘 찾았어요.';
+      } else {
+        resultEl.style.color = '#92400e';
+        resultEl.textContent = '🤔 기록된 데이터를 다시 살펴보세요. (힌트: 온도와 크기 사이의 관계를 "~할수록 ~해진다" 형태로 써보세요)';
+      }
+    });
+
+    draw();
+  } catch (e) {
+    console.error('patternlab module error', e);
+  }
+})();
+
+/* ===================== CONCEPT-BASED INQUIRY: 질문 유형 분류 도구 ===================== */
+(function () {
+  try {
+    var KEY = 'vch_questiontypes';
+    var cats = ['fact', 'concept', 'debate'];
+    var inputs = {
+      fact: document.getElementById('qt_factInput'),
+      concept: document.getElementById('qt_conceptInput'),
+      debate: document.getElementById('qt_debateInput')
+    };
+    var lists = {
+      fact: document.getElementById('qt_factList'),
+      concept: document.getElementById('qt_conceptList'),
+      debate: document.getElementById('qt_debateList')
+    };
+    var data = { fact: [], concept: [], debate: [] };
+
+    function load() {
+      try {
+        var raw = localStorage.getItem(KEY);
+        var parsed = raw ? JSON.parse(raw) : null;
+        if (parsed) {
+          cats.forEach(function (c) { data[c] = parsed[c] || []; });
+        }
+      } catch (e) {}
+    }
+
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
+    }
+
+    function render(cat) {
+      var listEl = lists[cat];
+      if (!data[cat].length) {
+        listEl.innerHTML = '<div style="color:#9ca3af;font-size:12px;">아직 작성된 질문이 없습니다.</div>';
+        return;
+      }
+      listEl.innerHTML = data[cat].map(function (q, i) {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;background:#f9fafb;border-radius:8px;padding:6px 10px;margin-bottom:4px;">' +
+          '<span>' + q + '</span>' +
+          '<button data-cat="' + cat + '" data-idx="' + i + '" class="qt-delBtn" style="border:none;background:transparent;cursor:pointer;color:#9ca3af;">✕</button>' +
+          '</div>';
+      }).join('');
+    }
+
+    function renderAll() {
+      cats.forEach(render);
+    }
+
+    document.querySelectorAll('.qt-addBtn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var cat = btn.getAttribute('data-cat');
+        var input = inputs[cat];
+        var text = input.value.trim();
+        if (!text) { return; }
+        data[cat].push(text);
+        input.value = '';
+        save();
+        render(cat);
+      });
+    });
+
+    cats.forEach(function (cat) {
+      inputs[cat].addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          document.querySelector('.qt-addBtn[data-cat="' + cat + '"]').click();
+        }
+      });
+    });
+
+    document.querySelectorAll('#view-inquiryladder').forEach(function (view) {
+      view.addEventListener('click', function (e) {
+        var delBtn = e.target.closest ? e.target.closest('.qt-delBtn') : null;
+        if (!delBtn) { return; }
+        var cat = delBtn.getAttribute('data-cat');
+        var idx = Number(delBtn.getAttribute('data-idx'));
+        data[cat].splice(idx, 1);
+        save();
+        render(cat);
+      });
+    });
+
+    load();
+    renderAll();
+  } catch (e) {
+    console.error('questiontypes module error', e);
+  }
+})();
+
+/* ===================== CONCEPT-BASED INQUIRY: 일반화 문장 보드 ===================== */
+(function () {
+  try {
+    var groupInput = document.getElementById('gb_group');
+    var sentenceInput = document.getElementById('gb_sentence');
+    var addBtn = document.getElementById('gb_addBtn');
+    var board = document.getElementById('gb_board');
+    var KEY = 'vch_genboard_notes';
+    var colors = ['#fef08a', '#fecdd3', '#bbf7d0', '#bfdbfe', '#ddd6fe', '#fed7aa'];
+    var notes = [];
+
+    function load() {
+      try {
+        var raw = localStorage.getItem(KEY);
+        notes = raw ? JSON.parse(raw) : [];
+      } catch (e) { notes = []; }
+    }
+
+    function save() {
+      try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch (e) {}
+    }
+
+    function render() {
+      board.innerHTML = '';
+      if (!notes.length) {
+        board.innerHTML = '<div style="color:#64748b;font-size:13px;">아직 게시된 일반화 문장이 없습니다.</div>';
+        return;
+      }
+      notes.forEach(function (note, i) {
+        var card = document.createElement('div');
+        card.style.background = colors[i % colors.length];
+        card.style.borderRadius = '10px';
+        card.style.padding = '12px';
+        card.style.width = '160px';
+        card.style.minHeight = '110px';
+        card.style.boxShadow = '0 4px 10px rgba(0,0,0,0.12)';
+        card.style.position = 'relative';
+        card.style.fontSize = '13px';
+        card.innerHTML =
+          '<div style="font-weight:bold;margin-bottom:6px;">' + (note.group || '익명') + '</div>' +
+          '<div style="white-space:pre-wrap;">' + note.sentence + '</div>' +
+          '<button data-idx="' + i + '" style="position:absolute;top:4px;right:6px;border:none;background:transparent;cursor:pointer;font-size:13px;">✕</button>';
+        board.appendChild(card);
+      });
+      board.querySelectorAll('button[data-idx]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var idx = Number(btn.getAttribute('data-idx'));
+          notes.splice(idx, 1);
+          save();
+          render();
+        });
+      });
+    }
+
+    addBtn.addEventListener('click', function () {
+      var group = groupInput.value.trim();
+      var sentence = sentenceInput.value.trim();
+      if (!sentence) { return; }
+      notes.push({ group: group, sentence: sentence });
+      save();
+      groupInput.value = '';
+      sentenceInput.value = '';
+      render();
+    });
+
+    sentenceInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { addBtn.click(); }
+    });
+
+    load();
+    render();
+  } catch (e) {
+    console.error('genboard module error', e);
+  }
+})();
+
+/* ===================== INFOGRAPHIC 1 MODULE ===================== */
+(function () {
+  try {
+    var canvas = document.getElementById('info1Canvas');
+    var ctx = canvas.getContext('2d');
+    var tabs = document.querySelectorAll('#info1_tabs button');
+
+    var datasets = {
+      reading: { label: '독서량 (권/월)', values: [3, 5, 2, 6, 4, 7], color: '#f43f5e' },
+      participation: { label: '참여도 (%)', values: [80, 65, 90, 70, 85, 60], color: '#fb7185' },
+      homework: { label: '과제 제출률 (%)', values: [95, 88, 100, 75, 92, 80], color: '#be123c' }
+    };
+    var weeks = ['1주', '2주', '3주', '4주', '5주', '6주'];
+
+    function draw(key) {
+      var data = datasets[key];
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var padding = 40;
+      var w = canvas.width - padding * 2;
+      var h = canvas.height - padding * 2;
+      var maxVal = Math.max.apply(null, data.values) * 1.2;
+      var barWidth = w / data.values.length - 16;
+
+      ctx.strokeStyle = '#fecdd3';
+      ctx.beginPath();
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding, padding + h);
+      ctx.lineTo(padding + w, padding + h);
+      ctx.stroke();
+
+      data.values.forEach(function (val, i) {
+        var barH = (val / maxVal) * h;
+        var x = padding + i * (w / data.values.length) + 8;
+        var y = padding + h - barH;
+        ctx.fillStyle = data.color;
+        ctx.fillRect(x, y, barWidth, barH);
+        ctx.fillStyle = '#881337';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(weeks[i], x + barWidth / 2, padding + h + 16);
+        ctx.fillText(String(val), x + barWidth / 2, y - 6);
+      });
+
+      ctx.fillStyle = '#9f1239';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(data.label, padding, 20);
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.classList.remove('active-tab'); });
+        tab.classList.add('active-tab');
+        draw(tab.getAttribute('data-key'));
+      });
+    });
+
+    draw('reading');
+  } catch (e) {
+    console.error('infographic1 module error', e);
+  }
+})();
+
+/* ===================== INFOGRAPHIC 2 MODULE ===================== */
+(function () {
+  try {
+    var canvas = document.getElementById('info2Canvas');
+    var ctx = canvas.getContext('2d');
+    var legendEl = document.getElementById('info2_legend');
+
+    var data = [
+      { label: '스마트폰 보유', value: 92, color: '#0ea5e9' },
+      { label: '정보 검증 능력', value: 58, color: '#38bdf8' },
+      { label: '저작권 이해도', value: 47, color: '#7dd3fc' },
+      { label: '온라인 예절 실천', value: 73, color: '#0369a1' }
+    ];
+    var activeIndex = -1;
+
+    function drawChart() {
+      var cx = canvas.width / 2, cy = canvas.height / 2, r = canvas.width / 2 - 10, inner = r * 0.55;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var total = data.reduce(function (a, b) { return a + b.value; }, 0);
+      var start = -Math.PI / 2;
+      data.forEach(function (d, i) {
+        var slice = (d.value / total) * 2 * Math.PI;
+        var end = start + slice;
+        var isActive = i === activeIndex;
+        ctx.beginPath();
+        ctx.arc(cx, cy, isActive ? r + 6 : r, start, end);
+        ctx.arc(cx, cy, inner, end, start, true);
+        ctx.closePath();
+        ctx.fillStyle = d.color;
+        ctx.globalAlpha = (activeIndex === -1 || isActive) ? 1 : 0.35;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        start = end;
+      });
+      ctx.fillStyle = '#0c4a6e';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      var label = activeIndex === -1 ? '항목 클릭' : data[activeIndex].label + ' ' + data[activeIndex].value + '%';
+      ctx.fillText(label, cx, cy + 5);
+    }
+
+    function renderLegend() {
+      legendEl.innerHTML = '';
+      data.forEach(function (d, i) {
+        var item = document.createElement('div');
+        item.className = 'info2-legend-item' + (i === activeIndex ? ' active-legend' : '');
+        item.innerHTML = '<span class="info2-swatch" style="background:' + d.color + '"></span>' + d.label + ' (' + d.value + '%)';
+        item.addEventListener('click', function () {
+          activeIndex = activeIndex === i ? -1 : i;
+          drawChart();
+          renderLegend();
+        });
+        legendEl.appendChild(item);
+      });
+    }
+
+    drawChart();
+    renderLegend();
+  } catch (e) {
+    console.error('infographic2 module error', e);
+  }
+})();
+</script>
+</body>
+</html>
