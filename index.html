@@ -3,2964 +3,849 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>바이브코딩 콘텐츠 허브</title>
+<title>디자인 프롬프트 라이브러리 · Design Prompt Library</title>
 <style>
-  *{box-sizing:border-box;}
-  html,body{ margin:0; padding:0; font-family:'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif; }
-  .view{ display:none; min-height:100vh; }
-  .view.active{ display:block; }
+  :root{
+    --bg:#0c0d12; --bg2:#13151d; --card:#171922; --card2:#1d2030;
+    --line:#2a2d3c; --txt:#e8eaf2; --mut:#9aa0b4; --dim:#6b7088;
+    --accent:#7c8cff; --accent2:#5ce6c4; --radius:18px;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code',Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Pretendard','Apple SD Gothic Neo',sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--sans);background:
+    radial-gradient(1200px 700px at 80% -10%,rgba(124,140,255,.18),transparent 60%),
+    radial-gradient(1000px 600px at 0% 0%,rgba(92,230,196,.10),transparent 55%),
+    var(--bg);
+    color:var(--txt);-webkit-font-smoothing:antialiased;line-height:1.55;}
 
-  /* ===== DEVICE PREVIEW TOGGLE ===== */
-  #deviceToggle{
-    position:fixed; top:10px; right:10px; z-index:9999; display:flex; gap:4px;
-    background:rgba(17,24,39,0.85); padding:5px; border-radius:999px; box-shadow:0 4px 12px rgba(0,0,0,0.25);
-  }
-  #deviceToggle button{
-    border:none; background:transparent; color:#cbd5e1; font-size:13px; padding:6px 12px; border-radius:999px;
-    cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:5px;
-  }
-  #deviceToggle button.device-active{ background:#fff; color:#111827; font-weight:bold; }
-  body.device-mobile-mode{
-    max-width:420px; margin:0 auto; box-shadow:0 0 0 1px #d1d5db, 0 10px 40px rgba(0,0,0,0.25);
-    min-height:100vh; overflow-x:hidden;
-  }
-  body.device-mobile-mode .view.active{ overflow-y:auto; max-height:100vh; }
+  /* ---------- Header ---------- */
+  header{max-width:1240px;margin:0 auto;padding:56px 28px 8px;}
+  .eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);font-weight:600;}
+  h1{font-size:clamp(30px,5vw,48px);line-height:1.05;margin:.35em 0 .25em;font-weight:800;letter-spacing:-.02em;}
+  .sub{color:var(--mut);max-width:640px;font-size:16px;}
+  .meta{margin-top:14px;color:var(--dim);font-size:13px;}
 
-  /* ===== HOME ===== */
-  #view-home{
-    background:#f5f7fb; color:#1f2937;
-  }
-  #view-home header{ text-align:center; padding:48px 20px 24px; }
-  #view-home header h1{ margin:0 0 8px; font-size:28px; }
-  #view-home header p{ margin:0; color:#6b7280; font-size:15px; }
-  #view-home main{ max-width:980px; margin:0 auto; padding:20px 24px 80px; }
-  #view-home section{ margin-bottom:48px; }
-  .section-title{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
-  .section-title .dot{ width:12px; height:12px; border-radius:50%; }
-  .section-title h2{ margin:0; font-size:20px; }
-  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:18px; }
-  .card{
-    background:#ffffff; border-radius:14px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,0.08);
-    text-decoration:none; color:#1f2937; display:block; transition:transform .15s ease, box-shadow .15s ease;
-    border:1px solid #eef0f4; cursor:pointer; text-align:left; width:100%; font-family:inherit;
-  }
-  .card:hover{ transform:translateY(-4px); box-shadow:0 8px 22px rgba(0,0,0,0.12); }
-  .card .icon{ font-size:30px; margin-bottom:10px; display:block; }
-  .card h3{ margin:0 0 6px; font-size:16px; }
-  .card p{ margin:0; font-size:13px; color:#6b7280; line-height:1.5; }
-  .badge{
-    display:inline-block; font-size:11px; padding:3px 9px; border-radius:999px; margin-top:10px;
-    background:#eef2ff; color:#4338ca;
-  }
-  #view-home footer{ text-align:center; padding:24px; color:#6b7280; font-size:13px; }
+  /* ---------- Controls ---------- */
+  .controls{position:sticky;top:0;z-index:50;background:rgba(12,13,18,.82);
+    backdrop-filter:blur(14px);border-bottom:1px solid var(--line);margin-top:26px;}
+  .controls-inner{max-width:1240px;margin:0 auto;padding:14px 28px;display:flex;
+    flex-wrap:wrap;gap:12px;align-items:center;}
+  .search{flex:1;min-width:240px;display:flex;align-items:center;gap:10px;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;}
+  .search input{flex:1;background:none;border:none;outline:none;color:var(--txt);font-size:15px;font-family:var(--sans);}
+  .search svg{flex:none;opacity:.6}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{font-size:13px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);
+    background:var(--card);color:var(--mut);cursor:pointer;transition:.15s;white-space:nowrap;}
+  .chip:hover{color:var(--txt);border-color:var(--accent)}
+  .chip.active{background:var(--accent);color:#0c0d12;border-color:var(--accent);font-weight:600;}
+  .count{color:var(--dim);font-size:13px;margin-left:auto;}
 
-  /* ===== shared back button ===== */
-  .back-btn{
-    margin-top:28px; background:rgba(255,255,255,0.15); border:2px solid currentColor; cursor:pointer;
-    text-decoration:none; font-size:16px; font-weight:bold; font-family:inherit; padding:14px 28px;
-    border-radius:12px; transition:background .15s ease, transform .15s ease;
-  }
-  .back-btn:hover{ background:rgba(255,255,255,0.3); transform:translateY(-2px); }
-  #view-home .back-btn{ display:none; }
+  /* ---------- Grid ---------- */
+  .grid{max-width:1240px;margin:0 auto;padding:30px 28px 80px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:24px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;display:flex;flex-direction:column;transition:.2s;}
+  .card:hover{transform:translateY(-3px);border-color:#3a3f55;box-shadow:0 18px 40px -20px rgba(0,0,0,.7);}
+  .card.hidden{display:none}
 
-  /* ===== SAVE / GOOGLE SHEETS DEMO BUTTON (shared by 웹앱 category) ===== */
-  .save-row{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; justify-content:center; }
-  .save-btn{
-    border:none; border-radius:8px; padding:10px 18px; font-size:13px; font-weight:bold; cursor:pointer;
-    font-family:inherit; display:inline-flex; align-items:center; gap:6px; background:#475569; color:#fff;
-    transition:transform .15s ease, opacity .15s ease;
-  }
-  .save-btn:hover{ transform:translateY(-2px); opacity:0.92; }
-  .save-btn.sheets{ background:#0f9d58; }
-  .save-msg{
-    font-size:12px; margin-top:8px; min-height:16px; opacity:0; transition:opacity .25s ease;
-  }
-  .save-msg.show{ opacity:1; }
+  /* preview frame */
+  .preview{height:200px;position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;padding:18px;}
+  .preview *{box-sizing:border-box}
 
-  /* ===== QUIZ ===== */
-  #view-quiz{
-    background:linear-gradient(135deg,#3b82f6,#6366f1); align-items:center; justify-content:center; padding:24px;
-  }
-  #view-quiz.active{ display:flex; }
-  #quiz_box{ background:#fff; border-radius:18px; padding:36px; width:420px; max-width:90vw; box-shadow:0 12px 30px rgba(0,0,0,0.25); }
-  #quiz_app{ }
-  .quiz-top{ display:flex; justify-content:space-between; font-size:14px; color:#6b7280; margin-bottom:14px;}
-  .quiz-q{ margin:0 0 20px; font-size:19px; line-height:1.4; color:#1f2937;}
-  .quiz-opt{
-    display:block; width:100%; text-align:left; padding:13px 16px; margin-bottom:10px;
-    border:2px solid #e5e7eb; border-radius:10px; background:#fff; cursor:pointer; font-size:15px; transition:all .15s;
-  }
-  .quiz-opt:hover{ border-color:#93c5fd; background:#eff6ff; }
-  .quiz-opt.correct{ border-color:#10b981; background:#ecfdf5; }
-  .quiz-opt.wrong{ border-color:#ef4444; background:#fef2f2; }
-  .quiz-result{ text-align:center; }
-  .quiz-score{ font-size:42px; font-weight:bold; color:#3b82f6; margin:10px 0; }
-  .quiz-restart{
-    margin-top:14px; padding:11px 22px; border:none; border-radius:10px; background:#3b82f6; color:#fff;
-    font-size:14px; cursor:pointer;
-  }
-  #quiz_box .back-btn{ display:block; margin:24px auto 0; color:#3b82f6; background:#eef2ff; border-color:#3b82f6; }
+  .card-body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:12px;flex:1;}
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .card-title{font-size:18px;font-weight:700;letter-spacing:-.01em;margin:0;}
+  .tag{font-size:11px;color:var(--accent2);border:1px solid rgba(92,230,196,.3);
+    background:rgba(92,230,196,.08);padding:3px 9px;border-radius:999px;white-space:nowrap;flex:none;}
+  .desc{color:var(--mut);font-size:14px;margin:0;}
+  .desc b{color:var(--txt);font-weight:600;}
 
-  /* ===== MATCH ===== */
-  #view-match{
-    background:linear-gradient(135deg,#10b981,#059669); color:#fff;
-    flex-direction:column; align-items:center; justify-content:center; padding:24px;
-  }
-  #view-match.active{ display:flex; }
-  #view-match h1{ margin:0 0 6px; font-size:22px; }
-  #view-match .info{ margin-bottom:16px; font-size:14px; opacity:.9; }
-  #match_board{ display:grid; grid-template-columns:repeat(4,80px); gap:12px; }
-  .match-card{
-    width:80px; height:80px; border-radius:12px; background:#fff; color:#10b981;
-    display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer;
-    box-shadow:0 6px 14px rgba(0,0,0,0.2); user-select:none; transition:transform .15s;
-  }
-  .match-card.hidden-card{ background:#34d399; color:transparent; }
-  .match-card.matched{ background:#a7f3d0; cursor:default; }
-  #view-match .restart-btn{
-    margin-top:18px; padding:10px 20px; border:none; border-radius:10px; background:#fff; color:#059669;
-    font-weight:bold; cursor:pointer; font-size:14px;
-  }
-  #view-match .back-btn{ color:#fff; margin-top:10px; }
+  .ref-link{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;font-size:12px;
+    color:var(--accent);text-decoration:none;border:1px solid var(--line);background:var(--card2);
+    padding:5px 11px;border-radius:999px;transition:.15s;}
+  .ref-link:hover{border-color:var(--accent);background:rgba(124,140,255,.12);}
+  .prompt-wrap{margin-top:auto;display:flex;flex-direction:column;gap:6px;}
+  .prompt-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+    display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+  .prompt-label .lab-ko{color:var(--accent2);}
+  .prompt{position:relative;background:#0e0f16;border:1px solid var(--line);border-radius:12px;
+    padding:13px 44px 13px 14px;font-family:var(--mono);font-size:12.5px;line-height:1.5;
+    color:#cfd3e6;white-space:pre-wrap;word-break:break-word;}
+  .prompt.ko{font-family:var(--sans);font-size:13px;color:#d7dcef;background:#10141d;border-color:#243049;line-height:1.55;}
+  .copy{position:absolute;top:9px;right:9px;width:30px;height:30px;border-radius:8px;
+    border:1px solid var(--line);background:var(--card2);color:var(--mut);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:.15s;}
+  .copy:hover{color:var(--txt);border-color:var(--accent);}
+  .copy.done{background:var(--accent2);color:#0c0d12;border-color:var(--accent2);}
+  .copy svg{width:15px;height:15px}
 
-  /* ===== PENDULUM ===== */
-  #view-pendulum{
-    background:#0f172a; color:#e2e8f0; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-pendulum.active{ display:flex; }
-  #view-pendulum h1{ margin:0 0 4px; font-size:22px; }
-  #view-pendulum .sub{ margin:0 0 18px; color:#94a3b8; font-size:13px; }
-  #view-pendulum .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
-  #pendCanvas{ background:#1e293b; border-radius:14px; display:block; }
-  #view-pendulum .panel{ background:#1e293b; border-radius:14px; padding:20px; width:240px; }
-  #view-pendulum .row{ margin-bottom:16px; }
-  #view-pendulum label{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#cbd5e1; }
-  #view-pendulum input[type=range]{ width:100%; }
-  #view-pendulum button.ctrl{
-    width:100%; padding:10px; border:none; border-radius:8px; background:#3b82f6; color:#fff;
-    font-size:14px; cursor:pointer; margin-top:6px;
-  }
-  #view-pendulum .back-btn{ color:#94a3b8; }
-  #pend_errBox{ color:#fca5a5; font-size:13px; margin-top:10px; white-space:pre-wrap; }
+  footer{max-width:1240px;margin:0 auto;padding:0 28px 70px;color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:26px;}
+  footer a{color:var(--accent)}
+  .empty{grid-column:1/-1;text-align:center;color:var(--dim);padding:60px 0;}
 
-  /* ===== CORAL ===== */
-  #view-coral{
-    background:#ecfeff; color:#0c4a6e; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-coral.active{ display:flex; }
-  #view-coral h1{ margin:0 0 4px; font-size:22px; }
-  #view-coral .sub{ margin:0 0 18px; color:#0369a1; font-size:13px; text-align:center; max-width:520px;}
-  #view-coral .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
-  #coralCanvas{ background:#fff; border-radius:14px; border:1px solid #bae6fd; display:block; }
-  #view-coral .panel{ background:#fff; border-radius:14px; padding:20px; width:240px; border:1px solid #bae6fd; }
-  #view-coral .row{ margin-bottom:16px; }
-  #view-coral label{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#0369a1; }
-  #view-coral input[type=range]{ width:100%; }
-  #view-coral button.ctrl{
-    width:100%; padding:10px; border:none; border-radius:8px; background:#0ea5e9; color:#fff;
-    font-size:14px; cursor:pointer; margin-top:6px;
-  }
-  #view-coral .stat{ font-size:13px; color:#0369a1; margin-top:10px; }
-  #view-coral .back-btn{ color:#0ea5e9; background:#e0f2fe; border-color:#0ea5e9; }
-  #coral_errBox{ color:#dc2626; font-size:13px; margin-top:10px; white-space:pre-wrap; }
-
-  /* ===== PICKER ===== */
-  #view-picker{
-    background:#1e1b4b; color:#ede9fe; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-picker.active{ display:flex; }
-  #view-picker h1{ margin:0 0 4px; font-size:22px; }
-  #view-picker .sub{ margin:0 0 20px; color:#c4b5fd; font-size:13px; }
-  #view-picker .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; max-width:760px; }
-  #view-picker .panel{ background:#312e81; border-radius:14px; padding:20px; width:300px; }
-  #pick_names{
-    width:100%; height:160px; border-radius:10px; border:1px solid #4338ca; background:#1e1b4b; color:#ede9fe;
-    padding:10px; font-size:13px; resize:vertical;
-  }
-  #view-picker .row{ margin-top:14px; display:flex; gap:8px; align-items:center; font-size:13px; }
-  #pick_groupSize{ width:60px; padding:6px; border-radius:6px; border:1px solid #4338ca; background:#1e1b4b; color:#ede9fe; }
-  #view-picker button.ctrl{ padding:10px 16px; border:none; border-radius:8px; background:#8b5cf6; color:#fff; cursor:pointer; font-size:14px; }
-  #view-picker button.secondary{ background:#4338ca; }
-  #view-picker .resultBox{
-    background:#312e81; border-radius:14px; padding:30px; width:300px; display:flex; align-items:center; justify-content:center;
-    text-align:center; font-size:26px; font-weight:bold; min-height:160px;
-  }
-  #view-picker .picked{ color:#facc15; }
-  #view-picker .back-btn{ color:#c4b5fd; }
-  #pick_errBox{ color:#fca5a5; font-size:13px; margin-top:10px; white-space:pre-wrap; }
-
-  /* ===== TIMER ===== */
-  #view-timer{
-    background:#0c4a6e; color:#e0f2fe; flex-direction:column; align-items:center; justify-content:center; padding:24px;
-  }
-  #view-timer.active{ display:flex; }
-  #view-timer h1{ margin:0 0 4px; font-size:22px; }
-  #view-timer .sub{ margin:0 0 24px; color:#7dd3fc; font-size:13px; }
-  #timer_display{ font-size:72px; font-weight:bold; letter-spacing:2px; margin-bottom:24px; font-family:monospace; }
-  #timer_display.warn{ color:#facc15; }
-  #timer_display.danger{ color:#f87171; }
-  #view-timer .controls{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; justify-content:center; }
-  #view-timer button.ctrl{
-    padding:10px 18px; border:none; border-radius:8px; background:#0ea5e9; color:#fff; cursor:pointer; font-size:14px;
-    transition:transform .12s ease;
-  }
-  #view-timer button.ctrl:active{ transform:scale(0.93); }
-  #view-timer button.ctrl.btn-clicked{ animation:timerBtnPulse .3s ease; }
-  @keyframes timerBtnPulse{
-    0%{ transform:scale(0.9); box-shadow:0 0 0 5px rgba(255,255,255,0.45); }
-    100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(255,255,255,0); }
-  }
-  #view-timer button.secondary{ background:#075985; }
-  #view-timer .presets{ display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; justify-content:center; }
-  #view-timer .presets button{ background:#0369a1; font-size:13px; padding:7px 12px; border:none; border-radius:8px; color:#fff; cursor:pointer; }
-  #view-timer .back-btn{ color:#7dd3fc; }
-  #timer_errBox{ color:#fca5a5; font-size:13px; margin-top:10px; white-space:pre-wrap; }
-  #timer_saveMsg{ color:#bae6fd; max-width:380px; text-align:center; }
-
-  /* ===== RPS (가위바위보) ===== */
-  #view-rps{
-    background:linear-gradient(135deg,#ec4899,#db2777); color:#fff;
-    flex-direction:column; align-items:center; justify-content:center; padding:24px;
-  }
-  #view-rps.active{ display:flex; }
-  #view-rps h1{ margin:0 0 4px; font-size:22px; }
-  #view-rps .sub{ margin:0 0 18px; color:#fbcfe8; font-size:13px; }
-  #rps_score{ font-size:15px; margin-bottom:18px; background:rgba(255,255,255,0.15); padding:8px 18px; border-radius:999px; }
-  #rps_choices{ display:flex; gap:14px; margin-bottom:22px; }
-  #rps_choices button{
-    width:72px; height:72px; border-radius:50%; border:none; background:#fff; font-size:32px; cursor:pointer;
-    box-shadow:0 6px 14px rgba(0,0,0,0.25); transition:transform .12s ease;
-  }
-  #rps_choices button:hover{ transform:translateY(-4px) scale(1.05); }
-  #rps_battle{ display:flex; align-items:center; gap:20px; font-size:46px; margin-bottom:14px; min-height:60px; }
-  #rps_vs{ font-size:16px; opacity:.8; }
-  #rps_result{ font-size:19px; font-weight:bold; margin-bottom:10px; min-height:26px; }
-  #rps_resetBtn{
-    padding:9px 18px; border:none; border-radius:8px; background:rgba(255,255,255,0.2); color:#fff;
-    cursor:pointer; font-size:13px; margin-bottom:6px;
-  }
-  #view-rps .back-btn{ color:#fff; }
-
-  /* ===== NUMBER GUESS (숫자 맞추기) ===== */
-  #view-guess{
-    background:linear-gradient(135deg,#f97316,#ea580c); color:#fff;
-    flex-direction:column; align-items:center; justify-content:center; padding:24px;
-  }
-  #view-guess.active{ display:flex; }
-  #view-guess h1{ margin:0 0 4px; font-size:22px; }
-  #view-guess .sub{ margin:0 0 18px; color:#fed7aa; font-size:13px; text-align:center; }
-  #guess_box{ background:rgba(255,255,255,0.12); border-radius:16px; padding:28px; width:280px; text-align:center; }
-  #guess_input{
-    width:100%; padding:12px; font-size:18px; border-radius:8px; border:none; text-align:center; margin-bottom:12px;
-  }
-  #guess_submitBtn{
-    width:100%; padding:11px; border:none; border-radius:8px; background:#fff; color:#ea580c; font-weight:bold;
-    font-size:15px; cursor:pointer; margin-bottom:10px;
-  }
-  #guess_hint{ font-size:16px; min-height:24px; margin-bottom:8px; font-weight:bold; }
-  #guess_tries{ font-size:13px; color:#fed7aa; margin-bottom:14px; }
-  #guess_resetBtn{
-    padding:9px 18px; border:none; border-radius:8px; background:rgba(255,255,255,0.2); color:#fff;
-    cursor:pointer; font-size:13px;
-  }
-  #view-guess .back-btn{ color:#fff; }
-
-  /* ===== TYPING CHALLENGE (타이핑 챌린지) ===== */
-  #view-typing{
-    background:linear-gradient(135deg,#06b6d4,#0891b2); color:#fff;
-    flex-direction:column; align-items:center; justify-content:center; padding:24px;
-  }
-  #view-typing.active{ display:flex; }
-  #view-typing h1{ margin:0 0 4px; font-size:22px; }
-  #view-typing .sub{ margin:0 0 18px; color:#a5f3fc; font-size:13px; text-align:center; }
-  #typing_box{ background:rgba(255,255,255,0.12); border-radius:16px; padding:28px; width:340px; text-align:center; }
-  #typing_stats{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:14px; color:#a5f3fc; }
-  #typing_word{ font-size:30px; font-weight:bold; margin-bottom:16px; letter-spacing:1px; }
-  #typing_input{
-    width:100%; padding:12px; font-size:16px; border-radius:8px; border:none; text-align:center; margin-bottom:14px;
-  }
-  #typing_startBtn{
-    width:100%; padding:11px; border:none; border-radius:8px; background:#fff; color:#0891b2; font-weight:bold;
-    font-size:15px; cursor:pointer;
-  }
-  #typing_msg{ font-size:14px; min-height:20px; margin-top:10px; }
-  #view-typing .back-btn{ color:#fff; }
-
-  /* ===== PROJECTILE (포물선 운동) ===== */
-  #view-projectile{
-    background:#1e293b; color:#e2e8f0; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-projectile.active{ display:flex; }
-  #view-projectile h1{ margin:0 0 4px; font-size:22px; }
-  #view-projectile .sub{ margin:0 0 18px; color:#94a3b8; font-size:13px; }
-  #view-projectile .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
-  #projCanvas{ background:#0f172a; border-radius:14px; display:block; }
-  #view-projectile .panel{ background:#0f172a; border-radius:14px; padding:20px; width:240px; }
-  #view-projectile .row{ margin-bottom:16px; }
-  #view-projectile label{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#cbd5e1; }
-  #view-projectile input[type=range]{ width:100%; }
-  #view-projectile button.ctrl{
-    width:100%; padding:10px; border:none; border-radius:8px; background:#f59e0b; color:#1e293b;
-    font-size:14px; cursor:pointer; margin-top:6px; font-weight:bold;
-  }
-  #view-projectile .stat{ font-size:13px; color:#cbd5e1; margin-top:10px; }
-  #view-projectile .back-btn{ color:#94a3b8; }
-  #proj_errBox{ color:#fca5a5; font-size:13px; margin-top:10px; white-space:pre-wrap; }
-
-  /* ===== COIN FLIP (동전 던지기) ===== */
-  #view-coinflip{
-    background:#fef9c3; color:#713f12; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-coinflip.active{ display:flex; }
-  #view-coinflip h1{ margin:0 0 4px; font-size:22px; }
-  #view-coinflip .sub{ margin:0 0 18px; color:#a16207; font-size:13px; text-align:center; }
-  #coin_face{ font-size:64px; margin-bottom:14px; }
-  #coin_controls{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; justify-content:center; }
-  #coin_controls button{
-    padding:10px 18px; border:none; border-radius:8px; background:#ca8a04; color:#fff; cursor:pointer; font-size:14px;
-  }
-  #coin_controls button.secondary{ background:#92400e; }
-  #coinCanvas{ background:#fffbeb; border-radius:14px; border:1px solid #fde68a; display:block; }
-  #coin_stat{ font-size:14px; margin-top:12px; text-align:center; }
-  #view-coinflip .back-btn{ color:#713f12; background:rgba(0,0,0,0.06); }
-
-  /* ===== POLL (실시간 투표) ===== */
-  #view-poll{
-    background:#0c4a6e; color:#e0f2fe; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-poll.active{ display:flex; }
-  #view-poll h1{ margin:0 0 4px; font-size:22px; }
-  #view-poll .sub{ margin:0 0 18px; color:#7dd3fc; font-size:13px; }
-  #poll_box{ background:rgba(255,255,255,0.08); border-radius:16px; padding:24px; width:360px; }
-  .poll-option{ margin-bottom:14px; }
-  .poll-option-head{ display:flex; gap:6px; margin-bottom:6px; }
-  .poll-label-input{
-    flex:1; background:#075985; color:#fff; border:none; border-radius:10px; padding:10px 12px; font-size:14px;
-    font-family:inherit;
-  }
-  .poll-del{
-    border:none; background:rgba(255,255,255,0.15); color:#fff; border-radius:8px; padding:0 12px; font-size:12px;
-    cursor:pointer;
-  }
-  .poll-btn{
-    width:100%; text-align:left; padding:10px 14px; border:none; border-radius:10px; background:#0369a1; color:#fff;
-    cursor:pointer; font-size:13px; margin-bottom:6px;
-  }
-  .poll-bar-track{ width:100%; height:10px; background:rgba(255,255,255,0.15); border-radius:6px; overflow:hidden; }
-  .poll-bar-fill{ height:100%; background:#38bdf8; width:0%; transition:width .3s ease; }
-  .poll-pct{ font-size:12px; color:#bae6fd; margin-top:4px; }
-  #poll_addRow{ display:flex; gap:6px; margin:14px 0; }
-  #poll_newOptInput{
-    flex:1; padding:9px 10px; border-radius:8px; border:1px solid #38bdf8; background:rgba(255,255,255,0.08);
-    color:#fff; font-size:13px; font-family:inherit;
-  }
-  #poll_addOptBtn{
-    padding:9px 14px; border:none; border-radius:8px; background:#0ea5e9; color:#fff; cursor:pointer; font-size:13px;
-    font-weight:bold;
-  }
-  #poll_resetBtn{
-    width:100%; padding:10px; border:none; border-radius:8px; background:rgba(255,255,255,0.15); color:#fff;
-    cursor:pointer; font-size:13px; margin-top:8px;
-  }
-  #view-poll .back-btn{ color:#7dd3fc; }
-
-  /* ===== ROULETTE (룰렛) ===== */
-  #view-roulette{
-    background:#312e81; color:#e0e7ff; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-roulette.active{ display:flex; }
-  #view-roulette h1{ margin:0 0 4px; font-size:22px; }
-  #view-roulette .sub{ margin:0 0 18px; color:#c7d2fe; font-size:13px; }
-  #view-roulette .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; align-items:flex-start; }
-  #roulette_wheelWrap{ position:relative; width:260px; height:260px; }
-  #roulette_wheel{
-    width:260px; height:260px; border-radius:50%; transition:transform 3s cubic-bezier(.17,.67,.12,.99);
-    box-shadow:0 8px 24px rgba(0,0,0,0.3);
-  }
-  #roulette_pointer{
-    position:absolute; top:-12px; left:50%; transform:translateX(-50%); font-size:28px;
-  }
-  #view-roulette .panel{ background:#3730a3; border-radius:14px; padding:20px; width:260px; }
-  #roulette_items{
-    width:100%; height:120px; border-radius:10px; border:1px solid #4338ca; background:#1e1b4b; color:#e0e7ff;
-    padding:10px; font-size:13px; resize:vertical; margin-bottom:12px;
-  }
-  #roulette_spinBtn{
-    width:100%; padding:11px; border:none; border-radius:8px; background:#fbbf24; color:#1e1b4b; font-weight:bold;
-    font-size:15px; cursor:pointer;
-  }
-  #roulette_result{ font-size:18px; font-weight:bold; margin-top:12px; text-align:center; min-height:26px; }
-  #view-roulette .back-btn{ color:#c7d2fe; }
-
-  /* ===== NOTES (스티키 메모) ===== */
-  #view-notes{
-    background:#fef3c7; color:#78350f; padding:24px;
-  }
-  #view-notes.active{ display:flex; flex-direction:column; align-items:center; }
-  #view-notes h1{ margin:0 0 4px; font-size:22px; }
-  #view-notes .sub{ margin:0 0 18px; color:#92400e; font-size:13px; }
-  #notes_addRow{ display:flex; gap:8px; margin-bottom:20px; width:100%; max-width:600px; }
-  #notes_input{ flex:1; padding:10px; border-radius:8px; border:1px solid #d97706; font-size:14px; }
-  #notes_addBtn{ padding:10px 18px; border:none; border-radius:8px; background:#d97706; color:#fff; cursor:pointer; font-size:14px; }
-  #notes_board{ display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:14px; width:100%; max-width:700px; }
-  .sticky-note{
-    background:#fde68a; border-radius:8px; padding:14px; font-size:13px; line-height:1.5; min-height:100px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.12); position:relative; word-break:break-word;
-  }
-  .sticky-note .del{
-    position:absolute; top:6px; right:8px; background:none; border:none; cursor:pointer; font-size:13px; color:#92400e;
-  }
-  #view-notes .back-btn{ color:#78350f; background:rgba(0,0,0,0.06); }
-  #notes_saveMsg{ color:#92400e; max-width:380px; text-align:center; }
-
-  /* ===== ATTENDANCE (출석 체크) ===== */
-  #view-attendance{
-    background:#f0fdf4; color:#14532d; padding:24px;
-  }
-  #view-attendance.active{ display:flex; flex-direction:column; align-items:center; }
-  #view-attendance h1{ margin:0 0 4px; font-size:22px; }
-  #view-attendance .sub{ margin:0 0 18px; color:#166534; font-size:13px; }
-  #attend_addRow{ display:flex; gap:8px; margin-bottom:14px; width:100%; max-width:480px; }
-  #attend_nameInput{ flex:1; padding:9px 12px; border-radius:8px; border:1px solid #86efac; font-size:13px; font-family:inherit; }
-  #attend_addNameBtn{
-    background:#16a34a; color:#fff; border:none; padding:9px 16px; border-radius:8px; font-size:13px;
-    font-weight:bold; cursor:pointer; font-family:inherit;
-  }
-  #attend_addNameBtn:hover{ background:#15803d; }
-  .attend-row .remark-btn{
-    border:none; background:#e0e7ff; color:#4338ca; border-radius:6px; padding:5px 9px; font-size:11px; cursor:pointer;
-  }
-  .attend-row .remark-tag{
-    display:block; font-size:11px; color:#b45309; font-weight:normal; margin-top:2px;
-  }
-  #attend_controls{
-    display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; justify-content:center;
-  }
-  #attend_controls label{ font-size:13px; font-weight:bold; }
-  #attend_date{ padding:7px 10px; border-radius:8px; border:1px solid #86efac; font-size:13px; font-family:inherit; }
-  #attend_allPresentBtn{
-    background:#16a34a; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:13px;
-    font-weight:bold; cursor:pointer; font-family:inherit;
-  }
-  #attend_allPresentBtn:hover{ background:#15803d; }
-  #attend_saveMsg{ color:#166534; max-width:380px; text-align:center; }
-  #attend_summary{
-    font-size:13px; margin-bottom:16px; background:#dcfce7; padding:10px 18px; border-radius:999px;
-    text-align:center; max-width:90%;
-  }
-  #attend_list{ width:100%; max-width:480px; }
-  .attend-row{
-    display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#fff;
-    border-radius:10px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06); flex-wrap:wrap; gap:6px;
-  }
-  .attend-row .name{ font-size:14px; font-weight:bold; }
-  .attend-row .toggles{ display:flex; flex-wrap:wrap; gap:4px; }
-  .attend-row .toggles button{
-    border:none; border-radius:6px; padding:5px 9px; font-size:11px; cursor:pointer; font-family:inherit;
-  }
-  .attend-row .toggles .present{ background:#dcfce7; color:#15803d; }
-  .attend-row .toggles .field{ background:#dbeafe; color:#1d4ed8; }
-  .attend-row .toggles .early{ background:#fed7aa; color:#c2410c; }
-  .attend-row .toggles .sick{ background:#e9d5ff; color:#7e22ce; }
-  .attend-row .toggles .etc{ background:#e5e7eb; color:#374151; }
-  .attend-row .toggles button.active-state{ font-weight:bold; outline:2px solid currentColor; }
-  #view-attendance .back-btn{ color:#14532d; background:rgba(0,0,0,0.06); margin-top:16px; }
-
-  /* ===== INFOGRAPHIC 1 (학급 통계) ===== */
-  #view-infographic1{
-    background:#fff1f2; color:#881337; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-infographic1.active{ display:flex; }
-  #view-infographic1 h1{ margin:0 0 4px; font-size:22px; }
-  #view-infographic1 .sub{ margin:0 0 16px; color:#be123c; font-size:13px; text-align:center; }
-  #info1_tabs{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; justify-content:center; }
-  #info1_tabs button{
-    padding:9px 16px; border:none; border-radius:999px; background:#ffe4e6; color:#9f1239; cursor:pointer; font-size:13px;
-  }
-  #info1_tabs button.active-tab{ background:#f43f5e; color:#fff; font-weight:bold; }
-  #info1Canvas{ background:#fff; border-radius:14px; border:1px solid #fecdd3; display:block; }
-  #view-infographic1 .back-btn{ color:#881337; background:rgba(0,0,0,0.06); }
-
-  /* ===== INFOGRAPHIC 2 (디지털 리터러시) ===== */
-  #view-infographic2{
-    background:#f0f9ff; color:#0c4a6e; flex-direction:column; align-items:center; padding:24px;
-  }
-  #view-infographic2.active{ display:flex; }
-  #view-infographic2 h1{ margin:0 0 4px; font-size:22px; }
-  #view-infographic2 .sub{ margin:0 0 16px; color:#0369a1; font-size:13px; text-align:center; }
-  #view-infographic2 .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; align-items:center; }
-  #info2Canvas{ background:#fff; border-radius:14px; border:1px solid #bae6fd; display:block; }
-  #info2_legend{ display:flex; flex-direction:column; gap:8px; }
-  .info2-legend-item{
-    display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; cursor:pointer; background:#fff;
-    border:1px solid #bae6fd; font-size:13px;
-  }
-  .info2-legend-item.active-legend{ background:#bae6fd; font-weight:bold; }
-  .info2-swatch{ width:12px; height:12px; border-radius:50%; display:inline-block; }
-  #view-infographic2 .back-btn{ color:#0c4a6e; background:rgba(0,0,0,0.06); }
-
-  /* ===== REAL MOBILE RESPONSIVE OVERRIDES ===== */
-  @media (max-width: 600px){
-    canvas{ max-width:100%; height:auto; }
-
-    #deviceToggle{ top:6px; right:6px; padding:3px; }
-    #deviceToggle button{ padding:5px 9px; font-size:11px; }
-
-    #view-home header{ padding:30px 16px 16px; }
-    #view-home header h1{ font-size:21px; }
-    #view-home header p{ font-size:13px; }
-    #view-home main{ padding:14px 14px 60px; }
-    #view-home section{ margin-bottom:32px; }
-    .section-title h2{ font-size:17px; }
-    .grid{ grid-template-columns:1fr; gap:12px; }
-    .card{ padding:16px; }
-    .card .icon{ font-size:26px; margin-bottom:8px; }
-    .card h3{ font-size:15px; }
-    .card p{ font-size:12.5px; }
-
-    .back-btn{ width:100%; padding:13px 18px; font-size:15px; margin-top:20px; }
-
-    .save-row{ flex-direction:column; align-items:stretch; }
-    .save-btn{ width:100%; justify-content:center; padding:12px 16px; }
-
-    /* generic view heading/sub used across most categories */
-    .view h1{ font-size:19px; }
-    .view .sub{ font-size:12.5px; }
-
-    /* shrink memory-match grid to fit narrow screens */
-    #match_board{ grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; max-width:340px; }
-    .match-card{ width:100%; height:70px; font-size:22px; }
-
-    /* make sure long flex rows of inputs/buttons wrap and inputs are full-width */
-    input[type="text"], input[type="date"], input[type="number"], textarea, select{
-      font-size:14px; max-width:100%;
-    }
+  @media(max-width:560px){
+    header{padding-top:40px}
+    .grid{grid-template-columns:1fr;gap:18px;padding:22px 18px 60px}
+    .controls-inner{padding:12px 18px}
   }
 
-  @media (max-width: 380px){
-    #view-home header h1{ font-size:19px; }
-    .card .icon{ font-size:23px; }
-    #deviceToggle button{ padding:4px 7px; font-size:10px; }
-  }
+  /* =========================================================
+     PREVIEW STYLES — each .pv-* renders a mini UI in that style
+     ========================================================= */
+  .pv-mock{width:100%;height:100%;border-radius:12px;font-size:10px;}
+
+  /* 1 Liquid Glass — glossy translucent layer, strong specular + refraction */
+  .pv-liquid{background:linear-gradient(135deg,#7b5cff,#1fb6d8 55%,#ff6fc0);
+    display:flex;flex-direction:column;gap:10px;padding:14px;position:relative;overflow:hidden}
+  .pv-liquid::before{content:"";position:absolute;width:90px;height:90px;border-radius:50%;
+    background:radial-gradient(#fff,transparent 70%);top:-26px;right:26px;opacity:.55}
+  .pv-liquid .lq-nav{display:flex;gap:7px;align-items:center;background:rgba(255,255,255,.18);
+    backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.55);border-radius:999px;padding:8px 12px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 4px 12px rgba(0,0,0,.18);position:relative}
+  .pv-liquid .lq-nav span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.75)}
+  .pv-liquid .lq-nav span:nth-child(2){width:42px;border-radius:5px;height:7px}
+  .pv-liquid .lq-panel{flex:1;border-radius:20px;background:rgba(255,255,255,.16);backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.5);position:relative;overflow:hidden;padding:12px;color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -12px 22px rgba(255,255,255,.12),0 12px 28px rgba(0,0,0,.22)}
+  .pv-liquid .lq-panel::after{content:"";position:absolute;top:0;left:0;right:0;height:48%;
+    background:linear-gradient(rgba(255,255,255,.38),transparent);border-radius:20px 20px 50% 50%}
+  .pv-liquid b{font-size:13px;position:relative}
+  .pv-liquid .lq-row{display:flex;align-items:center;gap:10px;margin-top:11px;position:relative}
+  .pv-liquid .lq-btn{background:rgba(255,255,255,.5);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.75);
+    border-radius:999px;padding:5px 15px;font-size:11px;font-weight:700;color:#3a2a6a;box-shadow:inset 0 1px 0 #fff}
+  .pv-liquid .pill{flex:1;height:8px;border-radius:6px;background:rgba(255,255,255,.4)}
+
+  /* 2 Glassmorphism 2.0 */
+  .pv-glass{background:radial-gradient(circle at 20% 20%,#ff9bd2,transparent 45%),radial-gradient(circle at 80% 70%,#7afcff,transparent 45%),#5b5bd6;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:16px;}
+  .pv-glass .card2{background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.45);border-radius:14px;padding:11px 13px;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+  .pv-glass .card2 b{font-size:12px}
+  .pv-glass .ln{height:6px;border-radius:4px;background:rgba(255,255,255,.55);margin-top:7px;width:80%}
+  .pv-glass .ln.s{width:55%;background:rgba(255,255,255,.35)}
+
+  /* 3 Bento */
+  .pv-bento{display:grid;grid-template-columns:1.4fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;background:#0f1117;padding:6px;}
+  .pv-bento div{background:linear-gradient(160deg,#1c2030,#171a26);border:1px solid #2a2f42;border-radius:10px;padding:9px;color:#cdd3e8;font-weight:600;}
+  .pv-bento .big{grid-row:span 2;background:linear-gradient(160deg,#3a3f7a,#23264a);color:#fff}
+  .pv-bento .acc{background:linear-gradient(160deg,#1f5a4d,#16443a);color:#9af5dc}
+  .pv-bento small{display:block;font-size:8px;opacity:.6;font-weight:400}
+
+  /* 4 shadcn */
+  .pv-shadcn{background:#09090b;display:flex;flex-direction:column;gap:8px;padding:16px;justify-content:center;}
+  .pv-shadcn .row{display:flex;gap:8px}
+  .pv-shadcn .c{flex:1;background:#111114;border:1px solid #27272a;border-radius:10px;padding:10px;color:#e4e4e7}
+  .pv-shadcn b{font-size:12px}
+  .pv-shadcn .num{font-size:18px;font-weight:700;color:#fafafa}
+  .pv-shadcn .btn{background:#fafafa;color:#09090b;border-radius:8px;text-align:center;padding:7px;font-weight:600;font-size:11px}
+  .pv-shadcn .ghost{border:1px solid #27272a;color:#a1a1aa;border-radius:8px;text-align:center;padding:7px;font-size:11px}
+
+  /* 5 Material 3 */
+  .pv-m3{background:#fef7ff;display:flex;flex-direction:column;gap:9px;padding:15px;justify-content:center}
+  .pv-m3 .fab{align-self:flex-end;background:#6750a4;color:#fff;border-radius:16px;padding:9px 14px;font-weight:600;font-size:11px;box-shadow:0 4px 10px rgba(103,80,164,.4)}
+  .pv-m3 .chipm{display:inline-block;background:#e8def8;color:#21005d;border-radius:999px;padding:6px 13px;font-size:11px;margin-right:6px;font-weight:500}
+  .pv-m3 .cardm{background:#f7f2fa;border-radius:18px;padding:11px 13px;color:#1d1b20}
+  .pv-m3 b{font-size:12px;color:#1d1b20}
+  .pv-m3 .lnm{height:6px;background:#cac4d0;border-radius:4px;margin-top:7px;width:75%}
+
+  /* 6 Minimalist */
+  .pv-min{background:#ffffff;color:#111;padding:22px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+  .pv-min h4{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em;color:#0a0a0a}
+  .pv-min .ln{height:6px;background:#e7e7e7;border-radius:3px;width:90%}
+  .pv-min .ln.s{width:60%}
+  .pv-min .dot{width:34px;height:5px;background:#111;border-radius:3px}
+
+  /* 7 Editorial */
+  .pv-edit{background:#f4f1ea;color:#1a1a1a;padding:16px;display:flex;flex-direction:column;justify-content:center}
+  .pv-edit .k{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#a8341f;font-weight:700}
+  .pv-edit h4{font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:.98;margin:6px 0;font-weight:700;letter-spacing:-.01em}
+  .pv-edit .cols{display:flex;gap:10px;margin-top:6px}
+  .pv-edit .cols div{flex:1}
+  .pv-edit .ln{height:4px;background:#cfc8b8;border-radius:2px;margin-top:4px}
+  .pv-edit .ln.s{width:70%}
+
+  /* 8 Swiss */
+  .pv-swiss{background:#fff;color:#111;padding:0;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(4,1fr);}
+  .pv-swiss>div{border-right:1px solid #ececec;border-bottom:1px solid #ececec}
+  .pv-swiss .red{background:#e1352a;grid-column:1/3;grid-row:1/3}
+  .pv-swiss .t{grid-column:3/7;grid-row:1/2;display:flex;align-items:flex-end;padding:8px;font-weight:800;font-size:15px;letter-spacing:-.02em}
+  .pv-swiss .b{grid-column:3/7;grid-row:2/3;padding:8px;font-size:9px;color:#666;font-weight:600}
+  .pv-swiss .blk{grid-column:1/7;grid-row:3/5;padding:9px;display:flex;align-items:flex-end;font-size:38px;font-weight:800;letter-spacing:-.04em;color:#111}
+
+  /* 9 Neo-brutalism */
+  .pv-neo{background:#ffe14d;padding:16px;display:flex;flex-direction:column;gap:10px;justify-content:center}
+  .pv-neo .box{background:#fff;border:3px solid #000;border-radius:4px;box-shadow:5px 5px 0 #000;padding:10px 12px;font-weight:800;color:#000}
+  .pv-neo .pink{background:#ff5da2;color:#000}
+  .pv-neo .blue{background:#4d7cff;color:#fff;border-color:#000}
+  .pv-neo b{font-size:13px}
+  .pv-neo small{font-size:9px;font-weight:700}
+
+  /* 10 Soft neo */
+  .pv-softneo{background:#fdeee4;padding:16px;display:flex;flex-direction:column;gap:9px;justify-content:center}
+  .pv-softneo .box{background:#fff;border:2px solid #2b2b2b;border-radius:14px;box-shadow:3px 3px 0 #d9b8a4;padding:10px 12px;font-weight:700;color:#2b2b2b}
+  .pv-softneo .mint{background:#c8f0e0}
+  .pv-softneo .lav{background:#e0d8ff}
+  .pv-softneo b{font-size:12px}
+  .pv-softneo small{font-size:9px;color:#7a6e66;font-weight:600}
+
+  /* 11 Claymorphism — puffy 3D clay cards */
+  .pv-clay{background:#e7eafc;padding:15px;display:flex;gap:11px;align-items:center;justify-content:center}
+  .pv-clay .blob{width:54px;height:54px;border-radius:22px;background:#ff9aa2;flex:none;
+    box-shadow:7px 9px 16px rgba(150,150,200,.45),-4px -4px 10px #fff,inset 3px 3px 6px rgba(255,255,255,.7),inset -3px -4px 8px rgba(180,120,130,.35)}
+  .pv-clay .blob.b{background:#a0c4ff;box-shadow:7px 9px 16px rgba(150,150,200,.45),-4px -4px 10px #fff,inset 3px 3px 6px rgba(255,255,255,.7),inset -3px -4px 8px rgba(110,140,200,.35)}
+  .pv-clay .col{flex:1}
+  .pv-clay .cardc{background:#eef0fb;border-radius:22px;padding:13px;color:#4a4e69;font-weight:800;font-size:12px;
+    box-shadow:8px 10px 20px rgba(150,150,200,.4),-6px -6px 14px #fff,inset 2px 2px 5px rgba(255,255,255,.8)}
+  .pv-clay .lnc{height:8px;border-radius:6px;background:#e2e5f6;box-shadow:inset 2px 2px 5px rgba(150,150,200,.5),inset -2px -2px 4px #fff;margin-top:9px;width:80%}
+  .pv-clay .lnc.s{width:55%}
+
+  /* 12 AI Command Center */
+  .pv-ai{background:#070a12;padding:14px;display:flex;flex-direction:column;gap:8px;justify-content:center;position:relative}
+  .pv-ai .panel{background:linear-gradient(180deg,rgba(20,30,55,.9),rgba(10,16,30,.9));border:1px solid #1d3a5f;border-radius:10px;padding:10px;color:#bcd6ff;position:relative;overflow:hidden}
+  .pv-ai .panel::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#39d0ff,transparent)}
+  .pv-ai .row{display:flex;gap:8px}
+  .pv-ai .num{font-size:17px;font-weight:800;color:#5ad8ff;text-shadow:0 0 10px rgba(90,216,255,.7)}
+  .pv-ai small{font-size:8px;color:#5e7aa8;text-transform:uppercase;letter-spacing:.1em}
+  .pv-ai .bars{display:flex;gap:3px;align-items:flex-end;height:24px;margin-top:6px}
+  .pv-ai .bars i{flex:1;background:linear-gradient(#39d0ff,#1c6bff);border-radius:2px}
+
+  /* 13 Cyberpunk */
+  .pv-cyber{background:linear-gradient(#1a0633,#06021a);padding:16px;display:flex;flex-direction:column;gap:10px;justify-content:center;position:relative;overflow:hidden}
+  .pv-cyber::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 6px,rgba(255,0,200,.04) 7px)}
+  .pv-cyber h4{margin:0;font-size:18px;font-weight:800;font-style:italic;letter-spacing:.02em;color:#ff2bd6;text-shadow:0 0 8px #ff2bd6,2px 2px 0 #00eaff}
+  .pv-cyber .ln{height:5px;border-radius:3px;background:linear-gradient(90deg,#00eaff,#ff2bd6);box-shadow:0 0 8px rgba(0,234,255,.6);width:85%}
+  .pv-cyber .ln.s{width:55%}
+  .pv-cyber .btnc{align-self:flex-start;border:1px solid #00eaff;color:#00eaff;padding:6px 13px;border-radius:4px;font-size:10px;font-weight:700;text-shadow:0 0 6px #00eaff;box-shadow:0 0 10px rgba(0,234,255,.3)}
+
+  /* 14 Calm pastel */
+  .pv-calm{background:linear-gradient(150deg,#ffe3ec,#e3f0ff 60%,#e8fff4);padding:16px;display:flex;flex-direction:column;gap:9px;justify-content:center}
+  .pv-calm .cardp{background:rgba(255,255,255,.7);border-radius:18px;padding:11px 13px;color:#5a5a72;font-weight:600;font-size:12px;display:flex;align-items:center;gap:9px}
+  .pv-calm .ic{width:26px;height:26px;border-radius:50%;flex:none;background:#ffc6d9}
+  .pv-calm .ic.b{background:#bcd6ff}.pv-calm .ic.g{background:#bff0d8}
+  .pv-calm .ln{height:5px;background:#e3d4e8;border-radius:4px;margin-top:6px;width:70%}
+
+  /* 15 Luxury mesh */
+  .pv-lux{background:
+    radial-gradient(circle at 15% 30%,#ff7eb3,transparent 45%),
+    radial-gradient(circle at 85% 20%,#8a5cff,transparent 45%),
+    radial-gradient(circle at 60% 90%,#39c8ff,transparent 45%),#1a1130;
+    padding:18px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+  .pv-lux .k{font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+  .pv-lux h4{margin:2px 0;font-size:24px;font-weight:300;color:#fff;letter-spacing:.01em}
+  .pv-lux h4 b{font-weight:800}
+  .pv-lux .ln{height:4px;width:50%;background:rgba(255,255,255,.5);border-radius:3px;margin-top:4px}
+
+  /* 16 Data Visualization — real charts */
+  .pv-dataviz{background:#0c1019;padding:12px;display:flex;flex-direction:column;gap:8px;justify-content:center}
+  .pv-dataviz .dv-top{display:flex;gap:8px}
+  .pv-dataviz .dv-metric{flex:1;background:#131a28;border:1px solid #223150;border-radius:10px;padding:8px 11px;color:#cdd6ea}
+  .pv-dataviz .dv-metric small{font-size:8px;color:#7e8db0;text-transform:uppercase;letter-spacing:.08em}
+  .pv-dataviz .dv-metric b{display:block;font-size:18px;margin-top:2px}
+  .pv-dataviz .c1 b{color:#5ce6c4}.pv-dataviz .c2 b{color:#7c8cff}
+  .pv-dataviz .dv-donut{width:58px;flex:none;display:flex;align-items:center;justify-content:center;background:#131a28;border:1px solid #223150;border-radius:10px}
+  .pv-dataviz .dv-chart{background:#131a28;border:1px solid #223150;border-radius:10px;padding:8px 8px 4px}
+  .pv-dataviz .dv-chart small{font-size:8px;color:#7e8db0;text-transform:uppercase;letter-spacing:.08em}
+
+  /* 17 Apple Cupertino */
+  .pv-apple{background:#f2f2f7;padding:15px;display:flex;flex-direction:column;gap:9px;justify-content:center}
+  .pv-apple .cardq{background:#fff;border-radius:20px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.06);color:#1c1c1e}
+  .pv-apple b{font-size:13px;font-weight:600}
+  .pv-apple .row{display:flex;gap:9px}
+  .pv-apple .sq{flex:1;background:#fff;border-radius:18px;box-shadow:0 8px 22px rgba(0,0,0,.06);padding:11px;text-align:center}
+  .pv-apple .num{font-size:19px;font-weight:700;color:#007aff}
+  .pv-apple small{font-size:9px;color:#8e8e93}
+  .pv-apple .ln{height:5px;background:#e5e5ea;border-radius:4px;margin-top:7px;width:75%}
+
+  /* 18 Playful learning */
+  .pv-play{background:#fff7e6;padding:15px;display:flex;flex-direction:column;gap:9px;justify-content:center}
+  .pv-play .row{display:flex;gap:9px}
+  .pv-play .b1{flex:1;background:#ffd23f;border-radius:18px;padding:11px;font-weight:800;color:#7a4d00;text-align:center;font-size:12px}
+  .pv-play .b2{flex:1;background:#4ecdc4;border-radius:18px;padding:11px;font-weight:800;color:#06403b;text-align:center;font-size:12px}
+  .pv-play .b3{flex:1;background:#ff6b9d;border-radius:18px;padding:11px;font-weight:800;color:#fff;text-align:center;font-size:12px}
+  .pv-play .big{background:#a06cd5;border-radius:20px;padding:13px;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
+  .pv-play .emoji{font-size:22px}
+
+  /* 19 Public institution */
+  .pv-gov{background:#fff;padding:0;display:flex;flex-direction:column;font-size:10px}
+  .pv-gov .top{background:#10417a;color:#fff;padding:10px 13px;font-weight:700;font-size:12px;display:flex;align-items:center;gap:7px}
+  .pv-gov .top .seal{width:16px;height:16px;border-radius:50%;background:#fff;opacity:.9}
+  .pv-gov .body{padding:13px;color:#1d2b40}
+  .pv-gov .h{font-weight:700;font-size:12px;border-left:3px solid #10417a;padding-left:8px;color:#10417a}
+  .pv-gov .ln{height:5px;background:#dde5ef;border-radius:2px;margin-top:7px;width:92%}
+  .pv-gov .ln.s{width:65%}
+  .pv-gov .tbl{display:flex;margin-top:9px;border:1px solid #cdd8e8}
+  .pv-gov .tbl div{flex:1;padding:5px;border-right:1px solid #cdd8e8;font-size:8px;color:#5a6a82}
+  .pv-gov .tbl .hd{background:#eaf1f9;font-weight:700;color:#10417a}
+
+  /* 20 Spatial / VisionOS */
+  .pv-spatial{background:radial-gradient(circle at 50% 40%,#2a3550,#0a0e1a);padding:16px;display:flex;flex-direction:column;gap:10px;justify-content:center;perspective:600px}
+  .pv-spatial .float{background:rgba(255,255,255,.1);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:12px 14px;color:#fff;box-shadow:0 20px 40px rgba(0,0,0,.45);transform:rotateX(6deg)}
+  .pv-spatial .float.a{margin-left:18px;transform:rotateX(6deg) translateY(-4px)}
+  .pv-spatial b{font-size:12px}
+  .pv-spatial .ln{height:5px;background:rgba(255,255,255,.45);border-radius:4px;margin-top:7px;width:75%}
+  .pv-spatial .ln.s{width:50%;background:rgba(255,255,255,.28)}
+
+  /* ===================== EXTENDED STYLES (21–40) ===================== */
+
+  /* 21 Doodle */
+  .pv-doodle{background:#fffdf5;padding:16px;display:flex;flex-direction:column;gap:9px;justify-content:center;font-family:'Comic Sans MS','Segoe Print',cursive;color:#222}
+  .pv-doodle .dbox{border:2.5px solid #222;border-radius:255px 12px 225px 15px/15px 225px 15px 255px;padding:9px 13px;background:#fff;transform:rotate(-1.5deg);font-weight:700;font-size:13px}
+  .pv-doodle .dbox.b{transform:rotate(1.2deg);border-radius:15px 225px 15px 255px/255px 15px 225px 15px;background:#fff7d6}
+  .pv-doodle .arrow{align-self:flex-start;font-size:11px;font-weight:700;color:#e0552b;transform:rotate(-2deg)}
+
+  /* 22 Isometric */
+  .pv-iso{background:#eef1fb;display:flex;align-items:center;justify-content:center}
+  .pv-iso .scene{transform:rotateX(55deg) rotateZ(45deg);transform-style:preserve-3d;width:96px;height:96px;position:relative}
+  .pv-iso .tile{position:absolute;width:58px;height:58px;border-radius:8px}
+  .pv-iso .t1{background:#7c8cff;top:0;left:0;box-shadow:0 0 0 2px #5b6bdf}
+  .pv-iso .t2{background:#5ce6c4;top:16px;left:18px;box-shadow:0 0 0 2px #3bcaa8}
+  .pv-iso .t3{background:#ffd23f;top:32px;left:36px;box-shadow:0 0 0 2px #e0b400}
+
+  /* 23 Webtoon / Comic */
+  .pv-comic{background:#111;padding:3px;display:flex;gap:3px}
+  .pv-comic>div{flex:1;border:2px solid #111;position:relative;display:flex;align-items:center;justify-content:center;font-weight:900;border-radius:2px;text-align:center}
+  .pv-comic .p1{background:radial-gradient(#ffd23f 30%,#fff 31%) 0 0/7px 7px;color:#111;font-size:10px}
+  .pv-comic .p2{background:#ff5da2;color:#fff;font-style:italic;font-size:17px;text-shadow:1.5px 1.5px 0 #111;flex:1.3}
+  .pv-comic .p3{background:#4d7cff;color:#fff;font-size:10px}
+
+  /* 24 Flat illustration (Corporate Memphis) */
+  .pv-flat{background:#eaf4ff;display:flex;align-items:flex-end;justify-content:center;gap:16px;padding:0 18px;position:relative;overflow:hidden}
+  .pv-flat::before{content:"";position:absolute;width:34px;height:34px;border-radius:50%;background:#ffd23f;top:16px;right:24px}
+  .pv-flat .fig{position:relative;width:40px;height:96px}
+  .pv-flat .head{width:22px;height:22px;border-radius:50%;margin:0 auto}
+  .pv-flat .body{width:38px;height:56px;border-radius:20px 20px 6px 6px;margin:4px auto 0}
+  .pv-flat .f1 .head{background:#ffb38a}.pv-flat .f1 .body{background:#6c5ce7}
+  .pv-flat .f2 .head{background:#e0a06a}.pv-flat .f2 .body{background:#00b894}
+  .pv-flat .arm{position:absolute;width:10px;height:32px;border-radius:6px;top:30px}
+  .pv-flat .f1 .arm{background:#6c5ce7;right:-3px;transform:rotate(28deg)}
+  .pv-flat .f2 .arm{background:#00b894;left:-3px;transform:rotate(-28deg)}
+
+  /* 25 Risograph */
+  .pv-riso{background:#f3ece1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .pv-riso .shape{position:absolute;width:84px;height:84px;border-radius:50%;mix-blend-mode:multiply}
+  .pv-riso .s1{background:#ff4d6d;top:24px;left:34px}
+  .pv-riso .s2{background:#0a7cff;top:48px;left:84px}
+  .pv-riso .grain{position:absolute;inset:0;background-image:radial-gradient(rgba(0,0,0,.25) 1px,transparent 1px);background-size:3px 3px;opacity:.55}
+  .pv-riso .lbl{position:relative;z-index:2;font-weight:800;color:#222;font-size:14px;letter-spacing:.04em;mix-blend-mode:multiply}
+
+  /* 26 Kawaii */
+  .pv-kawaii{background:#ffeef5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+  .pv-kawaii .face{width:76px;height:64px;background:#fff5fa;border:2px solid #ffb0cd;border-radius:42% 42% 46% 46%;position:relative;box-shadow:0 4px 0 #ffd6e6}
+  .pv-kawaii .eye{position:absolute;width:9px;height:11px;background:#5b4a55;border-radius:50%;top:24px}
+  .pv-kawaii .eye.l{left:19px}.pv-kawaii .eye.r{right:19px}
+  .pv-kawaii .blush{position:absolute;width:11px;height:7px;background:#ff9ec2;border-radius:50%;top:33px;opacity:.85}
+  .pv-kawaii .blush.l{left:11px}.pv-kawaii .blush.r{right:11px}
+  .pv-kawaii .mouth{position:absolute;width:13px;height:7px;border:2px solid #5b4a55;border-top:none;border-radius:0 0 13px 13px;left:calc(50% - 7px);top:37px}
+  .pv-kawaii .lbl{font-weight:800;color:#e0608f;font-size:12px}
+
+  /* 27 Scrapbook */
+  .pv-scrap{background:#f6efe2;position:relative;overflow:hidden}
+  .pv-scrap .pho{position:absolute;background:#fff;border:1px solid #e3ddcf;padding:5px 5px 14px;box-shadow:0 5px 12px rgba(0,0,0,.18);font-size:8px;color:#999;text-align:center}
+  .pv-scrap .pho .img{width:66px;height:42px;border-radius:2px;margin-bottom:3px}
+  .pv-scrap .p1{transform:rotate(-7deg);left:30px;top:34px}.pv-scrap .p1 .img{background:#9ad0c2}
+  .pv-scrap .p2{transform:rotate(6deg);right:28px;top:50px}.pv-scrap .p2 .img{background:#f7c59f}
+  .pv-scrap .tape{position:absolute;width:34px;height:14px;background:rgba(255,221,120,.7);top:26px;left:50%;transform:translateX(-50%) rotate(-4deg)}
+  .pv-scrap .sticker{position:absolute;font-size:22px;bottom:14px;left:36px;transform:rotate(-10deg)}
+
+  /* 28 3D Clay Render */
+  .pv-3d{background:linear-gradient(160deg,#dfe7ff,#f3e8ff);display:flex;align-items:center;justify-content:center;gap:14px}
+  .pv-3d .ball{width:76px;height:76px;border-radius:50%;background:radial-gradient(circle at 32% 26%,#fff,#9b8cff 55%,#5b46d6);box-shadow:0 16px 26px rgba(91,70,214,.4),inset -6px -8px 14px rgba(60,40,160,.4)}
+  .pv-3d .cube{width:54px;height:54px;border-radius:16px;background:radial-gradient(circle at 30% 26%,#fff,#5ce6c4 55%,#1fae8e);box-shadow:0 14px 22px rgba(31,174,142,.4),inset -5px -7px 12px rgba(10,120,90,.4)}
+
+  /* 29 Watercolor */
+  .pv-water{background:#fcfbf7;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .pv-water .wash{position:absolute;border-radius:50%;filter:blur(11px);opacity:.6}
+  .pv-water .w1{width:90px;height:80px;background:#7fb3ff;top:18px;left:26px}
+  .pv-water .w2{width:80px;height:70px;background:#ff9ec2;top:58px;left:92px}
+  .pv-water .w3{width:72px;height:72px;background:#9be6c4;top:40px;left:66px}
+  .pv-water .lbl{position:relative;z-index:2;font-family:Georgia,serif;font-style:italic;font-size:17px;color:#3a3a3a}
+
+  /* 30 Infographic */
+  .pv-info{background:#fff;padding:14px;display:flex;flex-direction:column;gap:11px;justify-content:center;color:#222}
+  .pv-info .row{display:flex;gap:10px;align-items:center}
+  .pv-info .big{font-size:28px;font-weight:900;color:#ff5d73;line-height:1}
+  .pv-info .pie{width:42px;height:42px;border-radius:50%;background:conic-gradient(#7c8cff 0 65%,#e6e8f0 65% 100%);flex:none}
+  .pv-info .step{display:flex;gap:6px;align-items:center;font-size:10px;font-weight:700;color:#555}
+  .pv-info .dot{width:18px;height:18px;border-radius:50%;background:#ffd23f;color:#7a4d00;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900}
+  .pv-info small{font-size:9px;color:#888;font-weight:600}
+
+  /* 31 Neumorphism */
+  .pv-neu{background:#e0e5ec;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;padding:16px}
+  .pv-neu .row{display:flex;gap:14px;align-items:center}
+  .pv-neu .btn{background:#e0e5ec;border-radius:14px;padding:11px 20px;font-weight:700;color:#5b6377;font-size:12px;box-shadow:6px 6px 12px #b8bec9,-6px -6px 12px #ffffff}
+  .pv-neu .circle{width:36px;height:36px;border-radius:50%;background:#e0e5ec;box-shadow:6px 6px 12px #b8bec9,-6px -6px 12px #fff}
+  .pv-neu .field{width:82%;height:22px;border-radius:12px;background:#e0e5ec;box-shadow:inset 4px 4px 8px #b8bec9,inset -4px -4px 8px #fff}
+
+  /* 32 Memphis */
+  .pv-memphis{background:#fdf6ec;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .pv-memphis .lbl{font-weight:900;font-size:15px;color:#222;z-index:2;position:relative;letter-spacing:.02em}
+  .pv-memphis i{position:absolute;display:block}
+  .pv-memphis .c1{width:26px;height:26px;border-radius:50%;background:#ff5da2;top:18px;left:26px}
+  .pv-memphis .c2{width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:23px solid #4d7cff;top:26px;right:34px}
+  .pv-memphis .c3{width:32px;height:14px;background:repeating-linear-gradient(45deg,#111 0 3px,transparent 3px 6px);bottom:22px;left:36px;transform:rotate(-10deg)}
+  .pv-memphis .c4{width:22px;height:22px;background:#ffd23f;bottom:18px;right:28px;transform:rotate(20deg)}
+  .pv-memphis .c5{width:40px;height:18px;border:3px solid #00b894;border-radius:0 0 40px 40px;border-top:none;top:16px;left:44%}
+
+  /* 33 Y2K / Frutiger Aero */
+  .pv-y2k{background:linear-gradient(#bfe9ff,#5cc6ff 70%,#2aa3e6);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .pv-y2k .bubble{position:absolute;border-radius:50%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.9),rgba(255,255,255,.1) 60%);border:1px solid rgba(255,255,255,.6)}
+  .pv-y2k .b1{width:36px;height:36px;top:22px;left:34px}.pv-y2k .b2{width:22px;height:22px;bottom:28px;right:48px}.pv-y2k .b3{width:14px;height:14px;top:58px;left:96px}
+  .pv-y2k .glass{position:relative;z-index:2;background:linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.15));border:1px solid #fff;border-radius:14px;padding:10px 18px;font-weight:800;color:#0a5a8a;box-shadow:0 6px 16px rgba(0,80,140,.3),inset 0 1px 0 #fff;font-size:14px}
+
+  /* 34 Dopamine Maximalism */
+  .pv-dopa{background:conic-gradient(from 0deg,#ff2e63,#ffd23f,#08d9d6,#7c4dff,#ff2e63);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .pv-dopa .lbl{background:#111;color:#fff;font-weight:900;font-size:18px;padding:9px 16px;transform:rotate(-4deg);border:3px solid #fff;box-shadow:5px 5px 0 #ff2e63}
+  .pv-dopa .em{position:absolute;font-size:24px}
+  .pv-dopa .e1{top:16px;left:22px;transform:rotate(-15deg)}.pv-dopa .e2{bottom:18px;right:24px;transform:rotate(12deg)}
+
+  /* 35 Dark-First OLED */
+  .pv-oled{background:#000;display:flex;flex-direction:column;gap:10px;justify-content:center;padding:18px;color:#fff}
+  .pv-oled .h{font-size:18px;font-weight:800;letter-spacing:-.02em}
+  .pv-oled .h .acc{color:#0aff9d}
+  .pv-oled .cardo{border:1px solid #1a1a1a;border-radius:12px;padding:11px;background:#0a0a0a}
+  .pv-oled .ln{height:5px;background:#1c1c1c;border-radius:3px;width:80%}
+  .pv-oled .ln.s{width:55%;margin-top:7px}
+  .pv-oled .btn{align-self:flex-start;background:#0aff9d;color:#000;font-weight:700;font-size:11px;padding:6px 14px;border-radius:8px}
+
+  /* 36 Aurora Holographic */
+  .pv-aurora{background:#0a0e1a;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .pv-aurora .a{position:absolute;border-radius:50%;filter:blur(18px);opacity:.8}
+  .pv-aurora .a1{width:120px;height:80px;background:#4dffa6;top:-12px;left:-12px}
+  .pv-aurora .a2{width:110px;height:80px;background:#7c4dff;bottom:-12px;right:-12px}
+  .pv-aurora .a3{width:90px;height:70px;background:#39c8ff;top:40px;left:80px}
+  .pv-aurora .lbl{position:relative;z-index:2;font-weight:300;font-size:18px;color:#fff;letter-spacing:.05em}
+
+  /* 37 Big Type Poster */
+  .pv-bigtype{background:#111;color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px}
+  .pv-bigtype .t{font-size:52px;font-weight:900;letter-spacing:-.05em;line-height:.82;text-align:center}
+  .pv-bigtype .t span{color:#ffd23f}
+
+  /* 38 Notion-style */
+  .pv-notion{background:#fff;color:#37352f;padding:15px;display:flex;flex-direction:column;gap:8px;justify-content:center;font-size:11px}
+  .pv-notion .h{font-size:15px;font-weight:800}
+  .pv-notion .h .em{margin-right:6px}
+  .pv-notion .li{display:flex;gap:8px;align-items:center}
+  .pv-notion .chk{width:13px;height:13px;border:1.5px solid #b0ada5;border-radius:3px;flex:none}
+  .pv-notion .chk.on{background:#2383e2;border-color:#2383e2}
+  .pv-notion .call{background:#f7f6f3;border-radius:6px;padding:8px;font-size:10px;color:#6b6a66;border-left:3px solid #e3e2de}
+
+  /* 39 Blueprint */
+  .pv-blue{background:#0b3a6b;position:relative;overflow:hidden;color:#cfe6ff;display:flex;align-items:center;justify-content:center}
+  .pv-blue::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px);background-size:15px 15px}
+  .pv-blue .draw{position:relative;z-index:2;width:92px;height:64px;border:1.5px solid #cfe6ff;border-radius:6px}
+  .pv-blue .draw::before{content:"";position:absolute;width:30px;height:30px;border:1.5px solid #9cc6ff;border-radius:50%;top:16px;left:30px}
+  .pv-blue .draw::after{content:"⌀ 90mm";position:absolute;bottom:-15px;left:0;font-size:8px;color:#9cc6ff;font-family:var(--mono)}
+
+  /* 40 Duotone */
+  .pv-duo{background:#1a1147;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;position:relative;overflow:hidden;padding:14px}
+  .pv-duo .img{position:absolute;inset:0;background:linear-gradient(135deg,#ff2e7e,#1a1147 70%)}
+  .pv-duo .img::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 62% 38%,rgba(0,224,255,.55),transparent 55%)}
+  .pv-duo small{position:relative;z-index:2;color:#ff7eb0;font-size:9px;letter-spacing:.2em;text-transform:uppercase;font-weight:700}
+  .pv-duo .lbl{position:relative;z-index:2;color:#fff;font-weight:900;font-size:18px;letter-spacing:-.02em;line-height:1.05}
 </style>
 </head>
 <body>
 
-<div id="deviceToggle">
-  <button id="device_pcBtn">🖥️ PC 화면</button>
-  <button id="device_mobileBtn">📱 모바일 화면</button>
-</div>
+<header>
+  <div class="eyebrow">Design Prompt Library</div>
+  <h1>디자인 프롬프트 라이브러리</h1>
+  <p class="sub">AI 이미지·UI 생성 도구에 바로 넣을 수 있는 40가지 디자인 스타일 프롬프트 모음. UI·대시보드부터 일러스트·인쇄·문서 스타일까지. 각 카드의 미리보기는 실제 CSS로 구현되어 그 스타일의 느낌을 그대로 보여줍니다.</p>
+  <div class="meta">영어 프롬프트 + 한글 해석 · 둘 다 클릭 한 번으로 복사 · 카드마다 "실제 사례 보기" 링크</div>
+</header>
 
-<!-- ===================== HOME ===================== -->
-<div class="view active" id="view-home">
-  <header>
-    <h1>🧩 바이브코딩 콘텐츠 허브</h1>
-    <p>카드를 클릭하면 해당 콘텐츠로 이동합니다.</p>
-  </header>
-  <main>
-    <section>
-      <div class="section-title"><span class="dot" style="background:#f43f5e"></span><h2>웹 인포그래픽</h2></div>
-      <div class="grid">
-        <button class="card" onclick="showView('view-infographic1')">
-          <span class="icon">📊</span>
-          <h3>학급 통계 인포그래픽</h3>
-          <p>독서량·참여도·과제 제출률 등 항목을 골라보는 인터랙티브 막대그래프</p>
-          <span class="badge">웹 인포그래픽</span>
-        </button>
-        <button class="card" onclick="showView('view-infographic2')">
-          <span class="icon">🍩</span>
-          <h3>디지털 리터러시 통계</h3>
-          <p>항목을 클릭하면 해당 비율이 강조되는 인터랙티브 도넛 차트</p>
-          <span class="badge">웹 인포그래픽</span>
-        </button>
-        <button class="card" onclick="showView('view-infographic3')">
-          <span class="icon">🔺</span>
-          <h3>사실-개념-일반화 피라미드</h3>
-          <p>개념기반 탐구수업의 사고 단계(사실→개념→일반화)를 한 단원 예시로 시각화한 인포그래픽</p>
-          <span class="badge">웹 인포그래픽</span>
-        </button>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-title"><span class="dot" style="background:#3b82f6"></span><h2>웹게임</h2></div>
-      <div class="grid">
-        <button class="card" onclick="showView('view-quiz')">
-          <span class="icon">❓</span>
-          <h3>교육용 퀴즈 게임</h3>
-          <p>객관식 문제를 풀며 점수를 모으는 간단한 퀴즈 게임</p>
-          <span class="badge">웹게임</span>
-        </button>
-        <button class="card" onclick="showView('view-match')">
-          <span class="icon">🃏</span>
-          <h3>카드 짝맞추기 게임</h3>
-          <p>짝이 맞는 카드를 찾는 메모리 매칭 게임</p>
-          <span class="badge">웹게임</span>
-        </button>
-        <button class="card" onclick="showView('view-rps')">
-          <span class="icon">✊</span>
-          <h3>가위바위보</h3>
-          <p>컴퓨터와 가위바위보 대결을 펼치며 승패를 기록하는 게임</p>
-          <span class="badge">웹게임</span>
-        </button>
-        <button class="card" onclick="showView('view-guess')">
-          <span class="icon">🔢</span>
-          <h3>숫자 맞추기</h3>
-          <p>1~100 사이 숫자를 더 크다/작다 힌트로 맞춰보는 추리 게임</p>
-          <span class="badge">웹게임</span>
-        </button>
-        <button class="card" onclick="showView('view-typing')">
-          <span class="icon">⌨️</span>
-          <h3>타이핑 챌린지</h3>
-          <p>제한 시간 안에 단어를 빠르게 입력해 점수를 쌓는 타자 게임</p>
-          <span class="badge">웹게임</span>
-        </button>
-        <button class="card" onclick="showView('view-conceptsort')">
-          <span class="icon">🧠</span>
-          <h3>사실/개념 분류 게임</h3>
-          <p>제시된 단어가 '사실(예시)'인지 '개념(상위 범주)'인지 분류해 점수를 쌓는 개념기반 탐구 게임</p>
-          <span class="badge">웹게임</span>
-        </button>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-title"><span class="dot" style="background:#10b981"></span><h2>웹시뮬레이션</h2></div>
-      <div class="grid">
-        <button class="card" onclick="showView('view-pendulum')">
-          <span class="icon">🔗</span>
-          <h3>진자 운동 시뮬레이션</h3>
-          <p>길이·각도를 조절하며 진자의 운동을 관찰하는 물리 시뮬레이션</p>
-          <span class="badge">웹시뮬레이션</span>
-        </button>
-        <button class="card" onclick="showView('view-projectile')">
-          <span class="icon">🚀</span>
-          <h3>포물선 운동 시뮬레이션</h3>
-          <p>초기 속도와 발사 각도를 조절하며 포물선 운동을 관찰하는 시뮬레이션</p>
-          <span class="badge">웹시뮬레이션</span>
-        </button>
-        <button class="card" onclick="showView('view-coinflip')">
-          <span class="icon">🪙</span>
-          <h3>동전 던지기 확률 시뮬레이션</h3>
-          <p>동전을 여러 번 던지며 앞면/뒷면 빈도와 확률을 관찰하는 시뮬레이션</p>
-          <span class="badge">웹시뮬레이션</span>
-        </button>
-        <button class="card" onclick="showView('view-coral')">
-          <span class="icon">🪸</span>
-          <h3>산호초 백화현상 시뮬레이션</h3>
-          <p>해수온 상승·해양오염도·보호구역 지정 효과를 조절하며 산호초 건강도 변화를 관찰하는 시뮬레이션</p>
-          <span class="badge">웹시뮬레이션</span>
-        </button>
-        <button class="card" onclick="showView('view-patternlab')">
-          <span class="icon">🧪</span>
-          <h3>패턴 탐구 실험실</h3>
-          <p>여러 사례의 변인을 바꿔보며 공통 패턴(일반화 문장)을 스스로 발견하는 탐구 시뮬레이션</p>
-          <span class="badge">웹시뮬레이션</span>
-        </button>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-title"><span class="dot" style="background:#8b5cf6"></span><h2>인터랙티브 도구</h2></div>
-      <div class="grid">
-        <button class="card" onclick="showView('view-picker')">
-          <span class="icon">🎯</span>
-          <h3>랜덤 학생/모둠 뽑기</h3>
-          <p>이름 목록을 입력하면 무작위로 발표자나 모둠을 뽑아주는 도구</p>
-          <span class="badge">인터랙티브 도구</span>
-        </button>
-        <button class="card" onclick="showView('view-poll')">
-          <span class="icon">🗳️</span>
-          <h3>실시간 투표 도구</h3>
-          <p>선택지를 클릭하면 즉시 투표 결과가 막대그래프로 반영되는 투표 도구</p>
-          <span class="badge">인터랙티브 도구</span>
-        </button>
-        <button class="card" onclick="showView('view-roulette')">
-          <span class="icon">🎡</span>
-          <h3>룰렛 뽑기 도구</h3>
-          <p>항목을 입력하고 돌리면 룰렛이 회전하며 무작위 항목을 뽑아주는 도구</p>
-          <span class="badge">인터랙티브 도구</span>
-        </button>
-        <button class="card" onclick="showView('view-inquiryladder')">
-          <span class="icon">💭</span>
-          <h3>질문 유형 분류 도구</h3>
-          <p>사실 질문·개념 질문·논쟁적 질문으로 구분해 직접 질문을 작성하고 모아보는 도구</p>
-          <span class="badge">인터랙티브 도구</span>
-        </button>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-title"><span class="dot" style="background:#0ea5e9"></span><h2>웹앱</h2></div>
-      <div class="grid">
-        <button class="card" onclick="showView('view-timer')">
-          <span class="icon">⏱️</span>
-          <h3>수업 타이머</h3>
-          <p>시간을 설정해 카운트다운하는 간단한 수업용 타이머 앱</p>
-          <span class="badge">웹앱</span>
-        </button>
-        <button class="card" onclick="showView('view-notes')">
-          <span class="icon">🗒️</span>
-          <h3>스티키 메모 게시판</h3>
-          <p>공지나 할 일을 메모지로 붙여 정리하는 간단한 게시판 웹앱</p>
-          <span class="badge">웹앱</span>
-        </button>
-        <button class="card" onclick="showView('view-attendance')">
-          <span class="icon">✅</span>
-          <h3>출석 체크 앱</h3>
-          <p>날짜별로 출석·체험학습·조퇴·병결·기타결을 체크하고 현황을 집계하는 웹앱</p>
-          <span class="badge">웹앱</span>
-        </button>
-      </div>
-    </section>
-  </main>
-  <footer>바이브코딩으로 제작된 예시 페이지 · 단일 HTML 파일이라 어디서든 더블클릭만으로 실행됩니다</footer>
-</div>
-
-<!-- ===================== QUIZ ===================== -->
-<div class="view" id="view-quiz">
-  <div id="quiz_box">
-    <div id="quiz_app"></div>
-    <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
+<div class="controls">
+  <div class="controls-inner">
+    <label class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="text" placeholder="스타일·용도·키워드 검색 (예: 대시보드, 보고서, neon)">
+    </label>
+    <div class="chips" id="chips"></div>
+    <span class="count" id="count"></span>
   </div>
 </div>
 
-<!-- ===================== MATCH ===================== -->
-<div class="view" id="view-match">
-  <h1>🃏 카드 짝맞추기</h1>
-  <div class="info" id="match_info">시도 횟수: 0</div>
-  <div id="match_board"></div>
-  <button class="restart-btn" id="match_restartBtn">다시 시작</button>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
+<main class="grid" id="grid"></main>
 
-<!-- ===================== PENDULUM ===================== -->
-<div class="view" id="view-pendulum">
-  <h1>진자 운동 시뮬레이션</h1>
-  <p class="sub">줄 길이와 시작 각도를 바꿔보며 진자의 흔들림을 관찰해보세요.</p>
-  <div class="wrap">
-    <canvas id="pendCanvas" width="360" height="380"></canvas>
-    <div class="panel">
-      <div class="row">
-        <label><span>줄 길이</span><span id="pend_lenVal">140</span></label>
-        <input type="range" id="pend_lenInput" min="60" max="170" value="140">
-      </div>
-      <div class="row">
-        <label><span>시작 각도 (도)</span><span id="pend_angVal">35</span></label>
-        <input type="range" id="pend_angInput" min="5" max="80" value="35">
-      </div>
-      <div class="row">
-        <label><span>중력 (m/s^2)</span><span id="pend_gravVal">9.8</span></label>
-        <input type="range" id="pend_gravInput" min="2" max="25" value="9.8" step="0.1">
-      </div>
-      <button class="ctrl" id="pend_toggleBtn">일시정지</button>
-      <button class="ctrl" id="pend_resetBtn" style="background:#475569;">초기화</button>
-      <div class="stat" id="pend_stat" style="font-size:13px; color:#cbd5e1; margin-top:10px;"></div>
-      <div id="pend_errBox"></div>
-    </div>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<div class="view" id="view-coral">
-  <h1>산호초 백화현상 시뮬레이션</h1>
-  <p class="sub">해수온 상승, 해양오염도, 보호구역 지정 효과를 조절하며 24개월 동안 산호초 건강도(생존율)가 어떻게 변하는지 관찰해보세요.</p>
-  <div class="wrap">
-    <canvas id="coralCanvas" width="420" height="320"></canvas>
-    <div class="panel">
-      <div class="row">
-        <label><span>해수온 상승 (℃)</span><span id="coral_tempVal">1.5</span></label>
-        <input type="range" id="coral_tempInput" min="0" max="4" value="1.5" step="0.1">
-      </div>
-      <div class="row">
-        <label><span>해양오염도 (%)</span><span id="coral_pollVal">30</span></label>
-        <input type="range" id="coral_pollInput" min="0" max="100" value="30" step="5">
-      </div>
-      <div class="row">
-        <label><span>보호구역 지정 (%)</span><span id="coral_consVal">0</span></label>
-        <input type="range" id="coral_consInput" min="0" max="100" value="0" step="5">
-      </div>
-      <button class="ctrl" id="coral_runBtn">시뮬레이션 실행</button>
-      <div class="stat" id="coral_stat"></div>
-      <div id="coral_errBox"></div>
-    </div>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== PICKER ===================== -->
-<div class="view" id="view-picker">
-  <h1>랜덤 학생/모둠 뽑기</h1>
-  <p class="sub">이름을 한 줄에 한 명씩 입력하고 뽑기를 눌러보세요. (모둠 뽑기는 인원수를 지정하세요)</p>
-  <div class="wrap">
-    <div class="panel">
-      <textarea id="pick_names" placeholder="홍길동
-김철수
-이영희
-박민수">홍길동
-김철수
-이영희
-박민수
-정수진
-최지우</textarea>
-      <div class="row">
-        <label for="pick_groupSize">모둠 인원수:</label>
-        <input type="number" id="pick_groupSize" min="1" value="1">
-      </div>
-      <div class="row">
-        <button class="ctrl" id="pick_pickBtn">뽑기</button>
-        <button class="ctrl secondary" id="pick_resetBtn">전체 초기화</button>
-      </div>
-      <div id="pick_errBox"></div>
-    </div>
-    <div class="resultBox" id="pick_result">이름을 입력하고<br>뽑기를 눌러주세요</div>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== TIMER ===================== -->
-<div class="view" id="view-timer">
-  <h1>수업 타이머</h1>
-  <p class="sub">시간을 설정하고 시작을 누르면 카운트다운이 진행됩니다.</p>
-  <div id="timer_display">05:00</div>
-  <div class="presets">
-    <button data-sec="60">1분</button>
-    <button data-sec="180">3분</button>
-    <button data-sec="300">5분</button>
-    <button data-sec="600">10분</button>
-  </div>
-  <div class="controls">
-    <button class="ctrl" id="timer_startBtn">시작</button>
-    <button class="ctrl secondary" id="timer_pauseBtn">일시정지</button>
-    <button class="ctrl secondary" id="timer_resetBtn">초기화</button>
-  </div>
-  <div id="timer_errBox"></div>
-  <div class="save-row">
-    <button class="save-btn" id="timer_saveBtn">💾 저장</button>
-    <button class="save-btn sheets" id="timer_sheetsBtn">📤 구글시트 연동</button>
-  </div>
-  <div class="save-msg" id="timer_saveMsg"></div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== RPS (가위바위보) ===================== -->
-<div class="view" id="view-rps">
-  <h1>✊ 가위바위보</h1>
-  <p class="sub">컴퓨터와 가위바위보 대결을 펼쳐보세요.</p>
-  <div id="rps_score">승 0 · 패 0 · 무 0</div>
-  <div id="rps_battle">
-    <span id="rps_meIcon">❓</span>
-    <span id="rps_vs">VS</span>
-    <span id="rps_cpuIcon">❓</span>
-  </div>
-  <div id="rps_result"></div>
-  <div id="rps_choices">
-    <button data-choice="rock">✊</button>
-    <button data-choice="paper">✋</button>
-    <button data-choice="scissors">✌️</button>
-  </div>
-  <button id="rps_resetBtn">기록 초기화</button>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== NUMBER GUESS (숫자 맞추기) ===================== -->
-<div class="view" id="view-guess">
-  <h1>🔢 숫자 맞추기</h1>
-  <p class="sub">1부터 100 사이의 숫자를 맞춰보세요. 더 크다/작다 힌트를 보고 추리해보세요.</p>
-  <div id="guess_box">
-    <input type="number" id="guess_input" min="1" max="100" placeholder="숫자 입력 (1~100)">
-    <button id="guess_submitBtn">제출</button>
-    <div id="guess_hint">숫자를 입력해보세요!</div>
-    <div id="guess_tries">시도 횟수: 0</div>
-    <button id="guess_resetBtn">다시 시작</button>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== TYPING CHALLENGE (타이핑 챌린지) ===================== -->
-<div class="view" id="view-typing">
-  <h1>⌨️ 타이핑 챌린지</h1>
-  <p class="sub">30초 동안 화면에 나온 단어를 최대한 빠르고 정확하게 입력해보세요.</p>
-  <div id="typing_box">
-    <div id="typing_stats"><span id="typing_timeLeft">남은 시간: 30초</span><span id="typing_scoreLabel">점수: 0</span></div>
-    <div id="typing_word">시작을 눌러주세요</div>
-    <input type="text" id="typing_input" placeholder="여기에 입력하세요" disabled>
-    <button id="typing_startBtn">시작</button>
-    <div id="typing_msg"></div>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== PROJECTILE (포물선 운동) ===================== -->
-<div class="view" id="view-projectile">
-  <h1>🚀 포물선 운동 시뮬레이션</h1>
-  <p class="sub">초기 속도와 발사 각도를 조절하고 발사해보세요.</p>
-  <div class="wrap">
-    <canvas id="projCanvas" width="420" height="320"></canvas>
-    <div class="panel">
-      <div class="row">
-        <label><span>초기 속도 (m/s)</span><span id="proj_velVal">25</span></label>
-        <input type="range" id="proj_velInput" min="5" max="50" value="25">
-      </div>
-      <div class="row">
-        <label><span>발사 각도 (도)</span><span id="proj_angVal">45</span></label>
-        <input type="range" id="proj_angInput" min="5" max="85" value="45">
-      </div>
-      <button class="ctrl" id="proj_fireBtn">발사</button>
-      <div class="stat" id="proj_stat"></div>
-      <div id="proj_errBox"></div>
-    </div>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== COIN FLIP (동전 던지기) ===================== -->
-<div class="view" id="view-coinflip">
-  <h1>🪙 동전 던지기 확률 시뮬레이션</h1>
-  <p class="sub">동전을 던지면서 앞면/뒷면 빈도가 확률(50%)에 가까워지는 과정을 관찰해보세요.</p>
-  <div id="coin_face">🪙</div>
-  <div id="coin_controls">
-    <button id="coin_flip1Btn">1회 던지기</button>
-    <button id="coin_flip100Btn">100회 던지기</button>
-    <button class="secondary" id="coin_resetBtn">초기화</button>
-  </div>
-  <canvas id="coinCanvas" width="320" height="200"></canvas>
-  <div id="coin_stat">아직 던지지 않았습니다</div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== POLL (실시간 투표) ===================== -->
-<div class="view" id="view-poll">
-  <h1>🗳️ 실시간 투표 도구</h1>
-  <p class="sub">항목 이름을 직접 수정하거나 새 항목을 추가할 수 있어요. 투표하기를 누르면 즉시 결과가 반영됩니다.</p>
-  <div id="poll_box">
-    <div id="poll_list"></div>
-    <div id="poll_addRow">
-      <input type="text" id="poll_newOptInput" placeholder="새 항목 이름 (예: 🍊 오렌지)">
-      <button id="poll_addOptBtn">항목 추가</button>
-    </div>
-    <button id="poll_resetBtn">투표 초기화</button>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== ROULETTE (룰렛 뽑기) ===================== -->
-<div class="view" id="view-roulette">
-  <h1>🎡 룰렛 뽑기 도구</h1>
-  <p class="sub">항목을 입력하고 돌리기를 누르면 룰렛이 회전하며 무작위로 멈춥니다.</p>
-  <div class="wrap">
-    <div id="roulette_wheelWrap">
-      <div id="roulette_pointer">🔻</div>
-      <canvas id="roulette_wheel" width="260" height="260"></canvas>
-    </div>
-    <div class="panel">
-      <textarea id="roulette_items">모둠1
-모둠2
-모둠3
-모둠4
-모둠5</textarea>
-      <button id="roulette_spinBtn">돌리기</button>
-      <div id="roulette_result"></div>
-    </div>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== NOTES (스티키 메모) ===================== -->
-<div class="view" id="view-notes">
-  <h1>🗒️ 스티키 메모 게시판</h1>
-  <p class="sub">공지사항이나 할 일을 메모지로 붙여 정리해보세요.</p>
-  <div id="notes_addRow">
-    <input type="text" id="notes_input" placeholder="메모 내용을 입력하세요">
-    <button id="notes_addBtn">추가</button>
-  </div>
-  <div id="notes_board"></div>
-  <div class="save-row">
-    <button class="save-btn" id="notes_saveBtn">💾 저장</button>
-    <button class="save-btn sheets" id="notes_sheetsBtn">📤 구글시트 연동</button>
-    <button class="save-btn" id="notes_sheetsSetupBtn" style="background:#64748b;">⚙️ 연동 설정</button>
-  </div>
-  <div class="save-msg" id="notes_saveMsg"></div>
-  <div id="notes_sheetsSetupBox" style="display:none; max-width:480px; margin-top:14px; background:#fff; border:1px solid #d97706; border-radius:12px; padding:16px; text-align:left; font-size:13px; color:#92400e;">
-    <p style="margin:0 0 10px; font-weight:bold;">배포된 Apps Script 웹앱 URL 입력</p>
-    <input type="text" id="notes_sheetsUrlInput" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%; padding:8px; border-radius:8px; border:1px solid #d97706; margin-bottom:8px; font-size:12px;">
-    <button id="notes_sheetsUrlSaveBtn" style="width:100%; padding:9px; border:none; border-radius:8px; background:#d97706; color:#fff; cursor:pointer; font-size:13px;">URL 저장</button>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== ATTENDANCE (출석 체크) ===================== -->
-<div class="view" id="view-attendance">
-  <h1>✅ 출석 체크 앱</h1>
-  <p class="sub">날짜를 선택하고 학생별 출결 상태를 체크하면 현황이 자동으로 집계됩니다.</p>
-  <div id="attend_addRow">
-    <input type="text" id="attend_nameInput" placeholder="학생 이름을 입력하세요">
-    <button id="attend_addNameBtn">학생 추가</button>
-  </div>
-  <div id="attend_controls">
-    <label for="attend_date">날짜</label>
-    <input type="date" id="attend_date">
-    <button id="attend_allPresentBtn">전체 출석</button>
-  </div>
-  <div id="attend_summary">출석 0 / 전체 0</div>
-  <div id="attend_list"></div>
-  <div class="save-row">
-    <button class="save-btn" id="attend_saveBtn">💾 저장</button>
-    <button class="save-btn sheets" id="attend_sheetsBtn">📤 구글시트 연동</button>
-    <button class="save-btn" id="attend_sheetsSetupBtn" style="background:#64748b;">⚙️ 연동 설정</button>
-  </div>
-  <div class="save-msg" id="attend_saveMsg"></div>
-  <div id="attend_sheetsSetupBox" style="display:none; max-width:480px; margin-top:14px; background:#fff; border:1px solid #86efac; border-radius:12px; padding:16px; text-align:left; font-size:13px; color:#14532d;">
-    <p style="margin:0 0 10px; font-weight:bold;">배포된 Apps Script 웹앱 URL 입력</p>
-    <input type="text" id="attend_sheetsUrlInput" placeholder="https://script.google.com/macros/s/.../exec" style="width:100%; padding:8px; border-radius:8px; border:1px solid #86efac; margin-bottom:8px; font-size:12px;">
-    <button id="attend_sheetsUrlSaveBtn" style="width:100%; padding:9px; border:none; border-radius:8px; background:#16a34a; color:#fff; cursor:pointer; font-size:13px;">URL 저장</button>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== INFOGRAPHIC 1 (학급 통계) ===================== -->
-<div class="view" id="view-infographic1">
-  <h1>📊 학급 통계 인포그래픽</h1>
-  <p class="sub">항목을 선택하면 해당 데이터의 막대그래프가 표시됩니다.</p>
-  <div id="info1_tabs">
-    <button data-key="reading" class="active-tab">독서량</button>
-    <button data-key="participation">참여도</button>
-    <button data-key="homework">과제 제출률</button>
-  </div>
-  <canvas id="info1Canvas" width="420" height="280"></canvas>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== INFOGRAPHIC 2 (디지털 리터러시) ===================== -->
-<div class="view" id="view-infographic2">
-  <h1>🍩 디지털 리터러시 통계</h1>
-  <p class="sub">항목을 클릭하면 해당 비율이 도넛 차트에서 강조됩니다.</p>
-  <div class="wrap">
-    <canvas id="info2Canvas" width="260" height="260"></canvas>
-    <div id="info2_legend"></div>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== CONCEPT-BASED INQUIRY: 사실/개념 분류 게임 ===================== -->
-<div class="view" id="view-conceptsort">
-  <h1>🧠 사실/개념 분류 게임</h1>
-  <p class="sub">제시된 단어가 '사실(구체적 예시)'인지 '개념(상위 범주)'인지 맞혀보세요.</p>
-  <div id="cs_box" style="background:#fff;border-radius:16px;padding:30px;min-width:240px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
-    <div id="cs_term" style="font-size:28px;font-weight:bold;margin-bottom:10px;">-</div>
-    <div id="cs_feedback" style="min-height:22px;font-size:14px;margin-bottom:14px;"></div>
-    <div style="display:flex;gap:10px;justify-content:center;">
-      <button id="cs_factBtn" style="padding:10px 18px;border:none;border-radius:10px;background:#3b82f6;color:#fff;cursor:pointer;font-size:14px;">사실(예시)</button>
-      <button id="cs_conceptBtn" style="padding:10px 18px;border:none;border-radius:10px;background:#8b5cf6;color:#fff;cursor:pointer;font-size:14px;">개념(상위범주)</button>
-    </div>
-  </div>
-  <div id="cs_score" style="margin-top:16px;font-size:15px;color:#1e3a8a;">점수: 0 / 0</div>
-  <button id="cs_restartBtn" style="margin-top:10px;padding:8px 16px;border:none;border-radius:10px;background:#64748b;color:#fff;cursor:pointer;display:none;">다시하기</button>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== CONCEPT-BASED INQUIRY: 사실-개념-일반화 피라미드 ===================== -->
-<div class="view" id="view-infographic3">
-  <h1>🔺 사실-개념-일반화 피라미드</h1>
-  <p class="sub">단계를 클릭하면 사고 단계별 설명이 나타납니다. 화살표를 눌러 다른 단원 예시도 살펴보세요. (1/5)</p>
-  <div id="pyr_topicNav" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-    <button id="pyr_prevBtn" style="border:none;background:#e2e8f0;color:#1f2937;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;">←</button>
-    <div id="pyr_topicLabel" style="font-weight:bold;font-size:14px;color:#1f2937;min-width:170px;text-align:center;">1 / 5 · 기후변화</div>
-    <button id="pyr_nextBtn" style="border:none;background:#e2e8f0;color:#1f2937;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;">→</button>
-  </div>
-  <div id="pyr_wrap" style="display:flex;flex-direction:column;align-items:center;gap:6px;max-width:420px;">
-    <button class="pyr-tier" data-tier="generalization" style="width:160px;padding:18px 10px;border:none;border-radius:10px 10px 0 0;background:#f43f5e;color:#fff;font-weight:bold;cursor:pointer;font-size:14px;">일반화</button>
-    <button class="pyr-tier" data-tier="concept" style="width:260px;padding:18px 10px;border:none;border-radius:6px;background:#fb7185;color:#fff;font-weight:bold;cursor:pointer;font-size:14px;">개념</button>
-    <button class="pyr-tier" data-tier="fact" style="width:360px;padding:18px 10px;border:none;border-radius:0 0 10px 10px;background:#fecdd3;color:#7f1d1d;font-weight:bold;cursor:pointer;font-size:14px;">사실(예시)</button>
-  </div>
-  <div id="pyr_detail" style="margin-top:18px;max-width:420px;background:#fff;border-radius:12px;padding:16px;font-size:14px;color:#374151;box-shadow:0 4px 16px rgba(0,0,0,0.08);min-height:60px;">단계를 클릭해보세요.</div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== CONCEPT-BASED INQUIRY: 패턴 탐구 실험실 ===================== -->
-<div class="view" id="view-patternlab">
-  <h1>🧪 패턴 탐구 실험실</h1>
-  <p class="sub">온도를 바꿔가며 풍선 크기를 관찰하고, 기록을 모아 스스로 일반화 문장을 만들어보세요.</p>
-  <div style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center; max-width:640px;">
-    <div>
-      <canvas id="pl_canvas" width="200" height="200" style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.08);"></canvas>
-      <div style="margin-top:10px;">
-        <label for="pl_temp">온도: <span id="pl_tempVal">20</span>°C</label><br>
-        <input type="range" id="pl_temp" min="-10" max="50" value="20" style="width:200px;">
-      </div>
-      <button id="pl_recordBtn" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:#10b981;color:#fff;cursor:pointer;">📍 이 값 기록하기</button>
-    </div>
-    <div style="min-width:200px;">
-      <div style="font-weight:bold;margin-bottom:6px;">기록된 데이터</div>
-      <div id="pl_log" style="background:#fff;border-radius:10px;padding:10px;font-size:13px;min-height:100px;max-height:160px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.08);">아직 기록이 없습니다.</div>
-    </div>
-  </div>
-  <div style="margin-top:18px;max-width:480px;width:100%;">
-    <label for="pl_genInput" style="font-weight:bold;font-size:14px;">위 데이터를 보고, 온도와 풍선 크기의 관계를 한 문장(일반화)으로 써보세요:</label>
-    <textarea id="pl_genInput" rows="2" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid #a7f3d0;font-size:13px;"></textarea>
-    <button id="pl_checkBtn" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;">✅ 확인하기</button>
-    <div id="pl_result" style="margin-top:10px;font-size:13px;color:#065f46;"></div>
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
-
-<!-- ===================== CONCEPT-BASED INQUIRY: 탐구 질문 사다리 ===================== -->
-<div class="view" id="view-inquiryladder">
-  <h1>💭 질문 유형 분류 도구</h1>
-  <p class="sub">질문을 사실 질문 · 개념 질문 · 논쟁적 질문으로 구분해서 작성하고 모아보세요.</p>
-  <div style="max-width:520px; width:100%; display:flex; flex-direction:column; gap:14px;">
-
-    <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
-      <div style="font-weight:bold;color:#7f1d1d;margin-bottom:4px;">🔹 사실 질문 (Factual)</div>
-      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">답이 정해져 있는, 구체적 사실에 근거한 질문. 예: "광합성은 어디에서 일어날까?"</div>
-      <div style="display:flex;gap:6px;">
-        <input type="text" id="qt_factInput" placeholder="사실 질문을 입력하세요" style="flex:1;padding:8px;border-radius:8px;border:1px solid #fecdd3;font-size:13px;">
-        <button class="qt-addBtn" data-cat="fact" style="padding:8px 12px;border:none;border-radius:8px;background:#ef4444;color:#fff;cursor:pointer;font-size:13px;">추가</button>
-      </div>
-      <div id="qt_factList" style="margin-top:8px;font-size:13px;"></div>
-    </div>
-
-    <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
-      <div style="font-weight:bold;color:#9d174d;margin-bottom:4px;">🔸 개념 질문 (Conceptual)</div>
-      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">사실들을 연결해 패턴·관계를 탐구하는, 여러 상황에 적용 가능한 질문. 예: "생물은 왜 환경에 적응할까?"</div>
-      <div style="display:flex;gap:6px;">
-        <input type="text" id="qt_conceptInput" placeholder="개념 질문을 입력하세요" style="flex:1;padding:8px;border-radius:8px;border:1px solid #fbcfe8;font-size:13px;">
-        <button class="qt-addBtn" data-cat="concept" style="padding:8px 12px;border:none;border-radius:8px;background:#db2777;color:#fff;cursor:pointer;font-size:13px;">추가</button>
-      </div>
-      <div id="qt_conceptList" style="margin-top:8px;font-size:13px;"></div>
-    </div>
-
-    <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
-      <div style="font-weight:bold;color:#581c87;margin-bottom:4px;">🔺 논쟁적 질문 (Debatable)</div>
-      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">정답이 하나가 아니며 가치 판단·입장에 따라 답이 달라지는 질문. 예: "유전자 편집 기술을 인간에게 사용해도 될까?"</div>
-      <div style="display:flex;gap:6px;">
-        <input type="text" id="qt_debateInput" placeholder="논쟁적 질문을 입력하세요" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e9d5ff;font-size:13px;">
-        <button class="qt-addBtn" data-cat="debate" style="padding:8px 12px;border:none;border-radius:8px;background:#7c3aed;color:#fff;cursor:pointer;font-size:13px;">추가</button>
-      </div>
-      <div id="qt_debateList" style="margin-top:8px;font-size:13px;"></div>
-    </div>
-
-  </div>
-  <button class="back-btn" onclick="showView('view-home')">← 허브로 돌아가기</button>
-</div>
+<footer>
+  복사 버튼을 누르면 해당 프롬프트(영문 또는 한글)가 클립보드에 들어갑니다. 미리보기는 각 스타일을 설명하기 위한 CSS 구현 예시이며, 실제 결과물은 사용하는 AI 도구에 따라 달라질 수 있습니다.<br>
+  출처 참고: Apple HIG / Material Design 3 / shadcn/ui / Nielsen Norman Group / IBM Carbon Design System.
+</footer>
 
 <script>
-function showView(id) {
-  var views = document.querySelectorAll('.view');
-  for (var i = 0; i < views.length; i++) { views[i].classList.remove('active'); }
-  var target = document.getElementById(id);
-  if (target) { target.classList.add('active'); }
-  window.scrollTo(0, 0);
+const DONUT = `<svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" fill="none" stroke="#22304d" stroke-width="5"/><circle cx="18" cy="18" r="14" fill="none" stroke="#7c8cff" stroke-width="5" stroke-linecap="round" stroke-dasharray="64 88" transform="rotate(-90 18 18)"/></svg>`;
+const AREA = `<svg width="100%" height="44" viewBox="0 0 200 44" preserveAspectRatio="none"><defs><linearGradient id="dvg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ce6c4" stop-opacity=".45"/><stop offset="1" stop-color="#5ce6c4" stop-opacity="0"/></linearGradient></defs><path d="M0,32 L28,24 L56,28 L84,15 L112,21 L140,7 L168,13 L200,6 L200,44 L0,44 Z" fill="url(#dvg)"/><path d="M0,32 L28,24 L56,28 L84,15 L112,21 L140,7 L168,13 L200,6" fill="none" stroke="#5ce6c4" stroke-width="2"/></svg>`;
+
+const STYLES = [
+  { name:"Liquid Glass UI", cat:"미래형", use:"고급 앱 · 미래형 대시보드",
+    pv:`<div class="pv-mock pv-liquid"><div class="lq-nav"><span></span><span></span><span></span></div><div class="lq-panel"><b>Liquid Glass</b><div class="lq-row"><div class="lq-btn">Play</div><div class="pill"></div></div></div></div>`,
+    prompt:"Apple Liquid Glass inspired UI, translucent layered panels, subtle refraction, depth, soft highlights, premium futuristic interface",
+    kp:"애플 Liquid Glass에서 영감받은 UI, 반투명하게 겹쳐진 패널, 은은한 굴절감, 깊이감, 부드러운 하이라이트, 고급스럽고 미래적인 인터페이스",
+    ko:"2025년 Apple이 소개한 <b>Liquid Glass</b> 방향. 유리 같은 투명감·깊이·동적 표현성을 강조해 고급 앱과 미래형 대시보드에 잘 맞습니다." },
+
+  { name:"Glassmorphism 2.0", cat:"미래형", use:"랜딩페이지 · AI 도구 소개",
+    pv:`<div class="pv-mock pv-glass"><div class="card2"><b>AI Toolkit</b><div class="ln"></div><div class="ln s"></div></div><div class="card2"><b>Get started</b><div class="ln s"></div></div></div>`,
+    prompt:"modern glassmorphism 2.0, frosted glass cards, blurred gradient background, layered depth, soft glow, readable contrast",
+    kp:"모던 글래스모피즘 2.0, 서리 낀 유리 카드, 흐릿한 그라데이션 배경, 층층이 쌓인 깊이감, 부드러운 발광, 읽기 좋은 대비",
+    ko:"반투명 유리 카드와 그라데이션 배경을 쓰되 예전보다 <b>가독성과 계층 구조</b>를 더 중시합니다. 랜딩페이지, AI 도구 소개 화면에 잘 맞습니다." },
+
+  { name:"Bento SaaS Dashboard", cat:"대시보드", use:"연수 자료 · AI 도구 비교 · 활동 안내",
+    pv:`<div class="pv-mock pv-bento"><div class="big">Revenue<small>+24%</small></div><div>Users<small>1.2k</small></div><div class="acc">Active<small>340</small></div><div>Tasks<small>17</small></div><div>Tickets<small>5</small></div></div>`,
+    prompt:"bento box grid layout, modular dashboard cards, asymmetric but balanced grid, clear hierarchy, product showcase style",
+    kp:"벤토 박스(도시락) 그리드 레이아웃, 모듈형 대시보드 카드, 비대칭이지만 균형 잡힌 격자, 명확한 위계, 제품 쇼케이스 스타일",
+    ko:"정보를 작은 카드 단위로 나눠 보여주는 최신 대시보드형 스타일. <b>연수 자료, 수업 꾸러미, AI 도구 비교표, 학생 활동 안내</b>에 특히 유용합니다." },
+
+  { name:"Shadcn/ui Minimal Dashboard", cat:"대시보드", use:"실제 웹앱 · 개발자 친화 UI",
+    pv:`<div class="pv-mock pv-shadcn"><div class="row"><div class="c"><b>Total</b><div class="num">8,420</div></div><div class="c"><b>Growth</b><div class="num">+12%</div></div></div><div class="row"><div class="btn">Continue</div><div class="ghost">Cancel</div></div></div>`,
+    prompt:"shadcn/ui inspired interface, Tailwind aesthetic, clean cards, subtle borders, rounded corners, neutral palette, excellent dark mode",
+    kp:"shadcn/ui 스타일 인터페이스, Tailwind 감성, 깔끔한 카드, 은은한 테두리, 둥근 모서리, 중성적인 색감, 뛰어난 다크모드",
+    ko:"실제 웹앱을 만들 때 가장 안정적입니다. 정갈한 카드, 얇은 테두리, <b>다크모드</b>, 개발자스러운 세련미가 강점. 커스터마이즈 가능한 컴포넌트 기반 디자인 시스템을 지향합니다." },
+
+  { name:"Material 3 Expressive", cat:"모바일", use:"구글 계열 모바일 앱",
+    pv:`<div class="pv-mock pv-m3"><div><span class="chipm">전체</span><span class="chipm">즐겨찾기</span></div><div class="cardm"><b>오늘의 활동</b><div class="lnm"></div></div><div class="fab">＋ 추가</div></div>`,
+    prompt:"Material 3 Expressive design, dynamic color system, rounded components, clear elevation, mobile-first accessible UI",
+    kp:"머티리얼 3 익스프레시브 디자인, 동적 색상 시스템, 둥근 컴포넌트, 명확한 입체감(elevation), 모바일 우선의 접근성 높은 UI",
+    ko:"구글 계열 모바일 앱 느낌. 버튼·카드·탭·하단 내비게이션이 명확해 AI가 구현할 때 <b>실패 확률이 낮습니다</b>. 동적 색상과 접근성 있는 색상 체계를 강조합니다." },
+
+  { name:"Clean Modern Minimalist", cat:"문서·보고서", use:"교육청 자료 · 연수 PPT · 보고서 표지",
+    pv:`<div class="pv-mock pv-min"><div class="dot"></div><h4>Less, but better.</h4><div class="ln"></div><div class="ln s"></div></div>`,
+    prompt:"clean modern minimalist design, generous whitespace, strong typography, restrained colors, editorial layout, premium feel",
+    kp:"깔끔한 모던 미니멀 디자인, 넉넉한 여백, 강한 타이포그래피, 절제된 색상, 에디토리얼 레이아웃, 고급스러운 느낌",
+    ko:"가장 무난하고 고급스럽습니다. <b>교육청 자료, 연수 PPT, 보고서 표지, 학부모 안내장</b>처럼 신뢰감이 중요한 자료에 좋습니다. 위계는 색·크기·그룹화로 만들면 사용성이 좋아집니다." },
+
+  { name:"Editorial Magazine Layout", cat:"문서·보고서", use:"보고서 · 카드뉴스 · 자료집 표지",
+    pv:`<div class="pv-mock pv-edit"><div class="k">Feature</div><h4>The Future of<br>Learning</h4><div class="cols"><div><div class="ln"></div><div class="ln"></div><div class="ln s"></div></div><div><div class="ln"></div><div class="ln s"></div></div></div></div>`,
+    prompt:"premium editorial magazine layout, large headline typography, elegant grid, strong image-text contrast, refined spacing",
+    kp:"고급 잡지 에디토리얼 레이아웃, 큰 헤드라인 타이포그래피, 우아한 그리드, 강한 이미지-텍스트 대비, 정제된 여백",
+    ko:"보고서, 카드뉴스, 교육과정 자료집 표지에 좋습니다. <b>'디자인 잘한 공공기관 보고서'</b> 느낌을 낼 때 유용합니다." },
+
+  { name:"Swiss Grid System", cat:"문서·보고서", use:"포스터 · 발표자료 · 정책자료",
+    pv:`<div class="pv-mock pv-swiss"><div class="red"></div><div class="t">Grid System</div><div class="b">STRUCTURE · ORDER · CLARITY</div><div class="blk">2026</div></div>`,
+    prompt:"Swiss graphic design, strict grid system, clean typography, strong alignment, minimal color, poster-like composition",
+    kp:"스위스 그래픽 디자인, 엄격한 그리드 시스템, 깔끔한 타이포그래피, 강한 정렬, 최소한의 색상, 포스터 같은 구성",
+    ko:"정렬감이 강하고 전문적입니다. <b>포스터, 발표자료, 정책자료, 연수 슬라이드</b>에 잘 맞습니다. 격자를 디자인의 구조적 기반으로 삼습니다." },
+
+  { name:"Neo-Brutalism", cat:"참여형", use:"참여형 활동 · 퀴즈 · 캠페인 포스터",
+    pv:`<div class="pv-mock pv-neo"><div class="box pink"><b>QUIZ TIME!</b></div><div class="box"><b>정답을 골라봐</b><br><small>A · B · C · D</small></div><div class="box blue"><b>START →</b></div></div>`,
+    prompt:"neo-brutalist UI, bold primary colors, thick black borders, hard shadows, playful asymmetry, intentionally raw layout",
+    kp:"네오 브루탈리즘 UI, 강렬한 원색, 두꺼운 검정 테두리, 또렷한 그림자, 장난스러운 비대칭, 의도적으로 날것의 레이아웃",
+    ko:"강렬하고 눈에 띕니다. <b>초등 참여형 활동, 퀴즈, 패들렛 아케이드, 캠페인 포스터</b>에 좋지만 공식 보고서에는 과할 수 있습니다." },
+
+  { name:"Soft Neo-Brutalism", cat:"참여형", use:"교육용 친근한 활동",
+    pv:`<div class="pv-mock pv-softneo"><div class="box mint"><b>오늘의 미션</b><br><small>친구와 인사 나누기</small></div><div class="box lav"><b>스티커 받기</b></div><div class="box"><b>완료 ✓</b></div></div>`,
+    prompt:"soft neo-brutalism, bold outlines, playful blocks, pastel background, friendly educational tone, less aggressive contrast",
+    kp:"소프트 네오 브루탈리즘, 굵은 외곽선, 장난스러운 블록, 파스텔 배경, 친근한 교육용 톤, 덜 공격적인 대비",
+    ko:"네오브루탈리즘을 교육용으로 부드럽게 바꾼 버전. <b>귀엽지만 너무 유치하지 않게</b> 만들 때 좋습니다." },
+
+  { name:"Claymorphism Education UI", cat:"어린이", use:"초등 SEL · 감정카드 · 학습 앱",
+    pv:`<div class="pv-mock pv-clay"><div class="blob"></div><div class="col"><div class="cardc">감정 카드<div class="lnc"></div><div class="lnc s"></div></div></div><div class="blob b"></div></div>`,
+    prompt:"claymorphism style, soft 3D rounded cards, pastel colors, friendly icons, playful but clean educational interface",
+    kp:"클레이모피즘 스타일, 부드러운 3D 둥근 카드, 파스텔 색상, 친근한 아이콘, 장난스럽지만 깔끔한 교육용 인터페이스",
+    ko:"찰흙 같은 둥근 3D 카드 느낌. <b>초등학생용 SEL, 감정카드, 그림책 수업, 학습 앱 화면</b>에 잘 어울립니다." },
+
+  { name:"AI Command Center", cat:"미래형", use:"AI 연수 · 학습분석 대시보드",
+    pv:`<div class="pv-mock pv-ai"><div class="row"><div class="panel" style="flex:1"><small>Accuracy</small><div class="num">94%</div></div><div class="panel" style="flex:1"><small>Active</small><div class="num">128</div></div></div><div class="panel"><small>Throughput</small><div class="bars"><i style="height:40%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%"></i><i style="height:60%"></i><i style="height:80%"></i></div></div></div>`,
+    prompt:"AI command center dashboard, dark interface, glowing data panels, structured cards, futuristic but professional, not cyberpunk cluttered",
+    kp:"AI 커맨드 센터 대시보드, 어두운 인터페이스, 빛나는 데이터 패널, 구조화된 카드, 미래적이지만 전문적인, 사이버펑크처럼 산만하지 않은",
+    ko:"AI 연수, 데이터 대시보드, 학습분석 화면에 좋습니다. <b>사이버펑크보다 덜 과하고 더 전문적인</b> 미래형 느낌입니다." },
+
+  { name:"Cyberpunk / Synthwave", cat:"미래형", use:"몰입형 제목 중심 자료",
+    pv:`<div class="pv-mock pv-cyber"><h4>NEON CITY</h4><div class="ln"></div><div class="ln s"></div><div class="btnc">ENTER ▸</div></div>`,
+    prompt:"cyberpunk synthwave interface, dark background, neon pink and blue accents, glowing lines, retro-futuristic atmosphere",
+    kp:"사이버펑크 신스웨이브 인터페이스, 어두운 배경, 네온 핑크와 블루 강조색, 빛나는 라인, 레트로 미래적 분위기",
+    ko:"몰입감과 화려함이 필요할 때 좋습니다. 단, 텍스트 많은 교육자료엔 가독성이 떨어질 수 있어 <b>제목 중심 자료에만</b> 추천합니다." },
+
+  { name:"Calm Pastel Wellness UI", cat:"감정·웰니스", use:"SEL · 상담 · 마음챙김 · 학급 루틴",
+    pv:`<div class="pv-mock pv-calm"><div class="cardp"><span class="ic"></span>오늘 기분은?</div><div class="cardp"><span class="ic b"></span>호흡 명상 5분</div><div class="cardp"><span class="ic g"></span>감사 한 가지</div></div>`,
+    prompt:"calm pastel wellness design, soft gradients, rounded cards, gentle icons, warm emotional tone, accessible readability",
+    kp:"차분한 파스텔 웰니스 디자인, 부드러운 그라데이션, 둥근 카드, 은은한 아이콘, 따뜻한 감성 톤, 읽기 편한 접근성",
+    ko:"<b>감정교육, SEL, 상담, 마음챙김, 학급 루틴</b> 자료에 좋습니다. 따뜻하고 안정적인 느낌을 줍니다." },
+
+  { name:"Luxury Gradient Mesh", cat:"발표·표지", use:"포스터 · 발표 표지 · 제목 슬라이드",
+    pv:`<div class="pv-mock pv-lux"><div class="k">Keynote 2026</div><h4>Designing the<br><b>Next Era</b></h4><div class="ln"></div></div>`,
+    prompt:"luxury gradient mesh background, elegant typography, soft abstract shapes, premium presentation design, minimal content blocks",
+    kp:"럭셔리 그라데이션 메시 배경, 우아한 타이포그래피, 부드러운 추상 형태, 고급스러운 프레젠테이션 디자인, 최소한의 콘텐츠 블록",
+    ko:"포스터, 발표 표지, 강의 제목 슬라이드에 좋습니다. 과하면 촌스러워질 수 있으니 <b>\"minimal content blocks\"</b>를 같이 넣는 게 중요합니다." },
+
+  { name:"Data Visualization Dashboard", cat:"대시보드", use:"평가 결과 · 성장 데이터 · 설문 시각화",
+    pv:`<div class="pv-mock pv-dataviz"><div class="dv-top"><div class="dv-metric c1"><small>정답률</small><b>87%</b></div><div class="dv-metric c2"><small>응답수</small><b>312</b></div><div class="dv-donut">${DONUT}</div></div><div class="dv-chart"><small>주간 추이</small>${AREA}</div></div>`,
+    prompt:"data visualization dashboard, clean charts, metric cards, clear labels, professional analytics UI, high contrast and readable numbers",
+    kp:"데이터 시각화 대시보드, 깔끔한 차트, 지표 카드, 명확한 라벨, 전문적인 분석 UI, 높은 대비와 읽기 쉬운 숫자",
+    ko:"<b>평가 결과, 학생 성장 데이터, 감정 체크인 대시보드, 연수 설문 결과</b> 시각화에 좋습니다." },
+
+  { name:"Apple-esque Cupertino Style", cat:"미래형", use:"앱 화면 · 고급 안내자료 · 포트폴리오",
+    pv:`<div class="pv-mock pv-apple"><div class="cardq"><b>나의 하루</b><div class="ln"></div></div><div class="row"><div class="sq"><div class="num">7</div><small>활동</small></div><div class="sq"><div class="num">92</div><small>점수</small></div></div></div>`,
+    prompt:"Apple-esque Cupertino style, soft squircle cards, refined spacing, subtle shadows, premium typography, calm neutral palette",
+    kp:"애플풍 쿠퍼티노 스타일, 부드러운 스퀘어클(둥근 사각) 카드, 정제된 여백, 은은한 그림자, 고급 타이포그래피, 차분한 중성 색감",
+    ko:"<b>앱 화면, 고급 안내자료, 교사 포트폴리오</b>용 디자인에 좋습니다. 깊이와 계층을 만드는 재료 효과를 디자인 요소로 활용합니다." },
+
+  { name:"Playful Learning App UI", cat:"어린이", use:"초등 웹앱 · 퀴즈 · 디지털 학습도구",
+    pv:`<div class="pv-mock pv-play"><div class="big"><span class="emoji">🚀</span> 오늘의 모험!</div><div class="row"><div class="b1">읽기</div><div class="b2">놀이</div><div class="b3">퀴즈</div></div></div>`,
+    prompt:"playful learning app UI, friendly rounded components, cheerful colors, simple icons, child-friendly but not childish",
+    kp:"장난스러운 학습 앱 UI, 친근한 둥근 컴포넌트, 발랄한 색상, 단순한 아이콘, 아이 친화적이지만 유치하지 않은",
+    ko:"<b>초등학생용 웹앱, 퀴즈, 활동 안내, 디지털 학습 도구</b>에 가장 실용적입니다." },
+
+  { name:"Professional Public Institution Style", cat:"문서·보고서", use:"교육청 보고서 · 학교 안내 · 공문형",
+    pv:`<div class="pv-mock pv-gov"><div class="top"><span class="seal"></span>○○교육청 안내</div><div class="body"><div class="h">1. 추진 배경</div><div class="ln"></div><div class="ln s"></div><div class="tbl"><div class="hd">구분</div><div class="hd">대상</div><div class="hd">일정</div></div></div></div>`,
+    prompt:"professional public institution design, clean Korean report layout, trustworthy colors, clear section hierarchy, accessible typography",
+    kp:"전문적인 공공기관 디자인, 깔끔한 한국형 보고서 레이아웃, 신뢰감 있는 색상, 명확한 섹션 위계, 접근성 있는 타이포그래피",
+    ko:"<b>교육청 보고서, 학교 안내자료, 정책 제안서, 연수 공문형 자료</b>에 좋습니다." },
+
+  { name:"Spatial UI / VisionOS Inspired", cat:"미래형", use:"VR · 미래교실 · AI 교육자료 표지",
+    pv:`<div class="pv-mock pv-spatial"><div class="float"><b>Welcome back</b><div class="ln"></div></div><div class="float a"><b>Spatial panel</b><div class="ln s"></div></div></div>`,
+    prompt:"spatial UI inspired design, floating panels, depth layers, soft shadows, translucent surfaces, immersive interface",
+    kp:"공간형(스페이셜) UI 디자인, 떠 있는 패널, 깊이 레이어, 부드러운 그림자, 반투명 표면, 몰입감 있는 인터페이스",
+    ko:"<b>VR, 메타퀘스트, 미래교실, AI 교육자료</b>에 적합합니다. 인쇄물보다는 웹·앱·발표 표지에 더 어울립니다." },
+
+  { name:"Hand-drawn Doodle / Sketch", cat:"일러스트", use:"학습지 · 인포그래픽 · 칠판자료",
+    pv:`<div class="pv-mock pv-doodle"><div class="dbox">오늘의 학습 목표 ✏️</div><div class="arrow">↳ 이렇게 적어요!</div><div class="dbox b">참 잘했어요 ⭐</div></div>`,
+    prompt:"hand-drawn doodle illustration style, marker sketch lines, playful organic imperfections, handwritten labels, white paper background, friendly and approachable",
+    kp:"손으로 그린 두들(낙서) 일러스트 스타일, 마커 스케치 라인, 장난스럽고 자연스러운 불완전함, 손글씨 라벨, 흰 종이 배경, 친근하고 편안한 느낌",
+    ko:"손그림·마커 스케치 느낌. <b>학습지, 칠판 판서형 자료, 인포그래픽, 활동 안내</b>에 친근하게 잘 맞습니다." },
+
+  { name:"Isometric Illustration", cat:"일러스트", use:"개념·과정 설명 · 인포그래픽",
+    pv:`<div class="pv-mock pv-iso"><div class="scene"><div class="tile t1"></div><div class="tile t2"></div><div class="tile t3"></div></div></div>`,
+    prompt:"isometric illustration, clean 3D geometric perspective, uniform 30-degree angles, structured depth, bright flat colors, modern infographic look",
+    kp:"아이소메트릭 일러스트, 깔끔한 3D 기하학적 시점, 균일한 30도 각도, 구조적인 깊이감, 밝은 플랫 색상, 모던한 인포그래픽 느낌",
+    ko:"입체 도형 시점으로 구조를 보여줍니다. <b>개념·과정·시스템 설명, 단계별 안내, 인포그래픽</b>에 강합니다." },
+
+  { name:"Webtoon / Comic Style", cat:"일러스트", use:"카드뉴스 · 스토리텔링 · 생활지도",
+    pv:`<div class="pv-mock pv-comic"><div class="p1">두근…</div><div class="p2">쾅!</div><div class="p3">다음 편에<br>계속</div></div>`,
+    prompt:"comic book / webtoon style, bold panel borders, halftone dots, dynamic speech bubbles, expressive action text, vivid flat colors",
+    kp:"만화책/웹툰 스타일, 굵은 칸 테두리, 하프톤 점 패턴, 역동적인 말풍선, 표현력 있는 효과음 텍스트, 선명한 플랫 색상",
+    ko:"칸·말풍선·효과음으로 이야기를 전합니다. <b>카드뉴스, 생활지도 스토리, 사건 설명</b>에 효과적이고 한국 학생에게 특히 친숙합니다." },
+
+  { name:"Flat Illustration (Corporate Memphis)", cat:"일러스트", use:"안내자료 · 설명 슬라이드 · 배너",
+    pv:`<div class="pv-mock pv-flat"><div class="fig f1"><div class="head"></div><div class="body"></div><span class="arm"></span></div><div class="fig f2"><div class="head"></div><div class="body"></div><span class="arm"></span></div></div>`,
+    prompt:"flat vector illustration, corporate memphis style, simple geometric characters, oversized limbs, friendly brand colors, clean minimal scene",
+    kp:"플랫 벡터 일러스트, 코퍼레이트 멤피스 스타일, 단순한 기하학적 캐릭터, 과장되게 큰 팔다리, 친근한 브랜드 색상, 깔끔하고 미니멀한 장면",
+    ko:"단순한 인물 일러스트로 친근하게 설명합니다. <b>안내자료, 설명 슬라이드, 배너, 가정통신문 삽화</b>에 두루 쓰기 좋습니다." },
+
+  { name:"Risograph Print", cat:"인쇄·레트로", use:"포스터 · 학급 게시물 · 표지",
+    pv:`<div class="pv-mock pv-riso"><span class="shape s1"></span><span class="shape s2"></span><span class="grain"></span><span class="lbl">RISO PRINT</span></div>`,
+    prompt:"risograph print style, 2-3 spot colors, overprint and slight misregistration, grainy paper texture, bold retro shapes, tactile handmade feel",
+    kp:"리소그래프 인쇄 스타일, 2~3가지 별색, 겹침 인쇄와 살짝 어긋난 정합, 거친 종이 질감, 굵은 레트로 도형, 손맛 나는 아날로그 느낌",
+    ko:"별색 겹침·거친 질감의 인쇄 감성. <b>포스터, 학급 게시물, 자료집 표지</b>에 감각적인 아날로그 느낌을 줍니다." },
+
+  { name:"Kawaii Cute UI", cat:"어린이", use:"저학년 · 캐릭터 · 보상 스티커",
+    pv:`<div class="pv-mock pv-kawaii"><div class="face"><span class="blush l"></span><span class="blush r"></span><span class="eye l"></span><span class="eye r"></span><span class="mouth"></span></div><div class="lbl">참 잘했어요!</div></div>`,
+    prompt:"kawaii cute UI, adorable rounded characters, soft pastel palette, blush cheeks, simple happy faces, hearts and stars, wholesome childlike charm",
+    kp:"카와이(귀여운) UI, 사랑스러운 둥근 캐릭터, 부드러운 파스텔 색감, 볼터치, 단순하고 행복한 표정, 하트와 별, 순수하고 아이다운 매력",
+    ko:"아주 귀여운 캐릭터 감성. <b>저학년 자료, 보상 스티커, 캐릭터 안내, 알림장</b>에 잘 어울립니다." },
+
+  { name:"Scrapbook / Sticker Collage", cat:"일러스트", use:"학급 게시물 · 활동지 · 추억앨범",
+    pv:`<div class="pv-mock pv-scrap"><div class="pho p1"><div class="img"></div>2026.03</div><div class="pho p2"><div class="img"></div>소풍</div><span class="tape"></span><span class="sticker">🌟</span></div>`,
+    prompt:"scrapbook collage style, taped photo cards, torn paper edges, stickers and washi tape, layered handmade arrangement, warm crafty mood",
+    kp:"스크랩북 콜라주 스타일, 테이프로 붙인 사진 카드, 찢긴 종이 가장자리, 스티커와 마스킹 테이프, 겹겹이 손으로 꾸민 배치, 따뜻한 수공예 분위기",
+    ko:"오려 붙인 듯한 콜라주 감성. <b>학급 게시물, 활동지, 추억 앨범, 모둠 결과물</b>에 정겹게 어울립니다." },
+
+  { name:"3D Clay Render (Spline)", cat:"일러스트", use:"표지 · 아이콘 · 발표 자료",
+    pv:`<div class="pv-mock pv-3d"><div class="ball"></div><div class="cube"></div></div>`,
+    prompt:"soft 3D clay render, glossy rounded objects, pastel gradients, soft studio lighting, smooth shadows, playful spline-style 3D scene",
+    kp:"부드러운 3D 클레이 렌더, 광택 있는 둥근 오브젝트, 파스텔 그라데이션, 부드러운 스튜디오 조명, 매끈한 그림자, 장난스러운 스플라인풍 3D 장면",
+    ko:"말랑한 3D 렌더 오브젝트. <b>표지, 아이콘, 발표 자료의 포인트 그래픽</b>으로 세련되게 쓰입니다." },
+
+  { name:"Watercolor / Organic", cat:"일러스트", use:"감성 자료 · 자연 주제 · 표지",
+    pv:`<div class="pv-mock pv-water"><span class="wash w1"></span><span class="wash w2"></span><span class="wash w3"></span><span class="lbl">Watercolor</span></div>`,
+    prompt:"watercolor illustration style, soft bleeding color washes, organic textures, gentle paper grain, delicate ink lines, calm artistic mood",
+    kp:"수채화 일러스트 스타일, 부드럽게 번지는 색 워시, 자연스러운 질감, 은은한 종이결, 섬세한 잉크 라인, 차분하고 예술적인 분위기",
+    ko:"번지는 물감의 부드러운 감성. <b>감성 자료, 자연·계절 주제, 시화, 표지</b>에 따뜻하게 어울립니다." },
+
+  { name:"Infographic / Data Storytelling", cat:"문서·보고서", use:"핸드아웃 · 통계 안내 · 카드뉴스",
+    pv:`<div class="pv-mock pv-info"><div class="row"><div class="big">87%</div><div class="pie"></div><div><small>참여율</small><br><small>312명</small></div></div><div class="step"><span class="dot">1</span>준비 <span class="dot">2</span>실행 <span class="dot">3</span>정리</div></div>`,
+    prompt:"infographic data storytelling, big bold numbers, simple icons, step-by-step flow, pie and bar snippets, clear labels, colorful but organized",
+    kp:"인포그래픽 데이터 스토리텔링, 크고 굵은 숫자, 단순한 아이콘, 단계별 흐름, 파이·막대 조각, 명확한 라벨, 컬러풀하지만 정돈된",
+    ko:"숫자·아이콘·단계로 한눈에 전달. 대시보드와 달리 <b>인쇄 핸드아웃, 통계 안내, 카드뉴스</b>에 맞춘 포스터형입니다." },
+
+  { name:"Neumorphism (Soft UI)", cat:"미래형", use:"앱 UI · 컨트롤 화면",
+    pv:`<div class="pv-mock pv-neu"><div class="row"><span class="circle"></span><div class="btn">눌러보기</div></div><div class="field"></div></div>`,
+    prompt:"neumorphism soft UI, monochrome extruded surfaces, dual soft shadows, subtle inner and outer light, minimal tactile controls",
+    kp:"뉴모피즘 소프트 UI, 단색의 돌출된 표면, 이중의 부드러운 그림자, 은은한 안팎 빛, 미니멀하고 촉각적인 컨트롤",
+    ko:"같은 색 배경에서 눌린·튀어나온 듯한 부드러운 입체 UI. <b>앱 UI, 컨트롤·설정 화면</b>의 절제된 미감에 좋습니다. (대비가 약해 가독성 주의)" },
+
+  { name:"Memphis Design", cat:"인쇄·레트로", use:"참여형 포스터 · 행사 배너",
+    pv:`<div class="pv-mock pv-memphis"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><i class="c5"></i><span class="lbl">MEMPHIS</span></div>`,
+    prompt:"Memphis design style, 1980s bold geometric shapes, squiggles, zigzags and dots, primary colors, playful chaotic composition",
+    kp:"멤피스 디자인 스타일, 1980년대풍 굵은 기하학 도형, 구불구불한 선과 지그재그·점, 원색, 장난스럽고 분방한 구성",
+    ko:"80년대풍 발랄한 도형 폭죽. <b>참여형 포스터, 행사 배너, 캠페인</b>에 활기를 줍니다." },
+
+  { name:"Y2K / Frutiger Aero", cat:"인쇄·레트로", use:"이벤트 표지 · 학생 흥미 자료",
+    pv:`<div class="pv-mock pv-y2k"><span class="bubble b1"></span><span class="bubble b2"></span><span class="bubble b3"></span><div class="glass">Aero ✨</div></div>`,
+    prompt:"Y2K Frutiger Aero aesthetic, glossy aqua surfaces, water bubbles and lens flares, sky-blue gradients, shiny chrome, optimistic retro-tech mood",
+    kp:"Y2K 프루티거 에어로 감성, 광택 나는 아쿠아 표면, 물방울과 렌즈 플레어, 하늘색 그라데이션, 반짝이는 크롬, 낙천적인 레트로테크 분위기",
+    ko:"2000년대 초의 반짝이는 물·유리 감성. <b>이벤트 표지, 학생 흥미 유발 자료</b>에 복고 트렌드로 통합니다." },
+
+  { name:"Dopamine Maximalism", cat:"참여형", use:"캠페인 · 강조 배너 · 이벤트",
+    pv:`<div class="pv-mock pv-dopa"><span class="em e1">🤩</span><span class="em e2">🎉</span><div class="lbl">GO!!!</div></div>`,
+    prompt:"dopamine maximalism, hyper-saturated clashing colors, oversized bold type, stickers and emojis, high-energy chaotic layout",
+    kp:"도파민 맥시멀리즘, 과도하게 채도 높은 충돌 색상, 거대하고 굵은 타이포, 스티커와 이모지, 에너지 넘치는 분방한 레이아웃",
+    ko:"강렬한 색·큰 글씨로 시선 강탈. <b>캠페인, 강조 배너, 이벤트 홍보</b>에 좋지만 정보량 많은 자료엔 비추천." },
+
+  { name:"Dark-First OLED Minimal", cat:"대시보드", use:"앱 · 야간용 화면 · 개발자 도구",
+    pv:`<div class="pv-mock pv-oled"><div class="h">Good evening<span class="acc">.</span></div><div class="cardo"><div class="ln"></div><div class="ln s"></div></div><div class="btn">시작하기</div></div>`,
+    prompt:"dark-first OLED minimal UI, true black background, single neon accent color, crisp white type, subtle bordered cards, energy-efficient elegant",
+    kp:"다크 퍼스트 OLED 미니멀 UI, 완전한 검정 배경, 단 하나의 네온 강조색, 또렷한 흰 글씨, 은은한 테두리 카드, 절전형의 우아함",
+    ko:"순수 검정 기반의 절제된 다크 UI. <b>앱, 야간용 화면, 개발자·기술 도구</b>에 세련되게 맞습니다." },
+
+  { name:"Aurora Holographic Gradient", cat:"발표·표지", use:"발표 표지 · 배경 · 브랜딩",
+    pv:`<div class="pv-mock pv-aurora"><span class="a a1"></span><span class="a a2"></span><span class="a a3"></span><span class="lbl">Aurora</span></div>`,
+    prompt:"aurora holographic gradient, flowing iridescent waves of green purple and blue, soft blurred light, dreamy futuristic atmosphere",
+    kp:"오로라 홀로그래픽 그라데이션, 초록·보라·파랑이 흐르는 영롱한 물결, 부드럽게 흐릿한 빛, 몽환적이고 미래적인 분위기",
+    ko:"영롱하게 흐르는 오로라빛 배경. <b>발표 표지, 섹션 배경, 브랜딩</b>에 고급스러운 분위기를 더합니다." },
+
+  { name:"Big Type Poster", cat:"발표·표지", use:"제목 슬라이드 · 포스터 · 표지",
+    pv:`<div class="pv-mock pv-bigtype"><div class="t">BIG<br><span>TYPE</span></div></div>`,
+    prompt:"big typography poster, oversized headline filling the frame, tight letter spacing, single accent color, minimal bold statement layout",
+    kp:"빅타이포 포스터, 화면을 가득 채우는 초대형 헤드라인, 좁은 자간, 단 하나의 강조색, 미니멀하고 강렬한 선언형 레이아웃",
+    ko:"글자 자체가 주인공인 포스터. <b>제목 슬라이드, 포스터, 표지</b>에서 메시지를 강하게 박습니다." },
+
+  { name:"Notion-style Document UI", cat:"문서·정리", use:"교사 정리자료 · 수업 노트 · 위키",
+    pv:`<div class="pv-mock pv-notion"><div class="h"><span class="em">📘</span>수업 노트</div><div class="li"><span class="chk on"></span>도입 자료 준비</div><div class="li"><span class="chk"></span>활동지 인쇄</div><div class="call">💡 핵심 질문을 칠판에 적어두기</div></div>`,
+    prompt:"Notion-style document UI, clean minimal layout, emoji headers, toggle lists and checkboxes, soft callout blocks, calm neutral typography",
+    kp:"노션풍 문서 UI, 깔끔하고 미니멀한 레이아웃, 이모지 헤더, 토글 리스트와 체크박스, 부드러운 콜아웃 블록, 차분한 중성 타이포그래피",
+    ko:"정돈된 문서·위키 감성. <b>교사 정리자료, 수업 노트, 업무 매뉴얼, 학급 위키</b>에 깔끔하게 맞습니다." },
+
+  { name:"Blueprint / Technical Drawing", cat:"문서·정리", use:"과학·공학 설명 · 구조도",
+    pv:`<div class="pv-mock pv-blue"><div class="draw"></div></div>`,
+    prompt:"blueprint technical drawing style, deep blue background, white and cyan line work, grid paper, dimension lines and annotations, precise engineering look",
+    kp:"블루프린트 기술 도면 스타일, 짙은 파랑 배경, 흰색과 청록 라인 작업, 모눈 종이, 치수선과 주석, 정밀한 엔지니어링 느낌",
+    ko:"설계 도면 감성. <b>과학·공학 개념 설명, 구조도, 메커니즘 분해도</b>에 정밀하고 전문적으로 어울립니다." },
+
+  { name:"Duotone", cat:"발표·표지", use:"표지 · 포스터 · 강조 이미지",
+    pv:`<div class="pv-mock pv-duo"><span class="img"></span><small>Duotone</small><div class="lbl">Two Tones,<br>One Mood</div></div>`,
+    prompt:"duotone design, two-color mapped imagery, strong color contrast, bold overlay typography, modern editorial poster mood",
+    kp:"듀오톤 디자인, 두 가지 색으로 매핑한 이미지, 강한 색 대비, 굵은 오버레이 타이포그래피, 모던한 에디토리얼 포스터 분위기",
+    ko:"두 가지 색으로 통일한 강렬한 이미지. <b>표지, 포스터, 강조 이미지</b>에 모던하고 임팩트 있게 쓰입니다." },
+];
+
+// 실제 사례 레퍼런스 (STYLES 순서와 동일) — 공식 소스 우선, 없으면 Dribbble 갤러리 검색
+const REFS = [
+  {t:"Apple WWDC25", u:"https://developer.apple.com/videos/play/wwdc2025/219/"},
+  {t:"Dribbble", u:"https://dribbble.com/search/glassmorphism"},
+  {t:"Bento Grids", u:"https://bentogrids.com/"},
+  {t:"shadcn 공식", u:"https://ui.shadcn.com/examples/dashboard"},
+  {t:"Material 3", u:"https://m3.material.io/"},
+  {t:"Dribbble", u:"https://dribbble.com/search/minimalist-website"},
+  {t:"Dribbble", u:"https://dribbble.com/search/editorial-layout"},
+  {t:"Dribbble", u:"https://dribbble.com/search/swiss-design"},
+  {t:"neobrutalism.dev", u:"https://www.neobrutalism.dev/"},
+  {t:"Dribbble", u:"https://dribbble.com/search/soft-brutalism"},
+  {t:"Hype4", u:"https://hype4.academy/tools/claymorphism-generator"},
+  {t:"Dribbble", u:"https://dribbble.com/search/ai-dashboard"},
+  {t:"Dribbble", u:"https://dribbble.com/search/cyberpunk-ui"},
+  {t:"Dribbble", u:"https://dribbble.com/search/wellness-app"},
+  {t:"Dribbble", u:"https://dribbble.com/search/gradient-mesh"},
+  {t:"Dribbble", u:"https://dribbble.com/search/dashboard-analytics"},
+  {t:"Apple HIG", u:"https://developer.apple.com/design/human-interface-guidelines/"},
+  {t:"Dribbble", u:"https://dribbble.com/search/kids-learning-app"},
+  {t:"KRDS 정부", u:"https://www.krds.go.kr/"},
+  {t:"Apple visionOS", u:"https://developer.apple.com/design/human-interface-guidelines/designing-for-visionos"},
+  {t:"Dribbble", u:"https://dribbble.com/search/hand-drawn-illustration"},
+  {t:"Dribbble", u:"https://dribbble.com/search/isometric-illustration"},
+  {t:"Dribbble", u:"https://dribbble.com/search/comic-style"},
+  {t:"Dribbble", u:"https://dribbble.com/search/flat-illustration"},
+  {t:"Dribbble", u:"https://dribbble.com/search/risograph"},
+  {t:"Dribbble", u:"https://dribbble.com/search/kawaii"},
+  {t:"Dribbble", u:"https://dribbble.com/search/scrapbook-collage"},
+  {t:"Spline 공식", u:"https://spline.design/"},
+  {t:"Dribbble", u:"https://dribbble.com/search/watercolor"},
+  {t:"Dribbble", u:"https://dribbble.com/search/infographic"},
+  {t:"Neumorphism.io", u:"https://neumorphism.io/"},
+  {t:"Dribbble", u:"https://dribbble.com/search/memphis-design"},
+  {t:"Dribbble", u:"https://dribbble.com/search/y2k"},
+  {t:"Dribbble", u:"https://dribbble.com/search/maximalism"},
+  {t:"Dribbble", u:"https://dribbble.com/search/dark-mode-ui"},
+  {t:"Dribbble", u:"https://dribbble.com/search/aurora-gradient"},
+  {t:"Dribbble", u:"https://dribbble.com/search/typographic-poster"},
+  {t:"Notion 공식", u:"https://www.notion.so/"},
+  {t:"Dribbble", u:"https://dribbble.com/search/blueprint"},
+  {t:"Dribbble", u:"https://dribbble.com/search/duotone"},
+];
+
+const CATS = ["전체","대시보드","미래형","일러스트","인쇄·레트로","문서·보고서","문서·정리","참여형","어린이","감정·웰니스","발표·표지","모바일"];
+let activeCat = "전체";
+let query = "";
+
+const grid = document.getElementById("grid");
+const chipsEl = document.getElementById("chips");
+const countEl = document.getElementById("count");
+
+CATS.forEach(c=>{
+  const b=document.createElement("button");
+  b.className="chip"+(c===activeCat?" active":"");
+  b.textContent=c;
+  b.onclick=()=>{activeCat=c;[...chipsEl.children].forEach(x=>x.classList.remove("active"));b.classList.add("active");render();};
+  chipsEl.appendChild(b);
+});
+
+const copyIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>`;
+const checkIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>`;
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+function attachCopy(btn,text,markEl){
+  btn.onclick=()=>{
+    const done=()=>{btn.classList.add("done");btn.innerHTML=checkIcon;setTimeout(()=>{btn.classList.remove("done");btn.innerHTML=copyIcon;},1300);};
+    navigator.clipboard.writeText(text).then(done).catch(()=>{
+      const r=document.createRange();r.selectNodeContents(markEl);
+      const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+      try{document.execCommand("copy");done();}catch(e){}
+      sel.removeAllRanges();
+    });
+  };
 }
 
-/* ===================== DEVICE PREVIEW TOGGLE ===================== */
-(function () {
-  try {
-    var pcBtn = document.getElementById('device_pcBtn');
-    var mobileBtn = document.getElementById('device_mobileBtn');
-
-    function applyDevice(mode) {
-      if (mode === 'mobile') {
-        document.body.classList.add('device-mobile-mode');
-        mobileBtn.classList.add('device-active');
-        pcBtn.classList.remove('device-active');
-      } else {
-        document.body.classList.remove('device-mobile-mode');
-        pcBtn.classList.add('device-active');
-        mobileBtn.classList.remove('device-active');
-      }
-      try { localStorage.setItem('vch_device_mode', mode); } catch (e) {}
-    }
-
-    pcBtn.addEventListener('click', function () { applyDevice('pc'); });
-    mobileBtn.addEventListener('click', function () { applyDevice('mobile'); });
-
-    var saved = 'pc';
-    try { saved = localStorage.getItem('vch_device_mode') || 'pc'; } catch (e) {}
-    applyDevice(saved);
-  } catch (e) {
-    console.error('device toggle error', e);
-  }
-})();
-
-/* 웹앱 카테고리 공용: "저장"/"구글시트 연동" 버튼은 백엔드가 없는 데모이므로
-   실제 저장은 하지 않고, 어떤 데이터가 전송될지 메시지로만 보여준다. */
-function demoSave(msgEl, kind, summary) {
-  if (!msgEl) { return; }
-  var text = kind === 'sheets'
-    ? '📤 구글시트 연동(데모): ' + summary + ' → 실제 연동을 위해서는 백엔드/구글 API 설정이 필요해요.'
-    : '💾 저장(데모): ' + summary + ' → 지금은 새로고침하면 사라져요. 영구 저장을 위해서는 백엔드 연결이 필요해요.';
-  msgEl.textContent = text;
-  msgEl.classList.add('show');
-  clearTimeout(msgEl._hideTimer);
-  msgEl._hideTimer = setTimeout(function () { msgEl.classList.remove('show'); }, 4500);
+function buildCards(){
+  grid.innerHTML="";
+  STYLES.forEach((s,i)=>{
+    const card=document.createElement("article");
+    card.className="card";
+    card.dataset.cat=s.cat;
+    card.dataset.idx=i;
+    card.innerHTML=`
+      <div class="preview">${s.pv}</div>
+      <div class="card-body">
+        <div class="card-head">
+          <h2 class="card-title">${s.name}</h2>
+          <span class="tag">${s.use}</span>
+        </div>
+        <p class="desc">${s.ko}</p>
+        <a class="ref-link" href="${REFS[i].u}" target="_blank" rel="noopener">실제 사례 보기 · ${REFS[i].t} ↗</a>
+        <div class="prompt-wrap">
+          <div class="prompt-label"><span>AI 프롬프트 (영문)</span></div>
+          <div class="prompt"><span class="ptext-en">${esc(s.prompt)}</span><button class="copy copy-en" title="영문 복사">${copyIcon}</button></div>
+          <div class="prompt-label"><span class="lab-ko">한글 해석</span></div>
+          <div class="prompt ko"><span class="ptext-ko">${esc(s.kp)}</span><button class="copy copy-ko" title="한글 복사">${copyIcon}</button></div>
+        </div>
+      </div>`;
+    attachCopy(card.querySelector(".copy-en"),s.prompt,card.querySelector(".ptext-en"));
+    attachCopy(card.querySelector(".copy-ko"),s.kp,card.querySelector(".ptext-ko"));
+    grid.appendChild(card);
+  });
 }
 
-/* ===================== QUIZ MODULE ===================== */
-(function () {
-  try {
-    var questions = [
-      { q: "다음 중 대한민국의 수도는?", opts: ["부산", "대전", "서울", "인천"], answer: 2 },
-      { q: "물은 몇 도에서 끓는가? (1기압 기준)", opts: ["0도", "50도", "100도", "150도"], answer: 2 },
-      { q: "지구에서 가장 큰 대륙은?", opts: ["유럽", "아시아", "아프리카", "북아메리카"], answer: 1 },
-      { q: "다음 중 소수(素數)가 아닌 것은?", opts: ["7", "11", "15", "13"], answer: 2 },
-      { q: "광합성이 주로 일어나는 식물의 기관은?", opts: ["뿌리", "줄기", "잎", "꽃"], answer: 2 }
-    ];
-    var current = 0, score = 0;
-    var app = document.getElementById('quiz_app');
-
-    function render() {
-      if (current >= questions.length) {
-        app.innerHTML =
-          '<div class="quiz-result">' +
-          '<div>퀴즈 완료!</div>' +
-          '<div class="quiz-score">' + score + ' / ' + questions.length + '</div>' +
-          '<button class="quiz-restart" id="quiz_restartBtn">다시 풀기</button>' +
-          '</div>';
-        document.getElementById('quiz_restartBtn').addEventListener('click', restart);
-        return;
-      }
-      var item = questions[current];
-      var html = '<div class="quiz-top"><span>문제 ' + (current + 1) + ' / ' + questions.length + '</span><span>점수: ' + score + '</span></div>';
-      html += '<h2 class="quiz-q">' + item.q + '</h2>';
-      for (var i = 0; i < item.opts.length; i++) {
-        html += '<button class="quiz-opt" data-i="' + i + '">' + item.opts[i] + '</button>';
-      }
-      app.innerHTML = html;
-      var btns = app.querySelectorAll('.quiz-opt');
-      btns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var i = Number(btn.getAttribute('data-i'));
-          btns.forEach(function (b) { b.disabled = true; });
-          if (i === item.answer) {
-            btn.classList.add('correct');
-            score++;
-          } else {
-            btn.classList.add('wrong');
-            btns[item.answer].classList.add('correct');
-          }
-          setTimeout(function () { current++; render(); }, 900);
-        });
-      });
-    }
-
-    function restart() { current = 0; score = 0; render(); }
-    render();
-  } catch (e) {
-    console.error('quiz module error', e);
-  }
-})();
-
-/* ===================== MATCH MODULE ===================== */
-(function () {
-  try {
-    var icons = ['🍎', '🍌', '🍇', '🍓', '🍉', '🍒', '🍍', '🥝'];
-    var cards, flipped, matchedCount, tries, locked;
-    var board = document.getElementById('match_board');
-    var info = document.getElementById('match_info');
-
-    function shuffle(arr) {
-      for (var i = arr.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
-      }
-      return arr;
-    }
-
-    function initMatch() {
-      var doubled = icons.concat(icons);
-      cards = shuffle(doubled.map(function (icon, i) { return { id: i, icon: icon, matched: false }; }));
-      flipped = []; matchedCount = 0; tries = 0; locked = false;
-      info.textContent = '시도 횟수: ' + tries;
-      renderBoard();
-    }
-
-    function renderBoard() {
-      board.innerHTML = '';
-      cards.forEach(function (card) {
-        var el = document.createElement('div');
-        var cls = 'match-card' + (card.matched ? ' matched' : (flipped.indexOf(card.id) !== -1 ? '' : ' hidden-card'));
-        el.className = cls;
-        el.textContent = (card.matched || flipped.indexOf(card.id) !== -1) ? card.icon : '';
-        el.addEventListener('click', function () { flip(card.id); });
-        board.appendChild(el);
-      });
-    }
-
-    function flip(id) {
-      if (locked) { return; }
-      var card = cards.filter(function (c) { return c.id === id; })[0];
-      if (card.matched || flipped.indexOf(id) !== -1) { return; }
-      flipped.push(id);
-      renderBoard();
-      if (flipped.length === 2) {
-        tries++;
-        info.textContent = '시도 횟수: ' + tries;
-        var a = cards.filter(function (c) { return c.id === flipped[0]; })[0];
-        var b = cards.filter(function (c) { return c.id === flipped[1]; })[0];
-        if (a.icon === b.icon) {
-          a.matched = true; b.matched = true;
-          matchedCount += 2;
-          flipped = [];
-          renderBoard();
-          if (matchedCount === cards.length) {
-            setTimeout(function () { alert('완료! 총 시도 횟수: ' + tries); }, 200);
-          }
-        } else {
-          locked = true;
-          setTimeout(function () { flipped = []; locked = false; renderBoard(); }, 700);
-        }
-      }
-    }
-
-    document.getElementById('match_restartBtn').addEventListener('click', initMatch);
-    initMatch();
-  } catch (e) {
-    console.error('match module error', e);
-  }
-})();
-
-/* ===================== PENDULUM MODULE ===================== */
-(function () {
-  try {
-    var canvas = document.getElementById('pendCanvas');
-    var ctx = canvas.getContext('2d');
-    if (!ctx) { throw new Error('이 브라우저에서 캔버스를 지원하지 않습니다.'); }
-
-    var lenInput = document.getElementById('pend_lenInput');
-    var angInput = document.getElementById('pend_angInput');
-    var gravInput = document.getElementById('pend_gravInput');
-    var lenVal = document.getElementById('pend_lenVal');
-    var angVal = document.getElementById('pend_angVal');
-    var gravVal = document.getElementById('pend_gravVal');
-    var toggleBtn = document.getElementById('pend_toggleBtn');
-    var resetBtn = document.getElementById('pend_resetBtn');
-    var statEl = document.getElementById('pend_stat');
-
-    var originX = 180, originY = 40;
-    var armLength = parseFloat(lenInput.value);
-    var gravity = parseFloat(gravInput.value);
-    var theta = parseFloat(angInput.value) * Math.PI / 180;
-    var omega = 0;
-    var running = true;
-    var lastTime = null;
-
-    function update(dt) {
-      var alpha = -(gravity / armLength) * Math.sin(theta);
-      omega += alpha * dt;
-      theta += omega * dt;
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      var bobX = originX + armLength * Math.sin(theta);
-      var bobY = originY + armLength * Math.cos(theta);
-
-      ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(originX, originY);
-      ctx.lineTo(bobX, bobY);
-      ctx.stroke();
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.beginPath();
-      ctx.arc(originX, originY, 5, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#3b82f6';
-      ctx.beginPath();
-      ctx.arc(bobX, bobY, 16, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    function loop(t) {
-      if (lastTime === null) { lastTime = t; }
-      var dt = Math.min((t - lastTime) / 1000, 0.032);
-      lastTime = t;
-      if (running) { update(dt); }
-      draw();
-      window.requestAnimationFrame(loop);
-    }
-
-    function updateStat() {
-      /* 소진폭 근사 주기: T = 2π√(L/g). 실제 시뮬레이션은 큰 각도도 정확히 계산하지만,
-         중력이 주기에 미치는 영향을 한눈에 보여주기 위한 참고값입니다. */
-      var period = 2 * Math.PI * Math.sqrt((armLength / 100) / gravity);
-      statEl.textContent = '예상 주기(소진폭 근사): ' + period.toFixed(2) + '초 — 중력이 커질수록 더 빨리 흔들립니다.';
-    }
-
-    lenInput.addEventListener('input', function () {
-      armLength = parseFloat(lenInput.value);
-      lenVal.textContent = lenInput.value;
-      updateStat();
-    });
-    angInput.addEventListener('input', function () {
-      angVal.textContent = angInput.value;
-    });
-    gravInput.addEventListener('input', function () {
-      gravity = parseFloat(gravInput.value);
-      gravVal.textContent = gravity.toFixed(1);
-      updateStat();
-    });
-    toggleBtn.addEventListener('click', function () {
-      running = !running;
-      toggleBtn.textContent = running ? '일시정지' : '재생';
-    });
-    resetBtn.addEventListener('click', function () {
-      theta = parseFloat(angInput.value) * Math.PI / 180;
-      omega = 0;
-      running = true;
-      toggleBtn.textContent = '일시정지';
-    });
-
-    updateStat();
-    draw();
-    window.requestAnimationFrame(loop);
-  } catch (e) {
-    var box = document.getElementById('pend_errBox');
-    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== CORAL BLEACHING MODULE ===================== */
-(function () {
-  try {
-    var canvas = document.getElementById('coralCanvas');
-    var ctx = canvas.getContext('2d');
-    if (!ctx) { throw new Error('이 브라우저에서 캔버스를 지원하지 않습니다.'); }
-
-    var tempInput = document.getElementById('coral_tempInput');
-    var pollInput = document.getElementById('coral_pollInput');
-    var consInput = document.getElementById('coral_consInput');
-    var tempVal = document.getElementById('coral_tempVal');
-    var pollVal = document.getElementById('coral_pollVal');
-    var consVal = document.getElementById('coral_consVal');
-    var stat = document.getElementById('coral_stat');
-
-    function simulate() {
-      var temp = parseFloat(tempInput.value);
-      var pollution = parseFloat(pollInput.value);
-      var conservation = parseFloat(consInput.value);
-      var months = 24;
-      var coral = 100;
-      var data = [coral];
-      var damageRate = (temp * 1.8 + pollution * 0.08) * (1 - conservation / 150);
-      if (damageRate < 0) { damageRate = 0; }
-      for (var i = 0; i < months; i++) {
-        coral = coral - damageRate;
-        if (coral < 0) { coral = 0; }
-        data.push(coral);
-      }
-      return data;
-    }
-
-    function draw(data) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      var padding = 40;
-      var w = canvas.width - padding * 2;
-      var h = canvas.height - padding * 2;
-      var maxY = 100;
-
-      ctx.strokeStyle = '#bae6fd';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(padding, padding);
-      ctx.lineTo(padding, padding + h);
-      ctx.lineTo(padding + w, padding + h);
-      ctx.stroke();
-
-      ctx.fillStyle = '#0369a1';
-      ctx.font = '11px sans-serif';
-      ctx.fillText('건강도(%)', padding - 32, padding - 8);
-      ctx.fillText('개월', padding + w - 10, padding + h + 20);
-
-      var last = data[data.length - 1];
-      var lineColor = last > 60 ? '#16a34a' : (last > 30 ? '#f59e0b' : '#dc2626');
-
-      ctx.strokeStyle = lineColor;
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      for (var j = 0; j < data.length; j++) {
-        var x = padding + (j / (data.length - 1)) * w;
-        var y = padding + h - (data[j] / maxY) * h;
-        if (j === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
-      }
-      ctx.stroke();
-
-      var riskLabel = last > 60 ? '낮음' : (last > 30 ? '높음' : '매우 높음');
-      stat.textContent = '24개월 후 산호 건강도: ' + Math.round(last) + '% / 백화 위험도: ' + riskLabel;
-    }
-
-    function run() {
-      var data = simulate();
-      draw(data);
-    }
-
-    tempInput.addEventListener('input', function () { tempVal.textContent = parseFloat(tempInput.value).toFixed(1); });
-    pollInput.addEventListener('input', function () { pollVal.textContent = pollInput.value; });
-    consInput.addEventListener('input', function () { consVal.textContent = consInput.value; });
-    document.getElementById('coral_runBtn').addEventListener('click', run);
-
-    run();
-  } catch (e) {
-    var box = document.getElementById('coral_errBox');
-    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== PICKER MODULE ===================== */
-(function () {
-  try {
-    var namesArea = document.getElementById('pick_names');
-    var groupSizeInput = document.getElementById('pick_groupSize');
-    var pickBtn = document.getElementById('pick_pickBtn');
-    var resetBtn = document.getElementById('pick_resetBtn');
-    var result = document.getElementById('pick_result');
-    var remaining = [];
-
-    function loadNames() {
-      return namesArea.value.split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
-    }
-
-    function ensurePool() {
-      if (remaining.length === 0) { remaining = loadNames(); }
-    }
-
-    pickBtn.addEventListener('click', function () {
-      ensurePool();
-      if (remaining.length === 0) {
-        result.innerHTML = '이름을 먼저 입력해주세요';
-        return;
-      }
-      var size = Math.max(1, parseInt(groupSizeInput.value, 10) || 1);
-      size = Math.min(size, remaining.length);
-      var picked = [];
-      for (var i = 0; i < size; i++) {
-        var idx = Math.floor(Math.random() * remaining.length);
-        picked.push(remaining[idx]);
-        remaining.splice(idx, 1);
-      }
-      result.innerHTML = picked.map(function (n) { return '<span class="picked">' + n + '</span>'; }).join('<br>');
-    });
-
-    resetBtn.addEventListener('click', function () {
-      remaining = [];
-      result.innerHTML = '이름을 입력하고<br>뽑기를 눌러주세요';
-    });
-  } catch (e) {
-    var box = document.getElementById('pick_errBox');
-    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== TIMER MODULE ===================== */
-(function () {
-  try {
-    var display = document.getElementById('timer_display');
-    var startBtn = document.getElementById('timer_startBtn');
-    var pauseBtn = document.getElementById('timer_pauseBtn');
-    var resetBtn = document.getElementById('timer_resetBtn');
-    var presetButtons = document.querySelectorAll('#view-timer .presets button');
-
-    var totalSeconds = 300;
-    var remaining = totalSeconds;
-    var timerId = null;
-
-    function format(sec) {
-      var m = Math.floor(sec / 60);
-      var s = sec % 60;
-      return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
-    }
-
-    function render() {
-      display.textContent = format(remaining);
-      display.classList.remove('warn', 'danger');
-      if (remaining <= 10) { display.classList.add('danger'); }
-      else if (remaining <= 30) { display.classList.add('warn'); }
-    }
-
-    function tick() {
-      remaining--;
-      if (remaining <= 0) {
-        remaining = 0;
-        render();
-        clearInterval(timerId);
-        timerId = null;
-        display.textContent = '시간 종료!';
-        return;
-      }
-      render();
-    }
-
-    function flashClick(btn) {
-      btn.classList.remove('btn-clicked');
-      /* restart animation even on rapid repeat clicks */
-      void btn.offsetWidth;
-      btn.classList.add('btn-clicked');
-      clearTimeout(btn._flashTimer);
-      btn._flashTimer = setTimeout(function () { btn.classList.remove('btn-clicked'); }, 300);
-    }
-
-    startBtn.addEventListener('click', function () {
-      flashClick(startBtn);
-      if (timerId) { return; }
-      if (remaining <= 0) { remaining = totalSeconds; }
-      timerId = setInterval(tick, 1000);
-    });
-
-    pauseBtn.addEventListener('click', function () {
-      flashClick(pauseBtn);
-      if (timerId) { clearInterval(timerId); timerId = null; }
-    });
-
-    resetBtn.addEventListener('click', function () {
-      flashClick(resetBtn);
-      if (timerId) { clearInterval(timerId); timerId = null; }
-      remaining = totalSeconds;
-      render();
-    });
-
-    presetButtons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (timerId) { clearInterval(timerId); timerId = null; }
-        totalSeconds = parseInt(btn.getAttribute('data-sec'), 10);
-        remaining = totalSeconds;
-        render();
-      });
-    });
-
-    var saveMsg = document.getElementById('timer_saveMsg');
-    var saveBtn = document.getElementById('timer_saveBtn');
-    var sheetsBtn = document.getElementById('timer_sheetsBtn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', function () {
-        demoSave(saveMsg, 'save', '남은 시간 ' + format(remaining));
-      });
-    }
-    if (sheetsBtn) {
-      sheetsBtn.addEventListener('click', function () {
-        demoSave(saveMsg, 'sheets', '남은 시간 ' + format(remaining));
-      });
-    }
-
-    render();
-  } catch (e) {
-    var box = document.getElementById('timer_errBox');
-    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== RPS MODULE ===================== */
-(function () {
-  try {
-    var choices = ['rock', 'paper', 'scissors'];
-    var icons = { rock: '✊', paper: '✋', scissors: '✌️' };
-    var names = { rock: '바위', paper: '보', scissors: '가위' };
-    var win = 0, lose = 0, draw = 0;
-
-    var scoreEl = document.getElementById('rps_score');
-    var meIcon = document.getElementById('rps_meIcon');
-    var cpuIcon = document.getElementById('rps_cpuIcon');
-    var resultEl = document.getElementById('rps_result');
-    var buttons = document.querySelectorAll('#rps_choices button');
-
-    function judge(me, cpu) {
-      if (me === cpu) { return 'draw'; }
-      if (
-        (me === 'rock' && cpu === 'scissors') ||
-        (me === 'paper' && cpu === 'rock') ||
-        (me === 'scissors' && cpu === 'paper')
-      ) { return 'win'; }
-      return 'lose';
-    }
-
-    function updateScore() {
-      scoreEl.textContent = '승 ' + win + ' · 패 ' + lose + ' · 무 ' + draw;
-    }
-
-    buttons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var me = btn.getAttribute('data-choice');
-        var cpu = choices[Math.floor(Math.random() * choices.length)];
-        meIcon.textContent = icons[me];
-        cpuIcon.textContent = icons[cpu];
-        var outcome = judge(me, cpu);
-        if (outcome === 'win') { win++; resultEl.textContent = '승리! ' + names[me] + ' > ' + names[cpu]; }
-        else if (outcome === 'lose') { lose++; resultEl.textContent = '패배! ' + names[cpu] + ' > ' + names[me]; }
-        else { draw++; resultEl.textContent = '무승부! 둘 다 ' + names[me]; }
-        updateScore();
-      });
-    });
-
-    document.getElementById('rps_resetBtn').addEventListener('click', function () {
-      win = 0; lose = 0; draw = 0;
-      updateScore();
-      meIcon.textContent = '❓';
-      cpuIcon.textContent = '❓';
-      resultEl.textContent = '';
-    });
-
-    updateScore();
-  } catch (e) {
-    console.error('rps module error', e);
-  }
-})();
-
-/* ===================== NUMBER GUESS MODULE ===================== */
-(function () {
-  try {
-    var input = document.getElementById('guess_input');
-    var submitBtn = document.getElementById('guess_submitBtn');
-    var resetBtn = document.getElementById('guess_resetBtn');
-    var hint = document.getElementById('guess_hint');
-    var triesEl = document.getElementById('guess_tries');
-
-    var target = Math.floor(Math.random() * 100) + 1;
-    var tries = 0;
-    var solved = false;
-
-    function newGame() {
-      target = Math.floor(Math.random() * 100) + 1;
-      tries = 0;
-      solved = false;
-      hint.textContent = '숫자를 입력해보세요!';
-      triesEl.textContent = '시도 횟수: 0';
-      input.value = '';
-      input.disabled = false;
-      input.focus();
-    }
-
-    function submitGuess() {
-      if (solved) { return; }
-      var val = parseInt(input.value, 10);
-      if (isNaN(val) || val < 1 || val > 100) {
-        hint.textContent = '1~100 사이의 숫자를 입력해주세요';
-        return;
-      }
-      tries++;
-      triesEl.textContent = '시도 횟수: ' + tries;
-      if (val === target) {
-        hint.textContent = '정답입니다! 🎉 (' + tries + '번 만에 맞췄어요)';
-        solved = true;
-        input.disabled = true;
-      } else if (val < target) {
-        hint.textContent = '더 큰 수예요 ⬆️';
-      } else {
-        hint.textContent = '더 작은 수예요 ⬇️';
-      }
-    }
-
-    submitBtn.addEventListener('click', submitGuess);
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { submitGuess(); }
-    });
-    resetBtn.addEventListener('click', newGame);
-  } catch (e) {
-    var box = document.getElementById('guess_errBox');
-    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== TYPING CHALLENGE MODULE ===================== */
-(function () {
-  try {
-    var words = [
-      '사과', '바나나', '컴퓨터', '학교', '선생님', '바이브코딩', '키보드', '인터넷',
-      '교실', '연수', '시뮬레이션', '학생', '도전', '집중', '연습', '성공',
-      '창의력', '협동', '발표', '문제해결'
-    ];
-    var wordEl = document.getElementById('typing_word');
-    var input = document.getElementById('typing_input');
-    var startBtn = document.getElementById('typing_startBtn');
-    var timeLeftEl = document.getElementById('typing_timeLeft');
-    var scoreLabelEl = document.getElementById('typing_scoreLabel');
-    var msgEl = document.getElementById('typing_msg');
-
-    var score = 0;
-    var timeLeft = 30;
-    var timerId = null;
-    var currentWord = '';
-
-    function pickWord() {
-      currentWord = words[Math.floor(Math.random() * words.length)];
-      wordEl.textContent = currentWord;
-    }
-
-    function endGame() {
-      clearInterval(timerId);
-      timerId = null;
-      input.disabled = true;
-      wordEl.textContent = '시간 종료!';
-      msgEl.textContent = '최종 점수: ' + score + '점';
-      startBtn.textContent = '다시 시작';
-    }
-
-    function startGame() {
-      score = 0;
-      timeLeft = 30;
-      scoreLabelEl.textContent = '점수: 0';
-      timeLeftEl.textContent = '남은 시간: 30초';
-      msgEl.textContent = '';
-      input.value = '';
-      input.disabled = false;
-      input.focus();
-      pickWord();
-      startBtn.textContent = '시작';
-      if (timerId) { clearInterval(timerId); }
-      timerId = setInterval(function () {
-        timeLeft--;
-        timeLeftEl.textContent = '남은 시간: ' + timeLeft + '초';
-        if (timeLeft <= 0) { endGame(); }
-      }, 1000);
-    }
-
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        if (input.value.trim() === currentWord) {
-          score++;
-          scoreLabelEl.textContent = '점수: ' + score;
-          pickWord();
-        }
-        input.value = '';
-      }
-    });
-
-    startBtn.addEventListener('click', startGame);
-  } catch (e) {
-    var box = document.getElementById('typing_msg');
-    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== PROJECTILE MODULE ===================== */
-(function () {
-  try {
-    var canvas = document.getElementById('projCanvas');
-    var ctx = canvas.getContext('2d');
-    if (!ctx) { throw new Error('이 브라우저에서 캔버스를 지원하지 않습니다.'); }
-
-    var velInput = document.getElementById('proj_velInput');
-    var angInput = document.getElementById('proj_angInput');
-    var velVal = document.getElementById('proj_velVal');
-    var angVal = document.getElementById('proj_angVal');
-    var fireBtn = document.getElementById('proj_fireBtn');
-    var stat = document.getElementById('proj_stat');
-
-    var g = 9.8;
-    var groundY = canvas.height - 20;
-    var originX = 30;
-    var scale = 6;
-    var animId = null;
-
-    function drawStatic() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = '#334155';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(0, groundY);
-      ctx.lineTo(canvas.width, groundY);
-      ctx.stroke();
-    }
-
-    function fire() {
-      if (animId) { cancelAnimationFrame(animId); animId = null; }
-      var v0 = parseFloat(velInput.value);
-      var angle = parseFloat(angInput.value) * Math.PI / 180;
-      var vx = v0 * Math.cos(angle);
-      var vy = v0 * Math.sin(angle);
-      var t = 0;
-      var dt = 0.03;
-      var path = [];
-
-      var totalRange = (v0 * v0 * Math.sin(2 * angle)) / g;
-      var maxHeight = (vy * vy) / (2 * g);
-      stat.textContent = '예상 사거리: ' + totalRange.toFixed(1) + 'm · 최고 높이: ' + maxHeight.toFixed(1) + 'm';
-
-      function step() {
-        drawStatic();
-        var x = vx * t;
-        var y = vy * t - 0.5 * g * t * t;
-        if (y < 0) {
-          drawPath(path);
-          return;
-        }
-        path.push([originX + x * scale, groundY - y * scale]);
-        drawPath(path);
-        t += dt;
-        animId = requestAnimationFrame(step);
-      }
-
-      function drawPath(pts) {
-        ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        for (var i = 0; i < pts.length; i++) {
-          if (i === 0) { ctx.moveTo(pts[i][0], pts[i][1]); } else { ctx.lineTo(pts[i][0], pts[i][1]); }
-        }
-        ctx.stroke();
-        if (pts.length > 0) {
-          var last = pts[pts.length - 1];
-          ctx.fillStyle = '#f59e0b';
-          ctx.beginPath();
-          ctx.arc(last[0], last[1], 7, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      step();
-    }
-
-    velInput.addEventListener('input', function () { velVal.textContent = velInput.value; });
-    angInput.addEventListener('input', function () { angVal.textContent = angInput.value; });
-    fireBtn.addEventListener('click', fire);
-
-    drawStatic();
-  } catch (e) {
-    var box = document.getElementById('proj_errBox');
-    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== COIN FLIP MODULE ===================== */
-(function () {
-  try {
-    var face = document.getElementById('coin_face');
-    var flip1Btn = document.getElementById('coin_flip1Btn');
-    var flip100Btn = document.getElementById('coin_flip100Btn');
-    var resetBtn = document.getElementById('coin_resetBtn');
-    var stat = document.getElementById('coin_stat');
-    var canvas = document.getElementById('coinCanvas');
-    var ctx = canvas.getContext('2d');
-
-    var heads = 0, tails = 0;
-
-    function drawBars() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      var total = heads + tails;
-      var maxBar = canvas.height - 60;
-      var hH = total > 0 ? (heads / Math.max(heads, tails, 1)) * maxBar : 0;
-      var tH = total > 0 ? (tails / Math.max(heads, tails, 1)) * maxBar : 0;
-
-      ctx.fillStyle = '#ca8a04';
-      ctx.fillRect(70, canvas.height - 30 - hH, 70, hH);
-      ctx.fillStyle = '#92400e';
-      ctx.fillRect(180, canvas.height - 30 - tH, 70, tH);
-
-      ctx.fillStyle = '#713f12';
-      ctx.font = '13px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('앞면 ' + heads, 105, canvas.height - 10);
-      ctx.fillText('뒷면 ' + tails, 215, canvas.height - 10);
-    }
-
-    function updateStat() {
-      var total = heads + tails;
-      if (total === 0) {
-        stat.textContent = '아직 던지지 않았습니다';
-        return;
-      }
-      var pctH = ((heads / total) * 100).toFixed(1);
-      var pctT = ((tails / total) * 100).toFixed(1);
-      stat.textContent = '총 ' + total + '회 · 앞면 ' + pctH + '% · 뒷면 ' + pctT + '%';
-    }
-
-    function flipOnce() {
-      var result = Math.random() < 0.5 ? 'heads' : 'tails';
-      if (result === 'heads') { heads++; face.textContent = '🙂'; } else { tails++; face.textContent = '🌑'; }
-      drawBars();
-      updateStat();
-    }
-
-    flip1Btn.addEventListener('click', flipOnce);
-    flip100Btn.addEventListener('click', function () {
-      for (var i = 0; i < 100; i++) {
-        if (Math.random() < 0.5) { heads++; } else { tails++; }
-      }
-      face.textContent = '🪙';
-      drawBars();
-      updateStat();
-    });
-    resetBtn.addEventListener('click', function () {
-      heads = 0; tails = 0;
-      face.textContent = '🪙';
-      drawBars();
-      updateStat();
-    });
-
-    drawBars();
-  } catch (e) {
-    var stat2 = document.getElementById('coin_stat');
-    if (stat2) { stat2.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== POLL MODULE ===================== */
-(function () {
-  try {
-    var listEl = document.getElementById('poll_list');
-    var newOptInput = document.getElementById('poll_newOptInput');
-    var addOptBtn = document.getElementById('poll_addOptBtn');
-    var resetBtn = document.getElementById('poll_resetBtn');
-
-    var options = [
-      { label: '🍎 사과', votes: 0 },
-      { label: '🍌 바나나', votes: 0 },
-      { label: '🍇 포도', votes: 0 }
-    ];
-
-    function esc(s) { return String(s).replace(/"/g, '&quot;'); }
-
-    function render() {
-      var total = options.reduce(function (a, o) { return a + o.votes; }, 0);
-      listEl.innerHTML = '';
-      options.forEach(function (o, i) {
-        var pct = total > 0 ? Math.round((o.votes / total) * 100) : 0;
-        var row = document.createElement('div');
-        row.className = 'poll-option';
-        row.innerHTML =
-          '<div class="poll-option-head">' +
-            '<input type="text" class="poll-label-input" data-idx="' + i + '" value="' + esc(o.label) + '">' +
-            '<button class="poll-del" data-idx="' + i + '">삭제</button>' +
-          '</div>' +
-          '<button class="poll-btn" data-idx="' + i + '">투표하기</button>' +
-          '<div class="poll-bar-track"><div class="poll-bar-fill" style="width:' + pct + '%"></div></div>' +
-          '<div class="poll-pct">' + o.votes + '표 (' + pct + '%)</div>';
-        listEl.appendChild(row);
-      });
-
-      listEl.querySelectorAll('.poll-label-input').forEach(function (input) {
-        input.addEventListener('change', function () {
-          var idx = parseInt(input.getAttribute('data-idx'), 10);
-          var v = input.value.trim();
-          options[idx].label = v || options[idx].label;
-        });
-      });
-      listEl.querySelectorAll('.poll-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var idx = parseInt(btn.getAttribute('data-idx'), 10);
-          options[idx].votes++;
-          render();
-        });
-      });
-      listEl.querySelectorAll('.poll-del').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var idx = parseInt(btn.getAttribute('data-idx'), 10);
-          if (options.length <= 1) { return; }
-          options.splice(idx, 1);
-          render();
-        });
-      });
-    }
-
-    function addOption() {
-      var name = newOptInput.value.trim();
-      if (!name) { return; }
-      options.push({ label: name, votes: 0 });
-      newOptInput.value = '';
-      render();
-    }
-
-    addOptBtn.addEventListener('click', addOption);
-    newOptInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { addOption(); }
-    });
-
-    resetBtn.addEventListener('click', function () {
-      options.forEach(function (o) { o.votes = 0; });
-      render();
-    });
-
-    render();
-  } catch (e) {
-    console.error('poll module error', e);
-  }
-})();
-
-/* ===================== ROULETTE MODULE ===================== */
-(function () {
-  try {
-    var wheel = document.getElementById('roulette_wheel');
-    var ctx = wheel.getContext('2d');
-    var itemsArea = document.getElementById('roulette_items');
-    var spinBtn = document.getElementById('roulette_spinBtn');
-    var resultEl = document.getElementById('roulette_result');
-    var colors = ['#fbbf24', '#f87171', '#34d399', '#60a5fa', '#a78bfa', '#f472b6', '#facc15', '#38bdf8'];
-    var currentRotation = 0;
-    var spinning = false;
-
-    function getItems() {
-      return itemsArea.value.split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
-    }
-
-    function drawWheel(items) {
-      var cx = wheel.width / 2, cy = wheel.height / 2, r = wheel.width / 2 - 4;
-      ctx.clearRect(0, 0, wheel.width, wheel.height);
-      var n = items.length;
-      if (n === 0) { return; }
-      var slice = (2 * Math.PI) / n;
-      for (var i = 0; i < n; i++) {
-        var start = i * slice;
-        var end = start + slice;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, r, start, end);
-        ctx.closePath();
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.fill();
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(start + slice / 2);
-        ctx.textAlign = 'right';
-        ctx.fillStyle = '#1e1b4b';
-        ctx.font = 'bold 13px sans-serif';
-        ctx.fillText(items[i], r - 10, 4);
-        ctx.restore();
-      }
-    }
-
-    function spin() {
-      if (spinning) { return; }
-      var items = getItems();
-      if (items.length === 0) {
-        resultEl.textContent = '항목을 먼저 입력해주세요';
-        return;
-      }
-      spinning = true;
-      var n = items.length;
-      var sliceDeg = 360 / n;
-      var winnerIndex = Math.floor(Math.random() * n);
-      // canvas angle convention: 0deg = 3 o'clock, increasing clockwise.
-      // the fixed pointer sits at the top of the wheel, which is 270deg in that convention.
-      var targetCenterDeg = winnerIndex * sliceDeg + sliceDeg / 2;
-      var pointerDeg = 270;
-      var extraSpins = 4 * 360;
-      var currentMod = ((currentRotation % 360) + 360) % 360;
-      var neededMod = ((pointerDeg - targetCenterDeg) % 360 + 360) % 360;
-      var delta = neededMod - currentMod;
-      if (delta <= 0) { delta += 360; }
-      var finalRotation = currentRotation + extraSpins + delta;
-      currentRotation = finalRotation;
-      wheel.style.transform = 'rotate(' + finalRotation + 'deg)';
-      resultEl.textContent = '회전 중...';
-      setTimeout(function () {
-        resultEl.textContent = '결과: ' + items[winnerIndex] + ' 🎉';
-        spinning = false;
-      }, 3100);
-    }
-
-    itemsArea.addEventListener('input', function () { drawWheel(getItems()); });
-    spinBtn.addEventListener('click', spin);
-
-    drawWheel(getItems());
-  } catch (e) {
-    var box = document.getElementById('roulette_result');
-    if (box) { box.textContent = '오류가 발생했습니다: ' + e.message; }
-  }
-})();
-
-/* ===================== NOTES MODULE ===================== */
-(function () {
-  try {
-    var input = document.getElementById('notes_input');
-    var addBtn = document.getElementById('notes_addBtn');
-    var board = document.getElementById('notes_board');
-    var colors = ['#fde68a', '#fecaca', '#bbf7d0', '#bfdbfe', '#ddd6fe', '#fbcfe8'];
-    var notes = [];
-    var STORAGE_KEY = 'vch_notes_data_v1';
-
-    function loadFromStorage() {
-      try {
-        var raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) { notes = JSON.parse(raw) || []; }
-      } catch (e) { notes = []; }
-    }
-
-    function persistToStorage() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch (e) {}
-    }
-
-    function render() {
-      board.innerHTML = '';
-      notes.forEach(function (note, i) {
-        var div = document.createElement('div');
-        div.className = 'sticky-note';
-        div.style.background = colors[i % colors.length];
-        div.innerHTML = '<button class="del" data-i="' + i + '">✕</button>' + note;
-        board.appendChild(div);
-      });
-      board.querySelectorAll('.del').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var i = Number(btn.getAttribute('data-i'));
-          notes.splice(i, 1);
-          persistToStorage();
-          render();
-        });
-      });
-    }
-
-    function addNote() {
-      var text = input.value.trim();
-      if (!text) { return; }
-      notes.push(text);
-      input.value = '';
-      persistToStorage();
-      render();
-    }
-
-    addBtn.addEventListener('click', addNote);
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { addNote(); }
-    });
-
-    var saveMsg = document.getElementById('notes_saveMsg');
-    var saveBtn = document.getElementById('notes_saveBtn');
-    var sheetsBtn = document.getElementById('notes_sheetsBtn');
-    var setupBtn = document.getElementById('notes_sheetsSetupBtn');
-    var setupBox = document.getElementById('notes_sheetsSetupBox');
-    var urlInput = document.getElementById('notes_sheetsUrlInput');
-    var urlSaveBtn = document.getElementById('notes_sheetsUrlSaveBtn');
-    var SHEETS_URL_KEY = 'vch_notes_sheets_url';
-
-    function showMsg(text) {
-      if (!saveMsg) { return; }
-      saveMsg.textContent = text;
-      saveMsg.classList.add('show');
-      clearTimeout(saveMsg._hideTimer);
-      saveMsg._hideTimer = setTimeout(function () { saveMsg.classList.remove('show'); }, 5000);
-    }
-
-    if (saveBtn) {
-      saveBtn.addEventListener('click', function () {
-        persistToStorage();
-        showMsg('💾 실제로 저장되었습니다. 새로고침해도 메모 ' + notes.length + '개가 유지됩니다. (이 브라우저에만 저장됨)');
-      });
-    }
-
-    try { urlInput.value = localStorage.getItem(SHEETS_URL_KEY) || ''; } catch (e) {}
-
-    if (setupBtn) {
-      setupBtn.addEventListener('click', function () {
-        setupBox.style.display = setupBox.style.display === 'none' ? 'block' : 'none';
-      });
-    }
-
-    if (urlSaveBtn) {
-      urlSaveBtn.addEventListener('click', function () {
-        var url = urlInput.value.trim();
-        if (!url) { return; }
-        try { localStorage.setItem(SHEETS_URL_KEY, url); } catch (e) {}
-        showMsg('✅ 구글시트 연동 URL이 저장되었습니다. 이제 "구글시트 연동" 버튼을 눌러 전송해보세요.');
-      });
-    }
-
-    if (sheetsBtn) {
-      sheetsBtn.addEventListener('click', function () {
-        var url = '';
-        try { url = localStorage.getItem(SHEETS_URL_KEY) || ''; } catch (e) {}
-        if (!url) {
-          showMsg('⚠️ 먼저 "⚙️ 연동 설정"에서 구글 Apps Script 웹앱 URL을 등록해주세요.');
-          setupBox.style.display = 'block';
-          return;
-        }
-        if (!notes.length) {
-          showMsg('⚠️ 보낼 메모가 없습니다. 먼저 메모를 추가해주세요.');
-          return;
-        }
-        var now = new Date();
-        var payload = { date: now.toLocaleString(), notes: notes };
-        showMsg('📤 전송 중...');
-        fetch(url, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        }).then(function () {
-          showMsg('📤 전송 완료! (no-cors 방식이라 응답 확인은 안 되니, 구글시트를 직접 열어 데이터가 들어왔는지 확인해주세요.)');
-        }).catch(function (err) {
-          showMsg('❌ 전송 실패: ' + err.message + ' (URL이 올바른지, 배포 권한이 "모든 사용자"인지 확인해주세요.)');
-        });
-      });
-    }
-
-    loadFromStorage();
-    render();
-  } catch (e) {
-    console.error('notes module error', e);
-  }
-})();
-
-/* ===================== ATTENDANCE MODULE ===================== */
-(function () {
-  try {
-    var names = ['홍길동', '김철수', '이영희', '박민수', '정수진', '최지우'];
-    var statusDefs = [
-      { key: 'present', label: '출석', cls: 'present' },
-      { key: 'field', label: '체험학습', cls: 'field' },
-      { key: 'early', label: '조퇴', cls: 'early' },
-      { key: 'sick', label: '병결', cls: 'sick' },
-      { key: 'etc', label: '기타결', cls: 'etc' }
-    ];
-    var STORAGE_KEY = 'vch_attendance_data_v1';
-    var records = {}; /* dateStr -> { name: statusKey|null } */
-    var remarksAll = {}; /* dateStr -> { name: remarkText } */
-
-    function pad2(n) { return n < 10 ? '0' + n : '' + n; }
-    function todayStr() {
-      var d = new Date();
-      return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
-    }
-
-    function loadFromStorage() {
-      try {
-        var raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) { return; }
-        var parsed = JSON.parse(raw);
-        if (parsed && parsed.records) { records = parsed.records; }
-        if (parsed && parsed.remarksAll) { remarksAll = parsed.remarksAll; }
-        if (parsed && parsed.names && parsed.names.length) { names = parsed.names; }
-      } catch (e) { console.error('attendance load error', e); }
-    }
-
-    function persistToStorage() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ records: records, remarksAll: remarksAll, names: names }));
-      } catch (e) { console.error('attendance save error', e); }
-    }
-
-    loadFromStorage();
-
-    var dateInput = document.getElementById('attend_date');
-    var allPresentBtn = document.getElementById('attend_allPresentBtn');
-    var listEl = document.getElementById('attend_list');
-    var summaryEl = document.getElementById('attend_summary');
-    var nameInput = document.getElementById('attend_nameInput');
-    var addNameBtn = document.getElementById('attend_addNameBtn');
-
-    dateInput.value = todayStr();
-
-    function getRecord() {
-      var d = dateInput.value || todayStr();
-      if (!records[d]) {
-        var obj = {};
-        names.forEach(function (n) { obj[n] = null; });
-        records[d] = obj;
-      }
-      return records[d];
-    }
-
-    function getRemarkRecord() {
-      var d = dateInput.value || todayStr();
-      if (!remarksAll[d]) { remarksAll[d] = {}; }
-      return remarksAll[d];
-    }
-
-    function render() {
-      var rec = getRecord();
-      var remarkRec = getRemarkRecord();
-      listEl.innerHTML = '';
-      var counts = {};
-      statusDefs.forEach(function (s) { counts[s.key] = 0; });
-      names.forEach(function (name) {
-        var row = document.createElement('div');
-        row.className = 'attend-row';
-        var st = rec[name];
-        if (st && counts.hasOwnProperty(st)) { counts[st]++; }
-        var remark = remarkRec[name] || '';
-        var btnsHtml = statusDefs.map(function (s) {
-          return '<button class="' + s.cls + (st === s.key ? ' active-state' : '') +
-            '" data-name="' + name + '" data-st="' + s.key + '">' + s.label + '</button>';
-        }).join('');
-        row.innerHTML =
-          '<span class="name">' + name + (remark ? '<span class="remark-tag">📝 ' + remark + '</span>' : '') + '</span>' +
-          '<span class="toggles">' + btnsHtml +
-          '<button class="remark-btn" data-remark="' + name + '">비고등록</button></span>';
-        listEl.appendChild(row);
-      });
-      summaryEl.textContent = statusDefs.map(function (s) {
-        return s.label + ' ' + counts[s.key];
-      }).join(' · ') + ' / 전체 ' + names.length;
-      persistToStorage();
-
-      listEl.querySelectorAll('button[data-st]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var name = btn.getAttribute('data-name');
-          var st = btn.getAttribute('data-st');
-          var rec2 = getRecord();
-          rec2[name] = rec2[name] === st ? null : st;
-          render();
-        });
-      });
-      listEl.querySelectorAll('button.remark-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var name = btn.getAttribute('data-remark');
-          var remarkRec2 = getRemarkRecord();
-          var current = remarkRec2[name] || '';
-          var input = window.prompt(name + ' 학생의 비고를 입력하세요 (예: 감기). 비워두고 확인을 누르면 비고가 삭제됩니다.', current);
-          if (input === null) { return; }
-          var trimmed = input.trim();
-          if (trimmed) { remarkRec2[name] = trimmed; } else { delete remarkRec2[name]; }
-          render();
-        });
-      });
-    }
-
-    function addName() {
-      var name = nameInput.value.trim();
-      if (!name) { return; }
-      if (names.indexOf(name) > -1) { nameInput.value = ''; return; }
-      names.push(name);
-      nameInput.value = '';
-      render();
-    }
-
-    dateInput.addEventListener('change', render);
-    allPresentBtn.addEventListener('click', function () {
-      var rec = getRecord();
-      names.forEach(function (n) { rec[n] = 'present'; });
-      render();
-    });
-    addNameBtn.addEventListener('click', addName);
-    nameInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { addName(); }
-    });
-
-    var saveMsg = document.getElementById('attend_saveMsg');
-    var saveBtn = document.getElementById('attend_saveBtn');
-    var sheetsBtn = document.getElementById('attend_sheetsBtn');
-    var setupBtn = document.getElementById('attend_sheetsSetupBtn');
-    var setupBox = document.getElementById('attend_sheetsSetupBox');
-    var urlInput = document.getElementById('attend_sheetsUrlInput');
-    var urlSaveBtn = document.getElementById('attend_sheetsUrlSaveBtn');
-    var SHEETS_URL_KEY = 'vch_attendance_sheets_url';
-
-    function showMsg(text) {
-      if (!saveMsg) { return; }
-      saveMsg.textContent = text;
-      saveMsg.classList.add('show');
-      clearTimeout(saveMsg._hideTimer);
-      saveMsg._hideTimer = setTimeout(function () { saveMsg.classList.remove('show'); }, 5000);
-    }
-
-    if (saveBtn) {
-      saveBtn.addEventListener('click', function () {
-        persistToStorage();
-        showMsg('💾 실제로 저장되었습니다. 새로고침해도 ' + dateInput.value + ' 출결 데이터가 유지됩니다. (이 브라우저에만 저장됨)');
-      });
-    }
-
-    try { urlInput.value = localStorage.getItem(SHEETS_URL_KEY) || ''; } catch (e) {}
-
-    if (setupBtn) {
-      setupBtn.addEventListener('click', function () {
-        setupBox.style.display = setupBox.style.display === 'none' ? 'block' : 'none';
-      });
-    }
-
-    if (urlSaveBtn) {
-      urlSaveBtn.addEventListener('click', function () {
-        var url = urlInput.value.trim();
-        if (!url) { return; }
-        try { localStorage.setItem(SHEETS_URL_KEY, url); } catch (e) {}
-        showMsg('✅ 구글시트 연동 URL이 저장되었습니다. 이제 "구글시트 연동" 버튼을 눌러 전송해보세요.');
-      });
-    }
-
-    if (sheetsBtn) {
-      sheetsBtn.addEventListener('click', function () {
-        var url = '';
-        try { url = localStorage.getItem(SHEETS_URL_KEY) || ''; } catch (e) {}
-        if (!url) {
-          showMsg('⚠️ 먼저 "⚙️ 연동 설정"에서 구글 Apps Script 웹앱 URL을 등록해주세요.');
-          setupBox.style.display = 'block';
-          return;
-        }
-        var rec = getRecord();
-        var remarkRec = getRemarkRecord();
-        var rows = names.map(function (n) {
-          var st = rec[n];
-          var label = '';
-          statusDefs.forEach(function (s) { if (s.key === st) { label = s.label; } });
-          return { name: n, status: label || '미체크', remark: remarkRec[n] || '' };
-        });
-        var payload = { date: dateInput.value, rows: rows };
-        showMsg('📤 전송 중...');
-        fetch(url, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        }).then(function () {
-          showMsg('📤 전송 완료! (no-cors 방식이라 응답 확인은 안 되니, 구글시트를 직접 열어 데이터가 들어왔는지 확인해주세요.)');
-        }).catch(function (err) {
-          showMsg('❌ 전송 실패: ' + err.message + ' (URL이 올바른지, 배포 권한이 "모든 사용자"인지 확인해주세요.)');
-        });
-      });
-    }
-
-    render();
-  } catch (e) {
-    console.error('attendance module error', e);
-  }
-})();
-
-/* ===================== CONCEPT-BASED INQUIRY: 사실/개념 분류 게임 ===================== */
-(function () {
-  try {
-    var items = [
-      { term: '사과', type: 'fact' },
-      { term: '과일', type: 'concept' },
-      { term: '코끼리', type: 'fact' },
-      { term: '동물', type: 'concept' },
-      { term: '선거', type: 'fact' },
-      { term: '민주주의', type: 'concept' },
-      { term: '태풍', type: 'fact' },
-      { term: '자연재해', type: 'concept' },
-      { term: '세종대왕', type: 'fact' },
-      { term: '리더십', type: 'concept' },
-      { term: '삼각형', type: 'fact' },
-      { term: '도형', type: 'concept' },
-      { term: '엽록소', type: 'fact' },
-      { term: '광합성', type: 'concept' },
-      { term: '용돈 기입장', type: 'fact' },
-      { term: '경제활동', type: 'concept' }
-    ];
-    var termEl = document.getElementById('cs_term');
-    var feedbackEl = document.getElementById('cs_feedback');
-    var scoreEl = document.getElementById('cs_score');
-    var factBtn = document.getElementById('cs_factBtn');
-    var conceptBtn = document.getElementById('cs_conceptBtn');
-    var restartBtn = document.getElementById('cs_restartBtn');
-    var order = [];
-    var idx = 0;
-    var correct = 0;
-    var answered = 0;
-    var ROUNDS = 10;
-
-    function shuffle(arr) {
-      var a = arr.slice();
-      for (var i = a.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
-      }
-      return a;
-    }
-
-    function updateScore() {
-      scoreEl.textContent = '점수: ' + correct + ' / ' + answered;
-    }
-
-    function showCurrent() {
-      if (idx >= order.length) {
-        termEl.textContent = '🎉 완료!';
-        feedbackEl.style.color = '#1f2937';
-        feedbackEl.textContent = '총 ' + order.length + '문제 중 ' + correct + '개 정답!';
-        factBtn.disabled = true; conceptBtn.disabled = true;
-        restartBtn.style.display = 'inline-block';
-        return;
-      }
-      termEl.textContent = order[idx].term;
-    }
-
-    function startGame() {
-      order = shuffle(items).slice(0, ROUNDS);
-      idx = 0; correct = 0; answered = 0;
-      feedbackEl.textContent = '';
-      restartBtn.style.display = 'none';
-      factBtn.disabled = false; conceptBtn.disabled = false;
-      updateScore();
-      showCurrent();
-    }
-
-    function answer(type) {
-      if (idx >= order.length) { return; }
-      var item = order[idx];
-      answered++;
-      var label = item.type === 'fact' ? '사실(예시)' : '개념(상위범주)';
-      if (type === item.type) {
-        correct++;
-        feedbackEl.style.color = '#16a34a';
-        feedbackEl.textContent = '✅ 정답! "' + item.term + '"은(는) ' + label + '입니다.';
-      } else {
-        feedbackEl.style.color = '#dc2626';
-        feedbackEl.textContent = '❌ 오답! "' + item.term + '"은(는) ' + label + '입니다.';
-      }
-      updateScore();
-      idx++;
-      setTimeout(showCurrent, 700);
-    }
-
-    factBtn.addEventListener('click', function () { answer('fact'); });
-    conceptBtn.addEventListener('click', function () { answer('concept'); });
-    restartBtn.addEventListener('click', startGame);
-
-    startGame();
-  } catch (e) {
-    console.error('conceptsort module error', e);
-  }
-})();
-
-/* ===================== CONCEPT-BASED INQUIRY: 사실-개념-일반화 피라미드 ===================== */
-(function () {
-  try {
-    var detail = document.getElementById('pyr_detail');
-    var tiers = document.querySelectorAll('.pyr-tier');
-    var label = document.getElementById('pyr_topicLabel');
-    var prevBtn = document.getElementById('pyr_prevBtn');
-    var nextBtn = document.getElementById('pyr_nextBtn');
-
-    var topics = [
-      {
-        name: '기후변화',
-        fact: '예시: "2023년 폭염일수가 평년보다 15일 늘었다", "북극 빙하 면적이 매년 줄고 있다" 같은 구체적 관찰 사실들',
-        concept: '개념: 위 사실들을 묶는 상위 범주 → "기후변화", "온실효과", "이상기후"',
-        generalization: '일반화 문장: "온실가스 배출이 늘어날수록 지구의 평균 기온과 이상기후 발생 빈도가 높아진다." (사실과 개념을 연결한 전이 가능한 원리)'
-      },
-      {
-        name: '생물의 적응',
-        fact: '예시: "북극곰은 두꺼운 지방층과 흰 털을 가졌다", "선인장은 잎이 가시로 변했다" 같은 구체적 관찰 사실들',
-        concept: '개념: 위 사실들을 묶는 상위 범주 → "적응", "생존 전략", "구조와 기능"',
-        generalization: '일반화 문장: "생물은 서식 환경에 적합한 신체 구조나 행동을 갖출수록 생존 가능성이 높아진다."'
-      },
-      {
-        name: '수요와 공급',
-        fact: '예시: "마스크가 품절되자 가격이 5배로 뛰었다", "딸기가 풍년이라 가격이 떨어졌다" 같은 구체적 관찰 사실들',
-        concept: '개념: 위 사실들을 묶는 상위 범주 → "수요", "공급", "시장 가격"',
-        generalization: '일반화 문장: "공급이 일정할 때 수요가 늘어날수록 가격은 상승한다."'
-      },
-      {
-        name: '혁명과 사회 변화',
-        fact: '예시: "프랑스 혁명 전 평민의 세금 부담이 컸다", "산업혁명으로 도시 인구가 급증했다" 같은 구체적 관찰 사실들',
-        concept: '개념: 위 사실들을 묶는 상위 범주 → "혁명", "사회 구조 변화", "갈등과 개혁"',
-        generalization: '일반화 문장: "기존 체제에 대한 불만이 누적되고 이를 바꿀 힘이 모일 때 사회는 급격히 변화한다."'
-      },
-      {
-        name: '차별과 인권',
-        fact: '예시: "한 세기 전 여성에게는 선거권이 없었다", "특정 인종은 같은 버스 좌석에 앉을 수 없었다" 같은 구체적 관찰 사실들',
-        concept: '개념: 위 사실들을 묶는 상위 범주 → "차별", "평등", "인권 신장"',
-        generalization: '일반화 문장: "사회적 약자의 목소리가 모이고 제도가 바뀔 때 평등과 인권은 확장된다."'
-      }
-    ];
-
-    var idx = 0;
-
-    function renderTopic() {
-      label.textContent = (idx + 1) + ' / ' + topics.length + ' · ' + topics[idx].name;
-      detail.textContent = '단계를 클릭해보세요.';
-      tiers.forEach(function (b) { b.style.outline = ''; });
-    }
-
-    tiers.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var tier = btn.getAttribute('data-tier');
-        detail.textContent = topics[idx][tier] || '';
-        tiers.forEach(function (b) { b.style.outline = ''; });
-        btn.style.outline = '3px solid #111827';
-      });
-    });
-
-    prevBtn.addEventListener('click', function () {
-      idx = (idx - 1 + topics.length) % topics.length;
-      renderTopic();
-    });
-    nextBtn.addEventListener('click', function () {
-      idx = (idx + 1) % topics.length;
-      renderTopic();
-    });
-
-    renderTopic();
-  } catch (e) {
-    console.error('infographic3 module error', e);
-  }
-})();
-
-/* ===================== CONCEPT-BASED INQUIRY: 패턴 탐구 실험실 ===================== */
-(function () {
-  try {
-    var canvas = document.getElementById('pl_canvas');
-    var ctx = canvas.getContext('2d');
-    var tempInput = document.getElementById('pl_temp');
-    var tempVal = document.getElementById('pl_tempVal');
-    var recordBtn = document.getElementById('pl_recordBtn');
-    var logEl = document.getElementById('pl_log');
-    var genInput = document.getElementById('pl_genInput');
-    var checkBtn = document.getElementById('pl_checkBtn');
-    var resultEl = document.getElementById('pl_result');
-    var records = [];
-
-    function radiusFor(temp) {
-      return 30 + (temp + 10) * 1.1;
-    }
-
-    function draw() {
-      var temp = Number(tempInput.value);
-      var r = radiusFor(temp);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-      ctx.arc(100, 100, r, 0, Math.PI * 2);
-      ctx.fillStyle = temp < 10 ? '#60a5fa' : (temp < 30 ? '#fbbf24' : '#f87171');
-      ctx.fill();
-    }
-
-    function renderLog() {
-      if (!records.length) { logEl.textContent = '아직 기록이 없습니다.'; return; }
-      logEl.innerHTML = records.map(function (r, i) {
-        return (i + 1) + '. 온도 ' + r.temp + '°C → 크기(반지름) ' + r.radius + 'px';
-      }).join('<br>');
-    }
-
-    tempInput.addEventListener('input', function () {
-      tempVal.textContent = tempInput.value;
-      draw();
-    });
-
-    recordBtn.addEventListener('click', function () {
-      var temp = Number(tempInput.value);
-      var r = Math.round(radiusFor(temp));
-      records.push({ temp: temp, radius: r });
-      renderLog();
-    });
-
-    checkBtn.addEventListener('click', function () {
-      var text = genInput.value.trim();
-      if (!text) {
-        resultEl.style.color = '#dc2626';
-        resultEl.textContent = '먼저 일반화 문장을 작성해주세요.';
-        return;
-      }
-      var hasTemp = /온도|기온/.test(text);
-      var hasIncrease = /클수록|커질수록|높아질수록|많을수록|증가|올라갈수록/.test(text);
-      var hasSize = /크기|커진다|커짐|풍선|부피/.test(text);
-      if (hasTemp && hasIncrease && hasSize) {
-        resultEl.style.color = '#16a34a';
-        resultEl.textContent = '👍 좋습니다! 예시 일반화: "온도가 높아질수록 풍선의 크기가 커진다." 와 비슷한 패턴을 잘 찾았어요.';
-      } else {
-        resultEl.style.color = '#92400e';
-        resultEl.textContent = '🤔 기록된 데이터를 다시 살펴보세요. (힌트: 온도와 크기 사이의 관계를 "~할수록 ~해진다" 형태로 써보세요)';
-      }
-    });
-
-    draw();
-  } catch (e) {
-    console.error('patternlab module error', e);
-  }
-})();
-
-/* ===================== CONCEPT-BASED INQUIRY: 질문 유형 분류 도구 ===================== */
-(function () {
-  try {
-    var KEY = 'vch_questiontypes';
-    var cats = ['fact', 'concept', 'debate'];
-    var inputs = {
-      fact: document.getElementById('qt_factInput'),
-      concept: document.getElementById('qt_conceptInput'),
-      debate: document.getElementById('qt_debateInput')
-    };
-    var lists = {
-      fact: document.getElementById('qt_factList'),
-      concept: document.getElementById('qt_conceptList'),
-      debate: document.getElementById('qt_debateList')
-    };
-    var data = { fact: [], concept: [], debate: [] };
-
-    function load() {
-      try {
-        var raw = localStorage.getItem(KEY);
-        var parsed = raw ? JSON.parse(raw) : null;
-        if (parsed) {
-          cats.forEach(function (c) { data[c] = parsed[c] || []; });
-        }
-      } catch (e) {}
-    }
-
-    function save() {
-      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
-    }
-
-    function render(cat) {
-      var listEl = lists[cat];
-      if (!data[cat].length) {
-        listEl.innerHTML = '<div style="color:#9ca3af;font-size:12px;">아직 작성된 질문이 없습니다.</div>';
-        return;
-      }
-      listEl.innerHTML = data[cat].map(function (q, i) {
-        return '<div style="display:flex;justify-content:space-between;align-items:center;background:#f9fafb;border-radius:8px;padding:6px 10px;margin-bottom:4px;">' +
-          '<span>' + q + '</span>' +
-          '<button data-cat="' + cat + '" data-idx="' + i + '" class="qt-delBtn" style="border:none;background:transparent;cursor:pointer;color:#9ca3af;">✕</button>' +
-          '</div>';
-      }).join('');
-    }
-
-    function renderAll() {
-      cats.forEach(render);
-    }
-
-    document.querySelectorAll('.qt-addBtn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var cat = btn.getAttribute('data-cat');
-        var input = inputs[cat];
-        var text = input.value.trim();
-        if (!text) { return; }
-        data[cat].push(text);
-        input.value = '';
-        save();
-        render(cat);
-      });
-    });
-
-    cats.forEach(function (cat) {
-      inputs[cat].addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-          document.querySelector('.qt-addBtn[data-cat="' + cat + '"]').click();
-        }
-      });
-    });
-
-    document.querySelectorAll('#view-inquiryladder').forEach(function (view) {
-      view.addEventListener('click', function (e) {
-        var delBtn = e.target.closest ? e.target.closest('.qt-delBtn') : null;
-        if (!delBtn) { return; }
-        var cat = delBtn.getAttribute('data-cat');
-        var idx = Number(delBtn.getAttribute('data-idx'));
-        data[cat].splice(idx, 1);
-        save();
-        render(cat);
-      });
-    });
-
-    load();
-    renderAll();
-  } catch (e) {
-    console.error('questiontypes module error', e);
-  }
-})();
-
-/* ===================== INFOGRAPHIC 1 MODULE ===================== */
-(function () {
-  try {
-    var canvas = document.getElementById('info1Canvas');
-    var ctx = canvas.getContext('2d');
-    var tabs = document.querySelectorAll('#info1_tabs button');
-
-    var datasets = {
-      reading: { label: '독서량 (권/월)', values: [3, 5, 2, 6, 4, 7], color: '#f43f5e' },
-      participation: { label: '참여도 (%)', values: [80, 65, 90, 70, 85, 60], color: '#fb7185' },
-      homework: { label: '과제 제출률 (%)', values: [95, 88, 100, 75, 92, 80], color: '#be123c' }
-    };
-    var weeks = ['1주', '2주', '3주', '4주', '5주', '6주'];
-
-    function draw(key) {
-      var data = datasets[key];
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      var padding = 40;
-      var w = canvas.width - padding * 2;
-      var h = canvas.height - padding * 2;
-      var maxVal = Math.max.apply(null, data.values) * 1.2;
-      var barWidth = w / data.values.length - 16;
-
-      ctx.strokeStyle = '#fecdd3';
-      ctx.beginPath();
-      ctx.moveTo(padding, padding);
-      ctx.lineTo(padding, padding + h);
-      ctx.lineTo(padding + w, padding + h);
-      ctx.stroke();
-
-      data.values.forEach(function (val, i) {
-        var barH = (val / maxVal) * h;
-        var x = padding + i * (w / data.values.length) + 8;
-        var y = padding + h - barH;
-        ctx.fillStyle = data.color;
-        ctx.fillRect(x, y, barWidth, barH);
-        ctx.fillStyle = '#881337';
-        ctx.font = '11px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(weeks[i], x + barWidth / 2, padding + h + 16);
-        ctx.fillText(String(val), x + barWidth / 2, y - 6);
-      });
-
-      ctx.fillStyle = '#9f1239';
-      ctx.font = 'bold 13px sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText(data.label, padding, 20);
-    }
-
-    tabs.forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        tabs.forEach(function (t) { t.classList.remove('active-tab'); });
-        tab.classList.add('active-tab');
-        draw(tab.getAttribute('data-key'));
-      });
-    });
-
-    draw('reading');
-  } catch (e) {
-    console.error('infographic1 module error', e);
-  }
-})();
-
-/* ===================== INFOGRAPHIC 2 MODULE ===================== */
-(function () {
-  try {
-    var canvas = document.getElementById('info2Canvas');
-    var ctx = canvas.getContext('2d');
-    var legendEl = document.getElementById('info2_legend');
-
-    var data = [
-      { label: '스마트폰 보유', value: 92, color: '#0ea5e9' },
-      { label: '정보 검증 능력', value: 58, color: '#38bdf8' },
-      { label: '저작권 이해도', value: 47, color: '#7dd3fc' },
-      { label: '온라인 예절 실천', value: 73, color: '#0369a1' }
-    ];
-    var activeIndex = -1;
-
-    function drawChart() {
-      var cx = canvas.width / 2, cy = canvas.height / 2, r = canvas.width / 2 - 10, inner = r * 0.55;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      var total = data.reduce(function (a, b) { return a + b.value; }, 0);
-      var start = -Math.PI / 2;
-      data.forEach(function (d, i) {
-        var slice = (d.value / total) * 2 * Math.PI;
-        var end = start + slice;
-        var isActive = i === activeIndex;
-        ctx.beginPath();
-        ctx.arc(cx, cy, isActive ? r + 6 : r, start, end);
-        ctx.arc(cx, cy, inner, end, start, true);
-        ctx.closePath();
-        ctx.fillStyle = d.color;
-        ctx.globalAlpha = (activeIndex === -1 || isActive) ? 1 : 0.35;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        start = end;
-      });
-      ctx.fillStyle = '#0c4a6e';
-      ctx.font = 'bold 14px sans-serif';
-      ctx.textAlign = 'center';
-      var label = activeIndex === -1 ? '항목 클릭' : data[activeIndex].label + ' ' + data[activeIndex].value + '%';
-      ctx.fillText(label, cx, cy + 5);
-    }
-
-    function renderLegend() {
-      legendEl.innerHTML = '';
-      data.forEach(function (d, i) {
-        var item = document.createElement('div');
-        item.className = 'info2-legend-item' + (i === activeIndex ? ' active-legend' : '');
-        item.innerHTML = '<span class="info2-swatch" style="background:' + d.color + '"></span>' + d.label + ' (' + d.value + '%)';
-        item.addEventListener('click', function () {
-          activeIndex = activeIndex === i ? -1 : i;
-          drawChart();
-          renderLegend();
-        });
-        legendEl.appendChild(item);
-      });
-    }
-
-    drawChart();
-    renderLegend();
-  } catch (e) {
-    console.error('infographic2 module error', e);
-  }
-})();
+function render(){
+  let n=0;
+  [...grid.children].forEach(card=>{
+    if(!card.dataset.idx)return;
+    const s=STYLES[card.dataset.idx];
+    const matchCat = activeCat==="전체" || s.cat===activeCat;
+    const hay=(s.name+" "+s.use+" "+s.ko+" "+s.prompt+" "+s.kp+" "+s.cat).toLowerCase();
+    const matchQ = !query || hay.includes(query);
+    const show = matchCat && matchQ;
+    card.classList.toggle("hidden",!show);
+    if(show)n++;
+  });
+  countEl.textContent=n+" / "+STYLES.length+" 스타일";
+  let empty=document.getElementById("empty");
+  if(n===0){ if(!empty){empty=document.createElement("div");empty.id="empty";empty.className="empty";empty.textContent="검색 결과가 없습니다.";grid.appendChild(empty);} }
+  else if(empty){empty.remove();}
+}
+
+document.getElementById("q").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render();});
+
+buildCards();
+render();
 </script>
 </body>
 </html>
